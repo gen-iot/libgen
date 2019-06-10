@@ -4,6 +4,11 @@ import (
 	"container/list"
 )
 
+type RwBuffer interface {
+	ReadableBuffer
+	WritableBuffer
+}
+
 type ReadableBuffer interface {
 	ReadInt32(offset int) int32
 	ReadUInt32(offset int) uint32
@@ -21,15 +26,29 @@ type ReadableBuffer interface {
 
 	ReadableLen() int
 
-	ReadN(offset int, n int) []uint8
+	ReadN(n int) []uint8
 	PopN(n int)
+}
+
+type WritableBuffer interface {
+	Write(data []byte)
+	WriteUInt16(v uint16)
+	WriteInt32(v int32)
 }
 
 type ByteBuffer struct {
 	data *list.List
 }
 
-func NewIoBuffer() *ByteBuffer {
+func (this *ByteBuffer) WriteUInt16(v uint16) {
+	this.Write(Uint16ToArrBE(v))
+}
+
+func (this *ByteBuffer) WriteInt32(v int32) {
+	this.Write(Int32ToArrBE(v))
+}
+
+func NewByteBuffer() *ByteBuffer {
 	return &ByteBuffer{
 		data: list.New(),
 	}
@@ -93,4 +112,52 @@ func (this *ByteBuffer) PopN(n int) {
 			this.data.Remove(this.data.Front())
 		}
 	}
+}
+
+func (this *ByteBuffer) ReadInt32(offset int) int32 {
+	return ArrayToInt32BE(this.ReadN(4))
+}
+
+func (this *ByteBuffer) ReadUInt32(offset int) uint32 {
+	return ArrToUint32BE(this.ReadN(4))
+}
+
+func (this *ByteBuffer) ReadInt16(offset int) int16 {
+	return ArrToInt16BE(this.ReadN(2))
+}
+
+func (this *ByteBuffer) ReadUInt16(offset int) uint16 {
+	return ArrToUint16BE(this.ReadN(2))
+}
+
+func (this *ByteBuffer) ReadInt8(offset int) int8 {
+	return int8(this.ReadN(1)[0])
+}
+
+func (this *ByteBuffer) ReadUInt8(offset int) uint8 {
+	return this.ReadN(1)[0]
+}
+
+func (this *ByteBuffer) PeekInt32(offset int) int32 {
+	return ArrayToInt32BE(this.PeekN(offset, 4))
+}
+
+func (this *ByteBuffer) PeekUInt32(offset int) uint32 {
+	return ArrToUint32BE(this.PeekN(offset, 4))
+}
+
+func (this *ByteBuffer) PeekInt16(offset int) int16 {
+	return ArrToInt16BE(this.PeekN(offset, 2))
+}
+
+func (this *ByteBuffer) PeekUInt16(offset int) uint16 {
+	return ArrToUint16BE(this.PeekN(offset, 2))
+}
+
+func (this *ByteBuffer) PeekInt8(offset int) int8 {
+	return int8(this.PeekN(offset, 1)[0])
+}
+
+func (this *ByteBuffer) PeekUInt8(offset int) uint8 {
+	return this.PeekN(offset, 1)[0]
 }

@@ -36,10 +36,11 @@ func Decode(buf ReadableBuffer) (*IOMsg, error) {
 		if dataLen > int32(buf.ReadableLen()+kMinMsgLen) {
 			return nil, ErrNeedMore
 		}
+		buf.PopN(kMinMsgLen)
 		return &IOMsg{
 			Cmd:    cmd,
 			Format: contentType,
-			Body:   buf.ReadN(kMinMsgLen, int(dataLen)),
+			Body:   buf.ReadN(int(dataLen)),
 		}, nil
 	}
 }

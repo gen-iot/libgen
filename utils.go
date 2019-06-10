@@ -13,7 +13,6 @@ func ArrToUint16BE(arr []uint8) uint16 {
 	return (uint16(arr[0]) << 8) | uint16(arr[1])
 }
 
-
 //big ending
 func Int16ToArrBE(v uint16) []uint8 {
 	return []uint8{uint8(v>>8) & 0xFF, uint8(v) & 0xFF}
@@ -27,7 +26,6 @@ func ArrToInt16BE(arr []uint8) int16 {
 	return (int16(arr[0]) << 8) | int16(arr[1])
 }
 
-
 //big ending
 func Uint32ToArrBE(v uint32) []uint8 {
 	return []uint8{uint8(v>>24) & 0xFF, uint8(v>>16) & 0xFF, uint8(v>>8) & 0xFF, uint8(v) & 0xFF}
@@ -39,6 +37,20 @@ func ArrToUint32BE(arr []uint8) uint32 {
 		return 0
 	}
 	return (uint32(arr[0]) << 24) | (uint32(arr[1]) << 16) | (uint32(arr[2]) << 8) | uint32(arr[3])
+}
+
+//big ending
+func Int32ToArrBE(v int32) []uint8 {
+	return []uint8{uint8(v>>24) & 0xFF, uint8(v>>16) & 0xFF, uint8(v>>8) & 0xFF, uint8(v) & 0xFF}
+}
+
+//big ending
+func ArrayToInt32BE(arr []uint8) int32 {
+	if len(arr) != 4 {
+		return 0
+	}
+	return (int32(arr[0]) << 24) | (int32(arr[1]) << 16) | (int32(arr[2]) << 8) | int32(arr[3])
+
 }
 
 //big ending
