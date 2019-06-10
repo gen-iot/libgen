@@ -10,12 +10,12 @@ type RwBuffer interface {
 }
 
 type ReadableBuffer interface {
-	ReadInt32(offset int) int32
-	ReadUInt32(offset int) uint32
-	ReadInt16(offset int) int16
-	ReadUInt16(offset int) uint16
-	ReadInt8(offset int) int8
-	ReadUInt8(offset int) uint8
+	ReadInt32() int32
+	ReadUInt32() uint32
+	ReadInt16() int16
+	ReadUInt16() uint16
+	ReadInt8() int8
+	ReadUInt8() uint8
 
 	PeekInt32(offset int) int32
 	PeekUInt32(offset int) uint32
@@ -40,13 +40,7 @@ type ByteBuffer struct {
 	data *list.List
 }
 
-func (this *ByteBuffer) WriteUInt16(v uint16) {
-	this.Write(Uint16ToArrBE(v))
-}
 
-func (this *ByteBuffer) WriteInt32(v int32) {
-	this.Write(Int32ToArrBE(v))
-}
 
 func NewByteBuffer() *ByteBuffer {
 	return &ByteBuffer{
@@ -114,27 +108,27 @@ func (this *ByteBuffer) PopN(n int) {
 	}
 }
 
-func (this *ByteBuffer) ReadInt32(offset int) int32 {
+func (this *ByteBuffer) ReadInt32() int32 {
 	return ArrayToInt32BE(this.ReadN(4))
 }
 
-func (this *ByteBuffer) ReadUInt32(offset int) uint32 {
+func (this *ByteBuffer) ReadUInt32() uint32 {
 	return ArrToUint32BE(this.ReadN(4))
 }
 
-func (this *ByteBuffer) ReadInt16(offset int) int16 {
+func (this *ByteBuffer) ReadInt16() int16 {
 	return ArrToInt16BE(this.ReadN(2))
 }
 
-func (this *ByteBuffer) ReadUInt16(offset int) uint16 {
+func (this *ByteBuffer) ReadUInt16() uint16 {
 	return ArrToUint16BE(this.ReadN(2))
 }
 
-func (this *ByteBuffer) ReadInt8(offset int) int8 {
+func (this *ByteBuffer) ReadInt8() int8 {
 	return int8(this.ReadN(1)[0])
 }
 
-func (this *ByteBuffer) ReadUInt8(offset int) uint8 {
+func (this *ByteBuffer) ReadUInt8() uint8 {
 	return this.ReadN(1)[0]
 }
 
@@ -160,4 +154,12 @@ func (this *ByteBuffer) PeekInt8(offset int) int8 {
 
 func (this *ByteBuffer) PeekUInt8(offset int) uint8 {
 	return this.PeekN(offset, 1)[0]
+}
+
+func (this *ByteBuffer) WriteUInt16(v uint16) {
+	this.Write(Uint16ToArrBE(v))
+}
+
+func (this *ByteBuffer) WriteInt32(v int32) {
+	this.Write(Int32ToArrBE(v))
 }
