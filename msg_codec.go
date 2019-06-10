@@ -18,7 +18,6 @@ type GenMsg struct {
 const kMinMsgLen = 2 + 2 + 4
 
 var ErrNeedMore = errors.New("codec want read more bytes")
-var ErrDecode = errors.New("decode failed")
 
 func Decode(buf ReadableBuffer) (*IOMsg, error) {
 	for {
@@ -37,9 +36,7 @@ func Decode(buf ReadableBuffer) (*IOMsg, error) {
 		}
 		return &IOMsg{
 			Cmd:  cmd,
-			Data: buf.ReadN(kMinMsgLen, int(kMinMsgLen+dataLen)),
+			Data: buf.ReadN(kMinMsgLen, int(dataLen)),
 		}, nil
 	}
 }
-
-
