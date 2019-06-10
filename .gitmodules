@@ -1,4 +1,4 @@
-[submodule "libplc"]
-	path = libplc
+[submodule "liblpc"]
+	path = liblpc
 	url = git@gitee.com:SuzhenProjects/liblpc.git
 	branch = master
