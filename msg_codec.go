@@ -4,10 +4,11 @@ import (
 	"errors"
 )
 
-// HEADER(FE FE) 2 | CMD 2| DATA_LEN 4| DATA N|
+// HEADER(FE FE) 2 | CMD 2| CONTENT_TYPE 1| DATA_LEN 4| DATA N|
 type IOMsg struct {
-	Cmd  uint16
-	Data []byte
+	Cmd    uint16
+	Format uint8
+	Body   []uint8
 }
 
 type GenMsg struct {
@@ -15,7 +16,7 @@ type GenMsg struct {
 	IOMsg
 }
 
-const kMinMsgLen = 2 + 2 + 4
+const kMinMsgLen = 2 + 2 + 1 + 4
 
 var ErrNeedMore = errors.New("codec want read more bytes")
 
@@ -30,13 +31,15 @@ func Decode(buf ReadableBuffer) (*IOMsg, error) {
 			continue
 		}
 		cmd := buf.PeekUInt16(2)
-		dataLen := buf.PeekInt32(4)
+		contentType := buf.PeekUInt8(4)
+		dataLen := buf.PeekInt32(5)
 		if dataLen > int32(buf.ReadableLen()+kMinMsgLen) {
 			return nil, ErrNeedMore
 		}
 		return &IOMsg{
-			Cmd:  cmd,
-			Data: buf.ReadN(kMinMsgLen, int(dataLen)),
+			Cmd:    cmd,
+			Format: contentType,
+			Body:   buf.ReadN(kMinMsgLen, int(dataLen)),
 		}, nil
 	}
 }
