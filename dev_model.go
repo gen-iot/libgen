@@ -17,16 +17,27 @@ const (
 	Int32Range LimiterType = "int32_range"
 )
 
-type Property struct {
-	Type          PropertyType
-	Name          string
-	LimiterType   LimiterType
-	LimiterConfig map[string]interface{}
+type PropertyLimiter struct {
+	Type        PropertyType
+	Name        string
+	LimiterType LimiterType
 }
 
+type DeviceModel struct {
+	Id               string
+	Name             string
+	PropertyLimiters []PropertyLimiter
+}
+
+//type Property struct {
+//	LimiterConfig map[string]interface{}
+//}
+
 type Device struct {
+	ModelId    string
+	Id         string
 	Name       string
 	Room       string
-	Properties []Property
+	Properties map[string]interface{}
 	MetaData   map[string]interface{}
 }
