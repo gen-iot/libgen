@@ -1,6 +1,7 @@
 package libgen
 
 import (
+	"encoding/json"
 	"errors"
 )
 
@@ -11,14 +12,17 @@ type IOMsg struct {
 	Body   []uint8
 }
 
-type GenMsg struct {
-	AppId string
-	IOMsg
-}
+type MsgFmt uint8
+
+const (
+	JSON MsgFmt = iota + 0x01
+	MSGPACK
+)
 
 const kMinMsgLen = 2 + 2 + 1 + 4
 
 var ErrNeedMore = errors.New("codec want read more bytes")
+var ErrUnknownMsgFmt = errors.New("unknown msg format")
 
 func Decode(buf ReadableBuffer) (*IOMsg, error) {
 	for {
@@ -31,16 +35,23 @@ func Decode(buf ReadableBuffer) (*IOMsg, error) {
 			continue
 		}
 		cmd := buf.PeekUInt16(2)
-		contentType := buf.PeekUInt8(4)
+		format := buf.PeekUInt8(4)
 		dataLen := buf.PeekInt32(5)
-		if dataLen > int32(buf.ReadableLen()+kMinMsgLen) {
+		if dataLen < 0 || dataLen > int32(buf.ReadableLen()+kMinMsgLen) {
 			return nil, ErrNeedMore
 		}
 		buf.PopN(kMinMsgLen)
 		return &IOMsg{
 			Cmd:    cmd,
-			Format: contentType,
+			Format: format,
 			Body:   buf.ReadN(int(dataLen)),
 		}, nil
 	}
+}
+
+func Encode(cmd uint16, format MsgFmt, data interface{}) []byte {
+	buffer := NewByteBuffer()
+	buffer.WriteUInt16(cmd)
+	buffer.WriteUInt8(uint8(format))
+
 }

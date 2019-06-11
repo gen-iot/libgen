@@ -32,6 +32,7 @@ type ReadableBuffer interface {
 
 type WritableBuffer interface {
 	Write(data []byte)
+	WriteUInt8(v uint8)
 	WriteUInt16(v uint16)
 	WriteInt32(v int32)
 }
@@ -39,8 +40,6 @@ type WritableBuffer interface {
 type ByteBuffer struct {
 	data *list.List
 }
-
-
 
 func NewByteBuffer() *ByteBuffer {
 	return &ByteBuffer{
@@ -60,6 +59,10 @@ func (this *ByteBuffer) Write(arr []uint8) {
 	for _, v := range arr {
 		this.data.PushBack(v)
 	}
+}
+
+func (this *ByteBuffer) WriteUInt8(v uint8) {
+	this.data.PushBack(v)
 }
 
 //checkout ReadableLen before call this
