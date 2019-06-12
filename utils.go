@@ -1,5 +1,10 @@
 package libgen
 
+import (
+	"fmt"
+	"strconv"
+)
+
 //big ending
 func Uint16ToArrBE(v uint16) []uint8 {
 	return []uint8{uint8(v>>8) & 0xFF, uint8(v) & 0xFF}
@@ -82,4 +87,11 @@ func ArrToUint64BE(arr []uint8) uint64 {
 		(uint64(arr[7]) << (8 * 0))
 }
 
+func any2Int32(v interface{}) (int32, error) {
+	i, err := strconv.Atoi(fmt.Sprintf("%v", v))
+	if err != nil {
+		return 0, err
+	}
+	return int32(i), nil
+}
 
