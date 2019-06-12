@@ -1,7 +1,6 @@
 package libgen
 
 import (
-	"gen/common"
 	"time"
 )
 
@@ -67,20 +66,20 @@ func NewDefaultTimeout(dur time.Duration) TimeoutPolicy {
 	return out
 }
 
-func newTimeoutPolicy(tp common.TimeoutType, config []byte) TimeoutPolicy {
+func newTimeoutPolicy(tp TimeoutType, config []byte) TimeoutPolicy {
 	switch tp {
-	case common.Timeout:
+	case Timeout:
 		var timeout time.Duration = 0
 		jsob, e := NewJsonObjectFromBytes(config)
 		if e != nil {
-			timeout = common.DefaultTimeoutPolicyTimeout
+			timeout = DefaultTimeoutPolicyTimeout
 		} else {
-			timeout = time.Duration(jsob.GetIntOr("timeout", int(common.DefaultTimeoutPolicyTimeout)))
+			timeout = time.Duration(jsob.GetIntOr("timeout", int(DefaultTimeoutPolicyTimeout)))
 		}
 		return NewDefaultTimeout(timeout)
-	case common.Custom:
+	case Custom:
 		return new(CustomTimeout)
-	case common.Never:
+	case Never:
 		return new(NeverTimeout)
 	default:
 		return new(NeverTimeout)

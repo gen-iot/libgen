@@ -1,3 +1,5 @@
+// +build client
+
 package libgen
 
 import (
@@ -5,16 +7,22 @@ import (
 	"libgen/liblpc/backend"
 	"net"
 	"os"
+	"sync"
 	"time"
 )
 
 var gClientConn net.Conn
 var rdBuf = make([]byte, 1024*1024*2)
 var rdCache = NewByteBuffer()
+var initOnce = sync.Once{}
 
 const clientFd = uintptr(3)
 
-func init() {
+func Init() {
+	initOnce.Do(doInit)
+}
+
+func doInit() {
 	fmt.Println("LIBGEN CLIENT INIT")
 	file := os.NewFile(clientFd, "")
 	c, err := net.FileConn(file)
