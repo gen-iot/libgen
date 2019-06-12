@@ -2,6 +2,7 @@ package libgen
 
 import (
 	"fmt"
+	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/liblpc"
 	"net"
 	"os"
@@ -11,7 +12,7 @@ import (
 
 var gClientConn net.Conn
 var rdBuf = make([]byte, 1024*1024*2)
-var rdCache = NewByteBuffer()
+var rdCache = std.NewByteBuffer()
 var initOnce = sync.Once{}
 
 const clientFd = uintptr(3)

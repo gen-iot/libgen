@@ -2,6 +2,7 @@ package libgen
 
 import (
 	"fmt"
+	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/liblpc"
 	"testing"
 )
@@ -29,7 +30,6 @@ func TestEncodeMessage_JSON(t *testing.T) {
 	bytes, err := Encode(1, JSON, o)
 	liblpc.PanicIfError(err)
 	fmt.Println(string(bytes))
-
 }
 
 func TestEncodeMessage_MSGPACK(t *testing.T) {
@@ -37,7 +37,7 @@ func TestEncodeMessage_MSGPACK(t *testing.T) {
 	bytes, err := Encode(1, MSGPACK, o)
 	liblpc.PanicIfError(err)
 	fmt.Println(string(bytes))
-	buffer := NewByteBuffer()
+	buffer := std.NewByteBuffer()
 	buffer.Write([]byte{1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 90})
 	buffer.Write(bytes)
 	msg, err := Decode(buffer, 1024*1024)
