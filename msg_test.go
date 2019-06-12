@@ -26,14 +26,14 @@ func newExampleStruct() *exampleStruct {
 
 func TestEncodeMessage_JSON(t *testing.T) {
 	o := newExampleStruct()
-	bytes, err := Encode(1, JSON, o)
+	bytes, err := Encode(std.GenRandomUUID(),1, JSON, o)
 	std.AssertError(err, "Encode")
 	fmt.Println(string(bytes))
 }
 
 func TestEncodeMessage_MSGPACK(t *testing.T) {
 	o := newExampleStruct()
-	bytes, err := Encode(1, MSGPACK, o)
+	bytes, err := Encode(std.GenRandomUUID(),1, MSGPACK, o)
 	std.AssertError(err, "Encode")
 	fmt.Println(string(bytes))
 	buffer := std.NewByteBuffer()

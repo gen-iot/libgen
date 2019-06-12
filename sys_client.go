@@ -34,7 +34,8 @@ func SendMsg(timeout time.Duration, cmd uint16, format MsgFmt, data interface{})
 	if err != nil {
 		return err
 	}
-	bytes, err := Encode(cmd, format, data)
+	msgId := std.GenRandomUUID()
+	bytes, err := Encode(msgId, cmd, format, data)
 	if err != nil {
 		return err
 	}
