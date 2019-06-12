@@ -2,7 +2,7 @@ package libgen
 
 import (
 	"errors"
-	"gitee.com/SuzhenProjects/liblpc/backend"
+	"gitee.com/SuzhenProjects/liblpc"
 )
 
 // HEADER(FE FE) 2 | CMD 2| CONTENT_TYPE 1| DATA_LEN 4| DATA N|
@@ -25,7 +25,7 @@ var ErrNeedMore = errors.New("codec want read more bytes")
 var ErrUnknownMsgFmt = errors.New("unknown msg format")
 
 func Decode(buf ReadableBuffer, maxBodyLen int) (*IOMsg, error) {
-	backend.Assert(maxBodyLen > 0, "maxBodyLen must > 0")
+	liblpc.Assert(maxBodyLen > 0, "maxBodyLen must > 0")
 	for {
 		if buf.ReadableLen() < kMinMsgLen {
 			return nil, ErrNeedMore

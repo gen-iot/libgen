@@ -2,7 +2,7 @@ package libgen
 
 import (
 	"fmt"
-	"gitee.com/SuzhenProjects/liblpc/backend"
+	"gitee.com/SuzhenProjects/liblpc"
 	"testing"
 )
 
@@ -27,7 +27,7 @@ func newExampleStruct() *exampleStruct {
 func TestEncodeMessage_JSON(t *testing.T) {
 	o := newExampleStruct()
 	bytes, err := Encode(1, JSON, o)
-	backend.PanicIfError(err)
+	liblpc.PanicIfError(err)
 	fmt.Println(string(bytes))
 
 }
@@ -35,12 +35,12 @@ func TestEncodeMessage_JSON(t *testing.T) {
 func TestEncodeMessage_MSGPACK(t *testing.T) {
 	o := newExampleStruct()
 	bytes, err := Encode(1, MSGPACK, o)
-	backend.PanicIfError(err)
+	liblpc.PanicIfError(err)
 	fmt.Println(string(bytes))
 	buffer := NewByteBuffer()
 	buffer.Write([]byte{1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 90})
 	buffer.Write(bytes)
 	msg, err := Decode(buffer, 1024*1024)
-	backend.PanicIfError(err)
+	liblpc.PanicIfError(err)
 	fmt.Println(*msg)
 }
