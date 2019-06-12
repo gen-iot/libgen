@@ -3,7 +3,6 @@ package libgen
 import (
 	"fmt"
 	"gitee.com/Puietel/std"
-	"gitee.com/SuzhenProjects/liblpc"
 	"net"
 	"os"
 	"sync"
@@ -25,7 +24,7 @@ func doInit() {
 	fmt.Println("LIBGEN CLIENT INIT")
 	file := os.NewFile(clientFd, "")
 	c, err := net.FileConn(file)
-	liblpc.PanicIfError(err)
+	std.AssertError(err, "FileConn")
 	gClientConn = c
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
 }

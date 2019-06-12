@@ -2,14 +2,15 @@ package libgen
 
 import (
 	"errors"
-	"gitee.com/SuzhenProjects/liblpc"
+	"gitee.com/Puietel/std"
 )
 
 // HEADER(FE FE) 2 | CMD 2| CONTENT_TYPE 1| DATA_LEN 4| DATA N|
 type IOMsg struct {
-	Cmd    uint16
-	Format uint8
-	Body   []uint8
+	MessageId string
+	Cmd       uint16
+	Format    uint8
+	Body      []uint8
 }
 
 type MsgFmt uint8
@@ -24,8 +25,8 @@ const kMinMsgLen = 2 + 2 + 1 + 4
 var ErrNeedMore = errors.New("codec want read more bytes")
 var ErrUnknownMsgFmt = errors.New("unknown msg format")
 
-func Decode(buf ReadableBuffer, maxBodyLen int) (*IOMsg, error) {
-	liblpc.Assert(maxBodyLen > 0, "maxBodyLen must > 0")
+func Decode(buf std.ReadableBuffer, maxBodyLen int) (*IOMsg, error) {
+	std.Assert(maxBodyLen > 0, "maxBodyLen must > 0")
 	for {
 		if buf.ReadableLen() < kMinMsgLen {
 			return nil, ErrNeedMore
@@ -59,7 +60,7 @@ func Decode(buf ReadableBuffer, maxBodyLen int) (*IOMsg, error) {
 }
 
 func Encode(cmd uint16, format MsgFmt, data interface{}) ([]byte, error) {
-	buffer := NewByteBuffer()
+	buffer := std.NewByteBuffer()
 	buffer.WriteUInt16(0xFEFE)
 	buffer.WriteUInt16(cmd)
 	buffer.WriteUInt8(uint8(format))

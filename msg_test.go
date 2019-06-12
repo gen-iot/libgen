@@ -3,7 +3,6 @@ package libgen
 import (
 	"fmt"
 	"gitee.com/Puietel/std"
-	"gitee.com/SuzhenProjects/liblpc"
 	"testing"
 )
 
@@ -28,19 +27,24 @@ func newExampleStruct() *exampleStruct {
 func TestEncodeMessage_JSON(t *testing.T) {
 	o := newExampleStruct()
 	bytes, err := Encode(1, JSON, o)
-	liblpc.PanicIfError(err)
+	std.AssertError(err, "Encode")
 	fmt.Println(string(bytes))
 }
 
 func TestEncodeMessage_MSGPACK(t *testing.T) {
 	o := newExampleStruct()
 	bytes, err := Encode(1, MSGPACK, o)
-	liblpc.PanicIfError(err)
+	std.AssertError(err, "Encode")
 	fmt.Println(string(bytes))
 	buffer := std.NewByteBuffer()
 	buffer.Write([]byte{1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 90})
 	buffer.Write(bytes)
 	msg, err := Decode(buffer, 1024*1024)
-	liblpc.PanicIfError(err)
+	std.AssertError(err, "Decode")
 	fmt.Println(*msg)
+}
+
+func TestUUID(t *testing.T) {
+	uuid := std.GenRandomUUID()
+	fmt.Println("uuid -> ", uuid, " len -> ", len(uuid))
 }
