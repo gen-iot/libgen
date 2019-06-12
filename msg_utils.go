@@ -30,3 +30,4 @@ func MsgpackUnmarshal(data []byte, v interface{}) error {
 	decoder.UseJSONTag(true)
 	return decoder.Decode(v)
 }
+

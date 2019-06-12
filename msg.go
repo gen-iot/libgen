@@ -2,6 +2,7 @@ package libgen
 
 import (
 	"errors"
+	"libgen/liblpc/backend"
 )
 
 // HEADER(FE FE) 2 | CMD 2| CONTENT_TYPE 1| DATA_LEN 4| DATA N|
@@ -23,7 +24,8 @@ const kMinMsgLen = 2 + 2 + 1 + 4
 var ErrNeedMore = errors.New("codec want read more bytes")
 var ErrUnknownMsgFmt = errors.New("unknown msg format")
 
-func Decode(buf ReadableBuffer) (*IOMsg, error) {
+func Decode(buf ReadableBuffer, maxBodyLen int) (*IOMsg, error) {
+	backend.Assert(maxBodyLen > 0, "maxBodyLen must > 0")
 	for {
 		if buf.ReadableLen() < kMinMsgLen {
 			return nil, ErrNeedMore
@@ -36,8 +38,16 @@ func Decode(buf ReadableBuffer) (*IOMsg, error) {
 		cmd := buf.PeekUInt16(2)
 		format := buf.PeekUInt8(4)
 		dataLen := buf.PeekInt32(5)
-		if dataLen < 0 || dataLen > int32(buf.ReadableLen()+kMinMsgLen) {
+		if dataLen < 0 {
+			buf.PopN(1)
+			continue
+		}
+		if dataLen > int32(buf.ReadableLen()+kMinMsgLen) {
 			return nil, ErrNeedMore
+		}
+		if int(dataLen) > maxBodyLen {
+			buf.PopN(kMinMsgLen + int(dataLen))
+			continue
 		}
 		buf.PopN(kMinMsgLen)
 		return &IOMsg{
@@ -50,6 +60,7 @@ func Decode(buf ReadableBuffer) (*IOMsg, error) {
 
 func Encode(cmd uint16, format MsgFmt, data interface{}) ([]byte, error) {
 	buffer := NewByteBuffer()
+	buffer.WriteUInt16(0xFEFE)
 	buffer.WriteUInt16(cmd)
 	buffer.WriteUInt8(uint8(format))
 	dataLen := 0
