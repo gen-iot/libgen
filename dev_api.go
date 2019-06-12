@@ -1,11 +1,5 @@
 package libgen
 
-import "fmt"
-
-func Init() {
-	fmt.Println("LIBGEN INIT")
-}
-
 //declare device models,only device model declared can be used in device
 //ps:this function need some privilege//TODO define privilege
 func DeclareDeviceModel(models ...DeviceModel) error {
@@ -69,7 +63,7 @@ func OnDeviceControl(devId string, cmdProps map[string]interface{}) error {
 
 //fetch all devices
 //ps:this function need some privilege//TODO define privilege
-func FetchDevices()  {
+func FetchDevices() {
 
 }
 
@@ -79,6 +73,7 @@ func DeviceControl(domain string, deviceId string, cmdProps map[string]interface
 
 	return nil
 }
+
 //this is a notify callback function,
 //this function will be called while devices'status which in other domain changed
 //ps:this function need some privilege//TODO define privilege
