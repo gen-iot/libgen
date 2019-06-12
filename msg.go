@@ -2,7 +2,7 @@ package libgen
 
 import (
 	"errors"
-	"libgen/liblpc/backend"
+	"gitee.com/SuzhenProjects/liblpc/backend"
 )
 
 // HEADER(FE FE) 2 | CMD 2| CONTENT_TYPE 1| DATA_LEN 4| DATA N|

@@ -1,10 +1,8 @@
-// +build client
-
 package libgen
 
 import (
 	"fmt"
-	"libgen/liblpc/backend"
+	"gitee.com/SuzhenProjects/liblpc/backend"
 	"net"
 	"os"
 	"sync"

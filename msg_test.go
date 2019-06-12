@@ -2,7 +2,7 @@ package libgen
 
 import (
 	"fmt"
-	"libgen/liblpc/backend"
+	"gitee.com/SuzhenProjects/liblpc/backend"
 	"testing"
 )
 
