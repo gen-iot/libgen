@@ -94,4 +94,3 @@ func any2Int32(v interface{}) (int32, error) {
 	}
 	return int32(i), nil
 }
-

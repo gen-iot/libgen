@@ -1,8 +1,8 @@
 package libgen
 
 type ModelProperty struct {
-	Type    PropertyType
-	Name    string
+	Type     PropertyType
+	Name     string
 	Restrict Restrict
 }
 

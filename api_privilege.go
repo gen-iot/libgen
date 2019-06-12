@@ -17,6 +17,4 @@ const (
 	ManageDevice
 	//privilege for retrieve devices from other domain,
 	RetrieveDevice
-
-
 )

@@ -1,6 +1,5 @@
 package libgen
 
-
 type AnyLimiter struct {
 	baseRestrict
 }
