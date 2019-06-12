@@ -1,5 +1,22 @@
 package libgen
 
+type GenCommand uint8
+
+const (
+	CmdDeclareDeviceModel GenCommand = iota
+	CmdRemoveDeviceModels
+	CmdUpdateDeviceModel
+	CmdRegisterDevices
+	CmdRemoveDevices
+	CmdUpdateDeviceRoom
+	CmdUpdateDeviceName
+	CmdUpdateDeviceStatus
+	CmdOnDeviceControl
+	CmdFetchDevices
+	CmdDeviceControl
+	CmdOnDeviceStatusChanged
+)
+
 //declare device models,only device model declared can be used in device
 //ps:this function need some privilege//TODO define privilege
 func DeclareDeviceModel(models ...DeviceModel) error {
