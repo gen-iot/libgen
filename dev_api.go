@@ -67,6 +67,12 @@ func OnDeviceControl(devId string, cmdProps map[string]interface{}) error {
 	return nil
 }
 
+//fetch all devices
+//ps:this function need some privilege//TODO define privilege
+func FetchDevices()  {
+
+}
+
 //control device,control some device in other domain
 //ps:this function need some privilege//TODO define privilege
 func DeviceControl(domain string, deviceId string, cmdProps map[string]interface{}) error {
