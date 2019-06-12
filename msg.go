@@ -1,7 +1,6 @@
 package libgen
 
 import (
-	"encoding/json"
 	"errors"
 )
 
@@ -49,9 +48,23 @@ func Decode(buf ReadableBuffer) (*IOMsg, error) {
 	}
 }
 
-func Encode(cmd uint16, format MsgFmt, data interface{}) []byte {
+func Encode(cmd uint16, format MsgFmt, data interface{}) ([]byte, error) {
 	buffer := NewByteBuffer()
 	buffer.WriteUInt16(cmd)
 	buffer.WriteUInt8(uint8(format))
-
+	dataLen := 0
+	var dataBytes []byte = nil
+	var err error = nil
+	if data != nil {
+		dataBytes, err = serializeData(format, data)
+		if err != nil {
+			return nil, err
+		}
+		dataLen = len(dataBytes)
+	}
+	buffer.WriteInt32(int32(dataLen))
+	if len(dataBytes) != 0 {
+		buffer.Write(dataBytes)
+	}
+	return buffer.ToArray(), nil
 }
