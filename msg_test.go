@@ -49,11 +49,3 @@ func TestUUID(t *testing.T) {
 	fmt.Println("uuid -> ", uuid, " len -> ", len(uuid))
 }
 
-func TestBaseReq(t *testing.T) {
-	req := new(DeclareModelReq)
-	req.Format = JSON
-	req.Name = "suzhen"
-	req.Data = req
-	data := req.GetData()
-	fmt.Println(string(data))
-}
