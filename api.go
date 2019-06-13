@@ -17,14 +17,14 @@ const (
 	CmdOnDeviceStatusChanged
 )
 
-type Client interface {
+type API interface {
 	//declare device models,only device model declared can be used in device
 	//ps:this function need some privilege//TODO define privilege
-	DeclareDeviceModel(models ...DeviceModel) error
+	DeclareDeviceModel(models []DeviceModel) error
 
 	//remove device models
 	//ps:this function need some privilege//TODO define privilege
-	RemoveDeviceModels(modIds ...string) error
+	RemoveDeviceModels(modIds []string) error
 
 	//update  device model
 	//ps:this function need some privilege//TODO define privilege
@@ -33,10 +33,10 @@ type Client interface {
 	//register devices,
 	//each device's modelId must be filled with device model declared ahead
 	//ps:this function need some privilege//TODO define privilege
-	RegisterDevices(devices ...Device) error
+	RegisterDevices(devices []Device) error
 	//remove devices
 	//ps:this function need some privilege//TODO define privilege
-	RemoveDevices(devIds ...string) error
+	RemoveDevices(devIds []string) error
 
 	//update device room
 	//ps:this function need some privilege//TODO define privilege
