@@ -5,14 +5,6 @@ import (
 	"gitee.com/Puietel/std"
 )
 
-// HEADER(FE FE) 2 | ID 32| CMD 2| CONTENT_TYPE 1| DATA_LEN 4| DATA N|
-type IOMsg struct {
-	Id     string
-	Cmd    uint16
-	Format uint8
-	Body   []uint8
-}
-
 type MsgFmt uint8
 
 const (
@@ -24,6 +16,14 @@ const kMinMsgLen = 2 + 32 + 2 + 1 + 4
 
 var ErrNeedMore = errors.New("codec want read more bytes")
 var ErrUnknownMsgFmt = errors.New("unknown msg format")
+
+// HEADER(FE FE) 2 | ID 32| CMD 2| CONTENT_TYPE 1| DATA_LEN 4| DATA N|
+type IOMsg struct {
+	Id     string
+	Cmd    uint16
+	Format MsgFmt
+	Body   []uint8
+}
 
 func Decode(buf std.ReadableBuffer, maxBodyLen int) (*IOMsg, error) {
 	std.Assert(maxBodyLen > 0, "maxBodyLen must > 0")
@@ -38,7 +38,7 @@ func Decode(buf std.ReadableBuffer, maxBodyLen int) (*IOMsg, error) {
 		}
 		msgId := string(buf.PeekN(2, 32))
 		cmd := buf.PeekUInt16(2 + 32)
-		format := buf.PeekUInt8(2 + 32 + 2)
+		format := MsgFmt(buf.PeekUInt8(2 + 32 + 2))
 		dataLen := buf.PeekInt32(2 + 32 + 2 + 1)
 		if dataLen < 0 {
 			buf.PopN(1)

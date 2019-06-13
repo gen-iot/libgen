@@ -26,14 +26,14 @@ func newExampleStruct() *exampleStruct {
 
 func TestEncodeMessage_JSON(t *testing.T) {
 	o := newExampleStruct()
-	bytes, err := Encode(std.GenRandomUUID(),1, JSON, o)
+	bytes, err := Encode(std.GenRandomUUID(), 1, JSON, o)
 	std.AssertError(err, "Encode")
 	fmt.Println(string(bytes))
 }
 
 func TestEncodeMessage_MSGPACK(t *testing.T) {
 	o := newExampleStruct()
-	bytes, err := Encode(std.GenRandomUUID(),1, MSGPACK, o)
+	bytes, err := Encode(std.GenRandomUUID(), 1, MSGPACK, o)
 	std.AssertError(err, "Encode")
 	fmt.Println(string(bytes))
 	buffer := std.NewByteBuffer()
@@ -47,4 +47,13 @@ func TestEncodeMessage_MSGPACK(t *testing.T) {
 func TestUUID(t *testing.T) {
 	uuid := std.GenRandomUUID()
 	fmt.Println("uuid -> ", uuid, " len -> ", len(uuid))
+}
+
+func TestBaseReq(t *testing.T) {
+	req := new(DeclareModelReq)
+	req.Format = JSON
+	req.Name = "suzhen"
+	req.Data = req
+	data := req.GetData()
+	fmt.Println(string(data))
 }

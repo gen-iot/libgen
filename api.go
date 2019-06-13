@@ -1,5 +1,7 @@
 package libgen
 
+import "time"
+
 type GenCommand uint8
 
 const (
@@ -58,7 +60,7 @@ type API interface {
 
 	//fetch all devices
 	//ps:this function need some privilege//TODO define privilege
-	FetchDevices()
+	FetchDevices() []*Device
 
 	//control device,control some device in other domain
 	//ps:this function need some privilege//TODO define privilege
@@ -68,4 +70,9 @@ type API interface {
 	//this function will be called while devices'status which in other domain changed
 	//ps:this function need some privilege//TODO define privilege
 	OnDeviceStatusChanged(domain string, deviceId string, statusProps map[string]interface{}) error
+
+	//GetData
+	Send(timeout time.Duration, data []byte) error
+
+	OnError(err error)
 }

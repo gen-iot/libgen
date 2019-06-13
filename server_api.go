@@ -2,45 +2,48 @@ package libgen
 
 import (
 	"gitee.com/Puietel/std"
-	"reflect"
+	"time"
 )
 
-type ServerWriteHandle func(data []byte, userData interface{})
-type ServerOnError func(err error, userData interface{})
-
 type Server struct {
-	API
-	writeHandle ServerWriteHandle
-	errHandle   ServerOnError
-	apiFuncMap  map[GenCommand]reflect.Value
 }
 
-func NewServer(api API, writeHandle ServerWriteHandle, errHandle ServerOnError) *Server {
+func NewServer() *Server {
 	s := new(Server)
-	s.API = api
-	s.writeHandle = writeHandle
-	s.errHandle = errHandle
 	return s
 }
 
-func (this *Server) makeApiFuncMap() {
-	of := reflect.TypeOf(this.API)
-	for i := 0; i < of.NumMethod(); i++ {
-		method := of.Method(i)
-	}
-}
-
-func (this *Server) OnDataRead(buf std.ReadableBuffer, userData interface{}) {
+func (this *Server) OnDataRead(buf std.ReadableBuffer, api API) {
 	for {
 		msg, err := Decode(buf, 1024*1024*1)
 		if err != nil {
 			if err == ErrNeedMore {
 				break
 			}
-			this.errHandle(err, userData)
+			api.OnError(err)
 			return
 		}
-		//decode msg
+		this.dispatchInvoke(msg, api)
+	}
+}
+
+func (this *Server) dispatchInvoke(msg *IOMsg, api API) {
+	var out interface{} = nil
+	switch GenCommand(msg.Cmd) {
+	case CmdDeclareDeviceModel:
+		out = api.FetchDevices()
 	}
 
+	if out == nil {
+		return
+	}
+	bytes, err := Encode(msg.Id, msg.Cmd, msg.Format, out)
+	if err != nil {
+		api.OnError(err)
+		return
+	}
+	err = api.Send(time.Second*5, bytes)
+	if err != nil {
+		api.OnError(err)
+	}
 }
