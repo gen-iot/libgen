@@ -87,6 +87,9 @@ func (this *RPC) NewCallable(fd int, userData interface{}) Callable {
 const kMaxRpcMsgBodyLen = 1024 * 1024 * 32
 
 func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err error) {
+	if err != nil {
+		return
+	}
 	for {
 		rawMsg, err := decodeRpcMsg(buf, kMaxRpcMsgBodyLen)
 		if err != nil {

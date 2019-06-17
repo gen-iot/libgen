@@ -29,14 +29,15 @@ func (this *apiClient) Call(timeout time.Duration, name string, param interface{
 	if err != nil {
 		return err
 	}
-	//
-	outBytes, err := encodeRpcMsg(outMsg)
-	this.Write(outBytes, false)
-	//
+	//add promise
 	promise := std.NewPromise()
 	promiseId := std.PromiseId(outMsg.Id)
 	this.ctx.promiseGroup.AddPromise(promiseId, promise)
 	defer this.ctx.promiseGroup.RemovePromise(promiseId)
+	//write out
+	outBytes, err := encodeRpcMsg(outMsg)
+	this.Write(outBytes, false)
+	//wait for data
 	future := promise.GetFuture()
 	data, err := future.WaitData(timeout)
 	if err != nil {

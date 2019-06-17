@@ -53,14 +53,13 @@ func startMockRemoteRpc(fd int, wg *sync.WaitGroup) {
 		default:
 		}
 		out := new(Rsp)
-		err = callable.Call(time.Second*1, "sum", &Req{
+		err = callable.Call(time.Second, "sum", &Req{
 			A:  10,
 			B:  100,
 			Tm: time.Now(),
 		}, out)
 		std.AssertError(err, "call error")
 		std.Assert(out.Sum == 10+100, "result error")
-		time.Sleep(time.Millisecond * 500)
 	}
 }
 
