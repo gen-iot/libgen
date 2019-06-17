@@ -1,4 +1,4 @@
-package rpc
+package rpcx
 
 import (
 	"errors"
@@ -98,7 +98,7 @@ func decodeRpcMsg(buf std.ReadableBuffer, maxBodyLen int) (*rpcRawMsg, error) {
 		outMsg := new(rpcRawMsg)
 		err := std.MsgpackUnmarshal(data, outMsg)
 		if err != nil {
-			log.Println("unmarshal rpc msg failed -> ", err)
+			log.Println("unmarshal rpcx msg failed -> ", err)
 			continue
 		}
 		return outMsg, nil

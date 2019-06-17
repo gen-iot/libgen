@@ -1,9 +1,11 @@
-package rpc
+package rpcx
 
 import (
 	"fmt"
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/liblpc"
+	"os"
+	"runtime/pprof"
 	"sync"
 	"testing"
 	"time"
@@ -28,10 +30,9 @@ func sum(req *Req) (*Rsp, error) {
 
 func startLocalRpc(fd int, wg *sync.WaitGroup) {
 	rpc, err := New()
-	std.AssertError(err, "new rpc")
+	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
-	sw := rpc.NewCallable(fd, nil)
-	defer std.CloseIgnoreErr(sw)
+	rpc.NewCallable(fd, nil)
 	rpc.RegFun(sum)
 	rpc.Start()
 	wg.Wait()
@@ -40,11 +41,11 @@ func startLocalRpc(fd int, wg *sync.WaitGroup) {
 func startMockRemoteRpc(fd int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	rpc, err := New()
-	std.AssertError(err, "new rpc")
+	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
-	callable := rpc.NewCallable(fd, nil)
 	rpc.Start()
-	after := time.After(time.Second * 10)
+	callable := rpc.NewCallable(fd, nil)
+	after := time.After(time.Second * 5)
 	for {
 		select {
 		case <-after:
@@ -64,6 +65,12 @@ func startMockRemoteRpc(fd int, wg *sync.WaitGroup) {
 }
 
 func TestRpc(t *testing.T) {
+	file, err := os.OpenFile("cpu_prof.prof", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0755)
+	std.AssertError(err, "create prof failed")
+	defer std.CloseIgnoreErr(file)
+	err = pprof.StartCPUProfile(file)
+	std.AssertError(err, "start profile failed")
+	defer pprof.StopCPUProfile()
 	fds, err := liblpc.MakeIpcSockpair(true)
 	std.AssertError(err, "socketPair error")
 	wg := &sync.WaitGroup{}

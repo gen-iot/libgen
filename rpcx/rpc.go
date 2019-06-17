@@ -1,4 +1,4 @@
-package rpc
+package rpcx
 
 import (
 	"gitee.com/Puietel/std"
@@ -77,6 +77,7 @@ func (this *RPC) Close() error {
 func (this *RPC) NewCallable(fd int, userData interface{}) Callable {
 	s := &apiClient{
 		FdBufferedStream: liblpc.NewFdBufferedStream(this.ioLoop, fd, this.genericRead),
+		ctx:              this,
 	}
 	s.SetUserData(userData)
 	s.Start()

@@ -1,4 +1,4 @@
-package rpc
+package rpcx
 
 import (
 	"gitee.com/Puietel/std"
