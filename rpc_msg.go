@@ -26,15 +26,51 @@ const kMinMsgLen = kDataOffset
 
 var ErrNeedMore = errors.New("codec want read more bytes")
 
+type rpcMsgType int
+
+const (
+	rpcReqMsg rpcMsgType = iota
+	rpcAckMsg
+)
+
 type rpcRawMsg struct {
-	Id         string `json:"msgId"`
-	MethodName string `json:"methodName"`
-	Type       int    `json:"type"` // req or ack
-	Err        string `json:"err"`  // fast path for ack error
-	Data       []byte `json:"data"` // req = param
+	Id         string     `json:"msgId"`
+	MethodName string     `json:"methodName"`
+	Type       rpcMsgType `json:"type"` // req or ack
+	Err        *string    `json:"err"`  // fast path for ack error
+	Data       []byte     `json:"data"` // req = param
 }
 
-func Decode(buf std.ReadableBuffer, maxBodyLen int) (*rpcRawMsg, error) {
+func (this *rpcRawMsg) GetError() error {
+	if this.Err == nil {
+		return nil
+	}
+	return errors.New(*this.Err)
+}
+
+func (this *rpcRawMsg) SetErrorString(es string) {
+	this.Err = &es
+}
+
+func (this *rpcRawMsg) SetError(err error) {
+	es := err.Error()
+	this.Err = &es
+}
+
+func (this *rpcRawMsg) BindData(v interface{}) error {
+	return std.MsgpackUnmarshal(this.Data, v)
+}
+
+func (this *rpcRawMsg) SetData(v interface{}) error {
+	bytes, err := std.MsgpackMarshal(v)
+	if err != nil {
+		return err
+	}
+	this.Data = bytes
+	return nil
+}
+
+func decodeRpcMsg(buf std.ReadableBuffer, maxBodyLen int) (*rpcRawMsg, error) {
 	std.Assert(maxBodyLen > 0, "maxBodyLen must > 0")
 	for {
 		if buf.ReadableLen() < kMinMsgLen {
@@ -69,7 +105,7 @@ func Decode(buf std.ReadableBuffer, maxBodyLen int) (*rpcRawMsg, error) {
 	}
 }
 
-func Encode(msg *rpcRawMsg) ([]byte, error) {
+func encodeRpcMsg(msg *rpcRawMsg) ([]byte, error) {
 	std.Assert(len(msg.Id) == 32, "msgId.Len != 32")
 	buffer := std.NewByteBuffer()
 	datas, err := std.MsgpackMarshal(msg)

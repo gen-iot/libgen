@@ -24,28 +24,28 @@ func newExampleStruct() *exampleStruct {
 	}
 }
 
-func TestEncodeMessage_JSON(t *testing.T) {
-	o := newExampleStruct()
-	bytes, err := Encode(std.GenRandomUUID(), 1, JSON, o)
-	std.AssertError(err, "Encode")
-	fmt.Println(string(bytes))
-}
-
 func TestEncodeMessage_MSGPACK(t *testing.T) {
-	o := newExampleStruct()
-	bytes, err := Encode(std.GenRandomUUID(), 1, MSGPACK, o)
-	std.AssertError(err, "Encode")
-	fmt.Println(string(bytes))
+	msg := &rpcRawMsg{
+		Id:         std.GenRandomUUID(),
+		MethodName: "sum",
+		Type:       rpcReqMsg,
+	}
+	msg.SetErrorString("try set error")
+	std.AssertError(msg.SetData(newExampleStruct()), "set data error")
+	bytes, err := encodeRpcMsg(msg)
+	std.AssertError(err, "encodeRpcMsg")
+	fmt.Println("encode -> ", string(bytes))
 	buffer := std.NewByteBuffer()
-	buffer.Write([]byte{1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 90})
 	buffer.Write(bytes)
-	msg, err := Decode(buffer, 1024*1024)
-	std.AssertError(err, "Decode")
-	fmt.Println(*msg)
+	outMsg, err := decodeRpcMsg(buffer, 1024*1024*4)
+	std.AssertError(err, "decodeRpcMsg")
+	outExampleStruct := new(exampleStruct)
+	err = outMsg.BindData(outExampleStruct)
+	std.AssertError(err, "bind data error")
+	fmt.Println(*outExampleStruct)
 }
 
 func TestUUID(t *testing.T) {
 	uuid := std.GenRandomUUID()
 	fmt.Println("uuid -> ", uuid, " len -> ", len(uuid))
 }
-
