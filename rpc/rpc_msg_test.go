@@ -1,4 +1,4 @@
-package libgen
+package rpc
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package libgen
+package rpc
 
 import (
 	"gitee.com/Puietel/std"
@@ -75,7 +75,7 @@ type RPC struct {
 	startFlag    int32
 }
 
-func NewRpc() (*RPC, error) {
+func New() (*RPC, error) {
 	loop, err := liblpc.NewIOEvtLoop(1024 * 1024 * 4)
 	if err != nil {
 		return nil, err
@@ -165,8 +165,9 @@ func (this *RPC) Call(sw liblpc.StreamWriter, timeout time.Duration, name string
 	sw.Write(outBytes, false)
 	//
 	promise := std.NewPromise()
-	this.promiseGroup.AddPromise(std.PromiseId(outMsg.Id), promise)
-	defer this.promiseGroup.RemovePromise(std.PromiseId(outMsg.Id))
+	promiseId := std.PromiseId(outMsg.Id)
+	this.promiseGroup.AddPromise(promiseId, promise)
+	defer this.promiseGroup.RemovePromise(promiseId)
 	future := promise.GetFuture()
 	data, err := future.WaitData(timeout)
 	if err != nil {

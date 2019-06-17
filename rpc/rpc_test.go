@@ -1,4 +1,4 @@
-package libgen
+package rpc
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func sum(req Req) (Rsp, error) {
 }
 
 func startLocalRpc(fd int) {
-	rpc, err := NewRpc()
+	rpc, err := New()
 	std.AssertError(err, "new rpc")
 	rpc.AddApiStream(fd, nil)
 	rpc.RegFun(sum)
@@ -34,7 +34,7 @@ func startLocalRpc(fd int) {
 }
 
 func startMockRemoteRpc(fd int) {
-	rpc, err := NewRpc()
+	rpc, err := New()
 	std.AssertError(err, "new rpc")
 	sw := rpc.AddApiStream(fd, nil)
 	rpc.Start()
@@ -53,5 +53,4 @@ func TestRpc(t *testing.T) {
 	std.AssertError(err, "socketPair error")
 	startLocalRpc(fds[0])
 	startMockRemoteRpc(fds[1])
-
 }
