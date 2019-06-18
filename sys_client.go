@@ -20,6 +20,8 @@ var gApiClient *ApiClientImpl
 
 var ApiCallTimeout = time.Second * 30
 
+var testerConn *net.TCPConn
+
 const clientFd = 3
 
 func Init() {
@@ -38,11 +40,11 @@ func doInit() {
 	addr, err := net.ResolveTCPAddr("tcp", "192.168.50.232:8000")
 	std.AssertError(err, "ResolveTCPAddr error")
 	conn, err := net.DialTCP("tcp", nil, addr)
+	std.AssertError(err, "net dial error")
+	testerConn = conn
 	runtime.SetFinalizer(conn, func(conn *net.TCPConn) {
 		fmt.Println("close conn")
 	})
-	runtime.KeepAlive(conn)
-	std.AssertError(err, "net dial error")
 	err = conn.SetNoDelay(true)
 	std.AssertError(err, "net SetNoDelay error")
 	f, err := conn.File()
