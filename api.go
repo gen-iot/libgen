@@ -2,77 +2,101 @@ package libgen
 
 import "time"
 
-type GenCommand uint8
+type BaseRequest struct {
+}
 
-const (
-	CmdDeclareDeviceModel GenCommand = iota
-	CmdRemoveDeviceModels
-	CmdUpdateDeviceModel
-	CmdRegisterDevices
-	CmdRemoveDevices
-	CmdUpdateDeviceRoom
-	CmdUpdateDeviceName
-	CmdUpdateDeviceStatus
-	CmdOnDeviceControl
-	CmdFetchDevices
-	CmdDeviceControl
-	CmdOnDeviceStatusChanged
-)
+type BaseResponse struct {
+}
 
-type API interface {
+type DeclareDeviceModelRequest struct {
+	BaseRequest
+	Models []*DeviceModel `json:"models" validate:"required,gt=0"`
+}
+
+type RemoveDeviceModelsRequest struct {
+	BaseRequest
+	Ids []string `json:"ids" validate:"required,gt=0"`
+}
+
+type UpdateDeviceModelRequest struct {
+	BaseRequest
+	Id    string       `json:"id" validate:"required"`
+	Model *DeviceModel `json:"model" validate:"required"`
+}
+
+type RegisterDevicesRequest struct {
+	BaseRequest
+	Devices []*Device `json:"devices" validate:"required,gt=0"`
+}
+
+type RemoveDevicesRequest struct {
+	BaseRequest
+	Ids []string `json:"ids" validate:"required,gt=0"`
+}
+
+type UpdateDeviceRequest struct {
+	Id         string                 `json:"id" validate:"required"`
+	Name       *string                `json:"name"`
+	Room       *string                `json:"room"`
+	Properties map[string]interface{} `json:"properties"`
+	MetaData   map[string]interface{} `json:"metaData"`
+}
+
+type FetchDevicesRequest struct {
+	BaseRequest
+	//if id is not nil or empty will be as the only query condition
+	Id *string `json:"id"`
+	//filter condition , if filed below not nil or empty will be as '&&' query condition
+	Name   *string `json:"name"`
+	Room   *string `json:"room"`
+	Domain *string `json:"domain"`
+}
+
+type FetchDevicesResponse struct {
+	BaseResponse
+	Devices []*DeviceWithDomain
+}
+
+type ControlDeviceRequest struct {
+	BaseRequest
+	Domain     string                 `json:"domain" validate:"required"`
+	Id         string                 `json:"id" validate:"required"`
+	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required"`
+}
+
+type Ping struct {
+	Time time.Time `json:"time"`
+	Msg  string    `json:"msg"`
+}
+
+type Pong = Ping
+
+type RpcApi interface {
 	//declare device models,only device model declared can be used in device
-	//ps:this function need some privilege//TODO define privilege
-	DeclareDeviceModel(models []DeviceModel) error
+	DeclareDeviceModel(req *DeclareDeviceModelRequest) (*BaseResponse, error)
 
 	//remove device models
-	//ps:this function need some privilege//TODO define privilege
-	RemoveDeviceModels(modIds []string) error
+	RemoveDeviceModels(req *RemoveDeviceModelsRequest) (*BaseResponse, error)
 
 	//update  device model
-	//ps:this function need some privilege//TODO define privilege
-	UpdateDeviceModel(modId string, model DeviceModel) error
+	UpdateDeviceModel(req *UpdateDeviceModelRequest) (*BaseResponse, error)
 
 	//register devices,
 	//each device's modelId must be filled with device model declared ahead
-	//ps:this function need some privilege//TODO define privilege
-	RegisterDevices(devices []Device) error
+	RegisterDevices(req *RegisterDevicesRequest) (*BaseResponse, error)
+
 	//remove devices
-	//ps:this function need some privilege//TODO define privilege
-	RemoveDevices(devIds []string) error
+	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
 
-	//update device room
-	//ps:this function need some privilege//TODO define privilege
-	UpdateDeviceRoom(devId string, newRoom string) error
+	//update device,
+	UpdateDevice(req *UpdateDeviceRequest) (*BaseResponse, error)
 
-	//update device name
-	//ps:this function need some privilege//TODO define privilege
-	UpdateDeviceName(devId string, newName string) error
+	//fetch devices
+	FetchDevices(req *FetchDevicesRequest) (*FetchDevicesResponse, error)
 
-	//update device status properties,
-	//statusProps must contains all status properties defined in DeviceModel
-	//ps:this function need some privilege//TODO define privilege
-	UpdateDeviceStatus(devId string, statusProps map[string]interface{}) error
+	//control devices
+	DeviceControl(req *ControlDeviceRequest) (*BaseResponse, error)
 
-	//device control callback function,
-	//this function will be called while someone want control device on your domain
-	//ps:this function need some privilege//TODO define privilege
-	OnDeviceControl(devId string, cmdProps map[string]interface{}) error
-
-	//fetch all devices
-	//ps:this function need some privilege//TODO define privilege
-	FetchDevices() []*Device
-
-	//control device,control some device in other domain
-	//ps:this function need some privilege//TODO define privilege
-	DeviceControl(domain string, deviceId string, cmdProps map[string]interface{}) error
-
-	//this is a notify callback function,
-	//this function will be called while devices'status which in other domain changed
-	//ps:this function need some privilege//TODO define privilege
-	OnDeviceStatusChanged(domain string, deviceId string, statusProps map[string]interface{}) error
-
-	//GetData
-	Send(timeout time.Duration, data []byte) error
-
-	OnError(err error)
+	//ping
+	Ping(req *Ping) (*Pong, error)
 }
