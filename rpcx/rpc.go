@@ -126,6 +126,7 @@ func (this *RPC) handleAck(inMsg *rpcRawMsg) {
 }
 
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
+	log.Println("RECV REQ id -> ", inMsg.Id)
 	fn := this.getFunc(inMsg.MethodName)
 	if fn == nil {
 		return // fn not found

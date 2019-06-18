@@ -7,9 +7,8 @@ import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
 	"log"
-	"net"
-	"runtime"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -19,8 +18,6 @@ var gRpc *rpcx.RPC
 var gApiClient *ApiClientImpl
 
 var ApiCallTimeout = time.Second * 30
-
-var testerConn *net.TCPConn
 
 const clientFd = 3
 
@@ -37,22 +34,14 @@ func doInit() {
 	gRpc.RegFuncWithName("Ping", onPing)
 	gRpc.Start()
 	gApiClient = new(ApiClientImpl)
-	addr, err := net.ResolveTCPAddr("tcp", "192.168.50.232:8000")
-	std.AssertError(err, "ResolveTCPAddr error")
-	conn, err := net.DialTCP("tcp", nil, addr)
-	std.AssertError(err, "net dial error")
-	testerConn = conn
-	runtime.SetFinalizer(conn, func(conn *net.TCPConn) {
-		fmt.Println("close conn")
+	sock, err := syscall.Socket(syscall.AF_INET, syscall.SOL_SOCKET, syscall.IPPROTO_TCP)
+	std.AssertError(err, "new sock err")
+	err = syscall.Connect(sock, &syscall.SockaddrInet4{
+		Port: 8000,
+		Addr: [4]byte{192, 168, 50, 232},
 	})
-	err = conn.SetNoDelay(true)
-	std.AssertError(err, "net SetNoDelay error")
-	f, err := conn.File()
-	std.AssertError(err, "get conn file error")
-	fd := int(f.Fd())
-
-	gCallable = gRpc.NewCallable(fd, nil)
-
+	std.AssertError(err, "connect err")
+	gCallable = gRpc.NewCallable(sock, nil)
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
 }
 

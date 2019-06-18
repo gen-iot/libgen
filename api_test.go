@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gitee.com/Puietel/std"
 	"log"
-	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -32,5 +31,4 @@ func TestApiClientImpl_Ping(t *testing.T) {
 		log.Println("ping test over")
 	}()
 	wg.Wait()
-	runtime.KeepAlive(testerConn)
 }
