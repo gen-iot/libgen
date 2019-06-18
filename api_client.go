@@ -1,3 +1,5 @@
+//+build client
+
 package libgen
 
 type ApiClientImpl struct {
