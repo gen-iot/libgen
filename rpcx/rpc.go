@@ -21,13 +21,17 @@ func New() (*RPC, error) {
 	if err != nil {
 		return nil, err
 	}
+	return NewWithLoop(loop), nil
+}
+
+func NewWithLoop(ioLoop *liblpc.IOEvtLoop) *RPC {
 	return &RPC{
-		ioLoop:       loop,
+		ioLoop:       ioLoop,
 		rcpFuncMap:   make(map[string]*rpcFunc),
 		promiseGroup: std.NewPromiseGroup(),
 		lock:         &sync.RWMutex{},
 		startFlag:    0,
-	}, nil
+	}
 }
 
 func (this *RPC) getFunc(name string) *rpcFunc {
