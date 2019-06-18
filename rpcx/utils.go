@@ -4,7 +4,6 @@ import (
 	"gitee.com/Puietel/std"
 	"reflect"
 	"runtime"
-	"strings"
 )
 
 var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
@@ -28,9 +27,10 @@ func checkOutParam(t reflect.Type) {
 }
 
 func getFuncName(fv reflect.Value) string {
-	fname := runtime.FuncForPC(reflect.Indirect(fv).Pointer()).Name()
-	idx := strings.LastIndex(fname, ".")
-	return fname[idx+1:]
+	//fname := runtime.FuncForPC(reflect.Indirect(fv).Pointer()).Name()
+	//idx := strings.LastIndex(fname, ".")
+	//return fname[idx+1:]
+	return runtime.FuncForPC(fv.Pointer()).Name()
 }
 
 func getValueElement(v reflect.Value) reflect.Value {
