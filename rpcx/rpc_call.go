@@ -4,6 +4,7 @@ import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/liblpc"
 	"io"
+	"log"
 	"time"
 )
 
@@ -34,6 +35,9 @@ func (this *apiClient) Call(timeout time.Duration, name string, param interface{
 	if err != nil {
 		return err
 	}
+
+	log.Println("SEND REQ id -> ", outMsg.Id)
+
 	//add promise
 	promise := std.NewPromise()
 	promiseId := std.PromiseId(outMsg.Id)

@@ -3,6 +3,7 @@ package rpcx
 import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/liblpc"
+	"log"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -120,6 +121,7 @@ func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err
 }
 
 func (this *RPC) handleAck(inMsg *rpcRawMsg) {
+	log.Println("RECV ACK id -> ", inMsg.Id)
 	this.promiseGroup.DonePromise(std.PromiseId(inMsg.Id), inMsg.GetError(), inMsg.Data)
 }
 
