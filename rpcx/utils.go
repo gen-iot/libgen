@@ -30,7 +30,10 @@ func checkOutParam(t reflect.Type) {
 func getFuncName(fv reflect.Value) string {
 	fname := runtime.FuncForPC(reflect.Indirect(fv).Pointer()).Name()
 	idx := strings.LastIndex(fname, ".")
-	return fname[idx+1:]
+	fname = fname[idx+1:]
+	idx = strings.LastIndex(fname, "-")
+	fname = fname[:idx]
+	return fname
 }
 
 func getValueElement(v reflect.Value) reflect.Value {
