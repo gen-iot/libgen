@@ -5,7 +5,7 @@ package libgen
 import (
 	"fmt"
 	"gitee.com/Puietel/std"
-	"libgen/rpcx"
+	"gitee.com/SuzhenProjects/libgen/rpcx"
 	"sync"
 	"time"
 )
