@@ -45,13 +45,12 @@ func (this *RPC) getFunc(name string) *rpcFunc {
 	return fn
 }
 
-func (this *RPC) RegFun(f interface{}) {
+func (this *RPC) RegFuncWithName(fname string, f interface{}) {
 	fv, ok := f.(reflect.Value)
 	if !ok {
 		fv = reflect.ValueOf(f)
 	}
 	std.Assert(fv.Kind() == reflect.Func, "f not func!")
-	fname := getFuncName(fv)
 	fvType := fv.Type()
 	//check in/out param
 	checkInParam(fvType)
@@ -66,6 +65,16 @@ func (this *RPC) RegFun(f interface{}) {
 		inP0Type:  fvType.In(1),
 		outP0Type: fvType.Out(0),
 	}
+}
+
+func (this *RPC) RegFun(f interface{}) {
+	fv, ok := f.(reflect.Value)
+	if !ok {
+		fv = reflect.ValueOf(f)
+	}
+	std.Assert(fv.Kind() == reflect.Func, "f not func!")
+	fname := getFuncName(fv)
+	this.RegFuncWithName(fname, fv)
 }
 
 func (this *RPC) Start() {
