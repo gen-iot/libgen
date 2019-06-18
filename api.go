@@ -1,6 +1,9 @@
 package libgen
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type BaseRequest struct {
 }
@@ -71,6 +74,10 @@ type ControlDeviceResponse struct {
 type Ping struct {
 	Time time.Time `json:"time"`
 	Msg  string    `json:"msg"`
+}
+
+func (this *Ping) String() string {
+	return fmt.Sprintf("time = %s , extraMsg = %s", this.Time.String(), this.Msg)
 }
 
 type Pong = Ping
