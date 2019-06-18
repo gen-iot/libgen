@@ -144,8 +144,7 @@ func TestRemoteTcpRpcV2(t *testing.T) {
 	fmt.Println("NewCallable")
 	clientRsp := new(libgen.Pong)
 	for {
-		time.Sleep(500 * time.Millisecond)
-		continue
+		time.Sleep(5 * time.Millisecond)
 		err = callable.Call(time.Second, "Ping", &libgen.Ping{
 			Time: time.Now(),
 			Msg:  "ping from server",
