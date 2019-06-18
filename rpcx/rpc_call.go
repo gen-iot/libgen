@@ -14,12 +14,17 @@ type Callable interface {
 }
 
 type apiClient struct {
-	*liblpc.FdBufferedStream
-	ctx *RPC
+	stream *liblpc.FdBufferedStream
+	ctx    *RPC
+	liblpc.BaseUserData
+}
+
+func (this *apiClient) Close() error {
+	return this.stream.Close()
 }
 
 func (this *apiClient) Call(timeout time.Duration, name string, param interface{}, out interface{}) error {
-	std.Assert(this.FdBufferedStream != nil, "stream is nil!")
+	std.Assert(this.stream != nil, "stream is nil!")
 	outMsg := &rpcRawMsg{
 		Id:         std.GenRandomUUID(),
 		MethodName: name,
@@ -36,7 +41,7 @@ func (this *apiClient) Call(timeout time.Duration, name string, param interface{
 	defer this.ctx.promiseGroup.RemovePromise(promiseId)
 	//write out
 	outBytes, err := encodeRpcMsg(outMsg)
-	this.Write(outBytes, false)
+	this.stream.Write(outBytes, false)
 	//wait for data
 	future := promise.GetFuture()
 	data, err := future.WaitData(timeout)

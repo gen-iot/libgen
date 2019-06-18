@@ -63,7 +63,7 @@ func (this *RPC) RegFun(f interface{}) {
 	this.rcpFuncMap[fname] = &rpcFunc{
 		name:      fname,
 		fun:       fv,
-		inP0Type:  fvType.In(0),
+		inP0Type:  fvType.In(1),
 		outP0Type: fvType.Out(0),
 	}
 }
@@ -81,11 +81,12 @@ func (this *RPC) Close() error {
 
 func (this *RPC) NewCallable(fd int, userData interface{}) Callable {
 	s := &apiClient{
-		FdBufferedStream: liblpc.NewFdBufferedStream(this.ioLoop, fd, this.genericRead),
-		ctx:              this,
+		stream: liblpc.NewFdBufferedStream(this.ioLoop, fd, this.genericRead),
+		ctx:    this,
 	}
 	s.SetUserData(userData)
-	s.Start()
+	s.stream.SetUserData(s)
+	s.stream.Start()
 	return s
 }
 
@@ -118,7 +119,8 @@ func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 	if fn == nil {
 		return // fn not found
 	}
-	outBytes, err := fn.Call(inMsg.Data)
+	apiCli := sw.GetUserData().(*apiClient)
+	outBytes, err := fn.Call(apiCli, inMsg.Data)
 	outMsg := &rpcRawMsg{
 		Id:         inMsg.Id,
 		MethodName: inMsg.MethodName,

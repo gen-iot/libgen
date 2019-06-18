@@ -7,19 +7,24 @@ import (
 	"strings"
 )
 
+var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
+var typeOfCallable = reflect.TypeOf((*Callable)(nil)).Elem()
+
 func checkInParam(t reflect.Type) {
 	inNum := t.NumIn()
-	std.Assert(inNum == 1, "func in param len != 1")
-	in := t.In(0)
-	inKind := in.Kind()
-	std.Assert(inKind == reflect.Ptr || inKind == reflect.Struct, "param must be prt of struct")
+	std.Assert(inNum == 2, "func in1 param len != 1")
+	in0 := t.In(0)
+	std.Assert(in0 == typeOfCallable, "param[0] must be callable")
+	in1 := t.In(1)
+	in1Kind := in1.Kind()
+	std.Assert(in1Kind == reflect.Ptr || in1Kind == reflect.Struct, "param[1] must be prt of struct")
 }
 
 func checkOutParam(t reflect.Type) {
 	outNum := t.NumOut()
-	std.Assert(outNum == 2, "func out param len != 2 ")
+	std.Assert(outNum == 2, "func musts have two out_param")
 	out1 := t.Out(1)
-	std.Assert(out1 == typeOfError, "out1 must be error type")
+	std.Assert(out1 == typeOfError, "out_param[1].type must be `error`")
 }
 
 func getFuncName(fv reflect.Value) string {
