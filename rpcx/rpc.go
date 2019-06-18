@@ -16,8 +16,10 @@ type RPC struct {
 	startFlag    int32
 }
 
+const RpcLoopDefaultBufferSize = 1024 * 1024 * 4
+
 func New() (*RPC, error) {
-	loop, err := liblpc.NewIOEvtLoop(1024 * 1024 * 4)
+	loop, err := liblpc.NewIOEvtLoop(RpcLoopDefaultBufferSize)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +28,7 @@ func New() (*RPC, error) {
 		rcpFuncMap:   make(map[string]*rpcFunc),
 		promiseGroup: std.NewPromiseGroup(),
 		lock:         &sync.RWMutex{},
-		startFlag:    1,
+		startFlag:    0,
 	}, nil
 }
 
