@@ -41,6 +41,9 @@ func (this *apiClient) Call(timeout time.Duration, name string, param interface{
 	defer this.ctx.promiseGroup.RemovePromise(promiseId)
 	//write out
 	outBytes, err := encodeRpcMsg(outMsg)
+	if err != nil {
+		return err
+	}
 	this.stream.Write(outBytes, false)
 	//wait for data
 	future := promise.GetFuture()
