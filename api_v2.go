@@ -1,5 +1,7 @@
 package libgen
 
+import "time"
+
 type BaseRequest struct {
 }
 
@@ -62,22 +64,39 @@ type ControlDeviceRequest struct {
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }
 
+type Ping struct {
+	Time time.Time `json:"time"`
+	Msg  string    `json:"msg"`
+}
+
+type Pong = Ping
+
 type RpcApi interface {
 	//declare device models,only device model declared can be used in device
 	DeclareDeviceModel(req *DeclareDeviceModelRequest) (*BaseResponse, error)
+
 	//remove device models
 	RemoveDeviceModels(req *RemoveDeviceModelsRequest) (*BaseResponse, error)
+
 	//update  device model
 	UpdateDeviceModel(req *UpdateDeviceModelRequest) (*BaseResponse, error)
+
 	//register devices,
 	//each device's modelId must be filled with device model declared ahead
 	RegisterDevices(req *RegisterDevicesRequest) (*BaseResponse, error)
+
 	//remove devices
 	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
+
 	//update device,
 	UpdateDevice(req *UpdateDeviceRequest) (*BaseResponse, error)
+
 	//fetch devices
 	FetchDevices(req *FetchDevicesRequest) (*FetchDevicesResponse, error)
+
 	//control devices
-	DeviceControl(req ControlDeviceRequest) (*BaseResponse, error)
+	DeviceControl(req *ControlDeviceRequest) (*BaseResponse, error)
+
+	//ping
+	Ping(req *Ping) (*Pong, error)
 }
