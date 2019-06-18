@@ -64,6 +64,10 @@ type ControlDeviceRequest struct {
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }
 
+type ControlDeviceResponse struct {
+	BaseResponse
+}
+
 type Ping struct {
 	Time time.Time `json:"time"`
 	Msg  string    `json:"msg"`

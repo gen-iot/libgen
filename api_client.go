@@ -3,45 +3,56 @@ package libgen
 type ApiClientImpl struct {
 }
 
+func (this *ApiClientImpl) callWrapper(method string, req interface{}, res interface{}) error {
+	return getCallable().Call(ApiCallTimeout, method, req, res)
+}
+
 func (this *ApiClientImpl) DeclareDeviceModel(req *DeclareDeviceModelRequest) (*BaseResponse, error) {
-	res := &BaseResponse{}
-	err := gCallable.Call(ApiCallTimeout, "DeclareDeviceModel", req, res)
+	res := new(BaseResponse)
+	err := this.callWrapper("DeclareDeviceModel", req, res)
 	return res, err
 }
 
 func (this *ApiClientImpl) RemoveDeviceModels(req *RemoveDeviceModelsRequest) (*BaseResponse, error) {
-
-	panic("implement me")
+	res := new(BaseResponse)
+	err := this.callWrapper("RemoveDeviceModels", req, res)
+	return res, err
 }
 
 func (this *ApiClientImpl) UpdateDeviceModel(req *UpdateDeviceModelRequest) (*BaseResponse, error) {
-
-	panic("implement me")
+	res := new(BaseResponse)
+	err := this.callWrapper("UpdateDeviceModel", req, res)
+	return res, err
 }
 
 func (this *ApiClientImpl) RegisterDevices(req *RegisterDevicesRequest) (*BaseResponse, error) {
-
-	panic("implement me")
+	res := new(BaseResponse)
+	err := this.callWrapper("RegisterDevices", req, res)
+	return res, err
 }
 
 func (this *ApiClientImpl) RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error) {
-
-	panic("implement me")
+	res := new(BaseResponse)
+	err := this.callWrapper("RemoveDevices", req, res)
+	return res, err
 }
 
 func (this *ApiClientImpl) UpdateDevice(req *UpdateDeviceRequest) (*BaseResponse, error) {
-
-	panic("implement me")
+	res := new(BaseResponse)
+	err := this.callWrapper("UpdateDevice", req, res)
+	return res, err
 }
 
 func (this *ApiClientImpl) FetchDevices(req *FetchDevicesRequest) (*FetchDevicesResponse, error) {
-
-	panic("implement me")
+	res := new(FetchDevicesResponse)
+	err := this.callWrapper("FetchDevices", req, res)
+	return res, err
 }
 
 func (this *ApiClientImpl) DeviceControl(req *ControlDeviceRequest) (*BaseResponse, error) {
-
-	panic("implement me")
+	res := new(BaseResponse)
+	err := this.callWrapper("DeviceControl", req, res)
+	return res, err
 }
 
 func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {
