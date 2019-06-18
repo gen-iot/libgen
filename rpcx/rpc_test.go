@@ -21,7 +21,7 @@ type Rsp struct {
 	Sum int
 }
 
-func sum(req *Req) (*Rsp, error) {
+func sum(call Callable, req *Req) (*Rsp, error) {
 	fmt.Println("req delta time -> ", time.Now().Sub(req.Tm))
 	return &Rsp{
 		Sum: req.A + req.B,
@@ -32,9 +32,9 @@ func startLocalRpc(fd int, wg *sync.WaitGroup) {
 	rpc, err := New()
 	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
-	rpc.NewCallable(fd, nil)
-	rpc.RegFun(sum)
 	rpc.Start()
+	rpc.RegFun(sum)
+	rpc.NewCallable(fd, nil)
 	wg.Wait()
 }
 
@@ -53,7 +53,7 @@ func startMockRemoteRpc(fd int, wg *sync.WaitGroup) {
 		default:
 		}
 		out := new(Rsp)
-		err = callable.Call(time.Second, "sum", &Req{
+		err = callable.Call(time.Second*500, "sum", &Req{
 			A:  10,
 			B:  100,
 			Tm: time.Now(),

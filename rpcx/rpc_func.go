@@ -7,8 +7,6 @@ import (
 	"reflect"
 )
 
-var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
-
 type rpcFunc struct {
 	name      string
 	fun       reflect.Value
@@ -34,7 +32,7 @@ func (this *rpcFunc) decodeInParam(data []byte) (interface{}, error) {
 	return newOut, nil
 }
 
-func (this *rpcFunc) Call(inBytes []byte) (outBytes []byte, err error) {
+func (this *rpcFunc) Call(remoteCallable Callable, inBytes []byte) (outBytes []byte, err error) {
 	defer func() {
 		panicErr := recover()
 		if panicErr == nil {
@@ -47,7 +45,7 @@ func (this *rpcFunc) Call(inBytes []byte) (outBytes []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	paramV := []reflect.Value{reflect.ValueOf(inParam)}
+	paramV := []reflect.Value{reflect.ValueOf(remoteCallable), reflect.ValueOf(inParam)}
 	retV := this.fun.Call(paramV)
 	if !retV[1].IsNil() {
 		err = retV[1].Interface().(error)
