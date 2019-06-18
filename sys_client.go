@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
+	"log"
+	"net"
 	"sync"
 	"time"
 )
@@ -15,7 +17,7 @@ var gCallable rpcx.Callable
 var gRpc *rpcx.RPC
 var gApiClient *ApiClientImpl
 
-var ApiCallTimeout = time.Second * 5
+var ApiCallTimeout = time.Second * 30
 
 const clientFd = 3
 
@@ -28,11 +30,23 @@ func doInit() {
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
-	gRpc.RegFun(deviceControl)
-	gRpc.RegFun(deviceStatus)
+	//gRpc.RegFun(deviceControl)
+	gRpc.RegFuncWithName("Ping", onPing)
 	gRpc.Start()
 	gApiClient = new(ApiClientImpl)
-	gCallable = gRpc.NewCallable(clientFd, nil)
+
+	addr, err := net.ResolveTCPAddr("tcp", "192.168.50.232:8000")
+	std.AssertError(err, "ResolveTCPAddr error")
+	conn, err := net.DialTCP("tcp", nil, addr)
+	std.AssertError(err, "net dial error")
+	err = conn.SetNoDelay(true)
+	std.AssertError(err, "net SetNoDelay error")
+	f, err := conn.File()
+	std.AssertError(err, "get conn file error")
+	fd := int(f.Fd())
+
+	gCallable = gRpc.NewCallable(fd, nil)
+
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
 }
 
@@ -52,17 +66,24 @@ type OnDeviceStatusFun func(req *ControlDeviceRequest) (*ControlDeviceResponse, 
 func RegOnDeviceControl(fn OnDeviceControlFun) {
 	gOnDeviceControl = fn
 }
+
 func RegOnDeviceStatus(fn OnDeviceControlFun) {
 	gOnDeviceControl = fn
 }
 
-func deviceControl(req *ControlDeviceRequest) (*ControlDeviceResponse, error) {
+func onPing(callable rpcx.Callable, req *Ping) (*Pong, error) {
+	log.Println("receive ping req.time =", req.Time, " delta is ", time.Now().Sub(req.Time))
+	return &Pong{Time: time.Now(), Msg: "client pong"}, nil
+}
+
+func onDeviceControl(req *ControlDeviceRequest) (*ControlDeviceResponse, error) {
 	if gOnDeviceControl != nil {
 		return gOnDeviceControl(req)
 	}
 	return new(ControlDeviceResponse), nil
 }
-func deviceStatus(req *ControlDeviceRequest) (*ControlDeviceResponse, error) {
+
+func onDeviceStatus(req *ControlDeviceRequest) (*ControlDeviceResponse, error) {
 	if gOnDeviceControl != nil {
 		return gOnDeviceControl(req)
 	}
