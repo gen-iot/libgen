@@ -3,6 +3,7 @@ package rpcx
 import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/liblpc"
+	"github.com/pkg/errors"
 	"log"
 	"reflect"
 	"sync"
@@ -125,23 +126,26 @@ func (this *RPC) handleAck(inMsg *rpcRawMsg) {
 	this.promiseGroup.DonePromise(std.PromiseId(inMsg.Id), inMsg.GetError(), inMsg.Data)
 }
 
+var errRpcFuncNotFound = errors.New("rpc func not found")
+
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 	log.Println("RECV REQ id -> ", inMsg.Id)
 	fn := this.getFunc(inMsg.MethodName)
-	if fn == nil {
-		return // fn not found
-	}
-	apiCli := sw.GetUserData().(*apiClient)
-	outBytes, err := fn.Call(apiCli, inMsg.Data)
 	outMsg := &rpcRawMsg{
 		Id:         inMsg.Id,
 		MethodName: inMsg.MethodName,
 		Type:       rpcAckMsg,
 	}
-	if err != nil {
-		outMsg.SetError(err)
+	if fn != nil {
+		apiCli := sw.GetUserData().(*apiClient)
+		outBytes, err := fn.Call(apiCli, inMsg.Data)
+		if err != nil {
+			outMsg.SetError(err)
+		} else {
+			outMsg.Data = outBytes
+		}
 	} else {
-		outMsg.Data = outBytes
+		outMsg.SetError(errRpcFuncNotFound)
 	}
 	sendBytes, err := encodeRpcMsg(outMsg)
 	if err != nil {
