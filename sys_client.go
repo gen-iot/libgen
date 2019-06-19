@@ -17,7 +17,7 @@ var gCallable rpcx.Callable
 var gRpc *rpcx.RPC
 var gApiClient *ApiClientImpl
 
-var ApiCallTimeout = time.Second * 30
+var ApiCallTimeout = time.Second * 1
 
 const clientFd = 3
 
@@ -38,7 +38,7 @@ func doInit() {
 	std.AssertError(err, "new sock err")
 	err = syscall.Connect(sock, &syscall.SockaddrInet4{
 		Port: 8000,
-		Addr: [4]byte{192, 168, 50, 232},
+		Addr: [4]byte{192, 168, 50, 48},
 	})
 	std.AssertError(err, "connect err")
 	gCallable = gRpc.NewCallable(sock, nil)
