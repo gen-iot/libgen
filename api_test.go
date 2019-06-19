@@ -29,11 +29,12 @@ func TestApiClientImpl_Ping(t *testing.T) {
 	callable := rpc.NewCallable(sock, nil)
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		count := 0
 		for {
 			log.Println("ping test count :", count)
 			res := new(Pong)
-			err=callable.Call(ApiCallTimeout, "Ping", &Ping{Time: time.Now(), Msg: fmt.Sprintf("client ping %d", count)}, res)
+			err = callable.Call(ApiCallTimeout, "Ping", &Ping{Time: time.Now(), Msg: fmt.Sprintf("client ping %d", count)}, res)
 			std.AssertError(err, "ping error")
 			log.Println("ping res msg >> ", res.Msg)
 			time.Sleep(time.Millisecond * 1)
@@ -43,7 +44,6 @@ func TestApiClientImpl_Ping(t *testing.T) {
 			//}
 		}
 		//time.Sleep(time.Second * 60 * 60)
-		wg.Done()
 	}()
 	wg.Wait()
 	log.Println("ping test over")
