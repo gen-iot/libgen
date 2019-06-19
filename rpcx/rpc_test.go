@@ -122,7 +122,7 @@ func TestRemoteTcpRpc(t *testing.T) {
 }
 
 func TestRemoteTcpRpcV2(t *testing.T) {
-	listenFd, err := syscall.Socket(syscall.AF_INET, syscall.SOL_SOCKET|syscall.O_CLOEXEC, syscall.IPPROTO_TCP)
+	listenFd, err := syscall.Socket(syscall.AF_INET, syscall.SOL_SOCKET|syscall.SOCK_CLOEXEC, syscall.IPPROTO_TCP)
 	std.AssertError(err, "create listen socket failed")
 	defer func() {
 		_ = syscall.Close(listenFd)
