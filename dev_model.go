@@ -7,13 +7,17 @@ type ModelProperty struct {
 }
 
 type DeviceModel struct {
-	Id              string           `json:"modelId" validate:"required"`
-	Name            string           `json:"name" validate:"required"`
+	DeviceModelInfo
 	ModelProperties []*ModelProperty `json:"modelProperties"`
 }
 
+type DeviceModelInfo struct {
+	Id   string `json:"modelId" validate:"required"`
+	Name string `json:"name" validate:"required"`
+}
+
 type Device struct {
-	ModelId    string                 `json:"modelId" validate:"required"`
+	ModelInfo  *DeviceModelInfo       `json:"modelInfo" validate:"required"`
 	Id         string                 `json:"devId" validate:"required"`
 	Name       string                 `json:"name" validate:"required"`
 	Room       string                 `json:"room" validate:"required"`
