@@ -11,10 +11,14 @@ type DeviceModel struct {
 	ModelProperties []*ModelProperty `json:"modelProperties"`
 }
 
+// example modelInfo:
+// DeviceModelInfo {
+//		Package :"com.example.example",
+//		Name	:"light",
+//}
 type DeviceModelInfo struct {
-	AppId string `json:"appId"` // if empty , use current appid
-	Id    string `json:"modelId" validate:"required"`
-	Name  string `json:"name" validate:"required"`
+	Package string `json:"package" validate:"required"` // if empty , use current appid
+	Name    string `json:"name" validate:"required"`    // model name
 }
 
 type Device struct {
