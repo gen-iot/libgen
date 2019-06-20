@@ -12,8 +12,9 @@ type DeviceModel struct {
 }
 
 type DeviceModelInfo struct {
-	Id   string `json:"modelId" validate:"required"`
-	Name string `json:"name" validate:"required"`
+	AppId string `json:"appId"` // if empty , use current appid
+	Id    string `json:"modelId" validate:"required"`
+	Name  string `json:"name" validate:"required"`
 }
 
 type Device struct {
