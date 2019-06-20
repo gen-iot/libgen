@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+type AppType int
+
+const (
+	LocalApp  AppType = 900
+	RemoteApp AppType = 901
+)
+
 type TimeoutType int
 
 const (
