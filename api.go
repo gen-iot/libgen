@@ -2,7 +2,6 @@ package libgen
 
 import (
 	"fmt"
-	"gitee.com/SuzhenProjects/libgen/rpcx"
 	"time"
 )
 
@@ -112,35 +111,4 @@ type RpcApiClient interface {
 
 	//ping
 	Ping(req *Ping) (*Pong, error)
-}
-
-// server side
-type RpcApiServer interface {
-	//declare device models,only device model declared can be used in device
-	DeclareDeviceModel(callable rpcx.Callable, req *DeclareDeviceModelRequest) (*BaseResponse, error)
-
-	//remove device models
-	RemoveDeviceModels(callable rpcx.Callable, req *RemoveDeviceModelsRequest) (*BaseResponse, error)
-
-	//update  device model
-	UpdateDeviceModel(callable rpcx.Callable, req *UpdateDeviceModelRequest) (*BaseResponse, error)
-
-	//register devices,
-	//each device's modelId must be filled with device model declared ahead
-	RegisterDevices(callable rpcx.Callable, req *RegisterDevicesRequest) (*BaseResponse, error)
-
-	//remove devices
-	RemoveDevices(callable rpcx.Callable, req *RemoveDevicesRequest) (*BaseResponse, error)
-
-	//update device,
-	UpdateDevice(callable rpcx.Callable, req *UpdateDeviceRequest) (*BaseResponse, error)
-
-	//fetch devices
-	FetchDevices(callable rpcx.Callable, req *FetchDevicesRequest) (*FetchDevicesResponse, error)
-
-	//control devices
-	DeviceControl(callable rpcx.Callable, req *ControlDeviceRequest) (*BaseResponse, error)
-
-	//ping
-	Ping(callable rpcx.Callable, req *Ping) (*Pong, error)
 }
