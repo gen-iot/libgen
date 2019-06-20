@@ -20,6 +20,7 @@ type Device struct {
 	Properties map[string]interface{} `json:"properties"`
 	MetaData   map[string]interface{} `json:"metadata"`
 }
+
 type DeviceInfo struct {
 	Device
 	AppId string `json:"appId"`
