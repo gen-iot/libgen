@@ -25,11 +25,11 @@ func (this *I32RangeLimiter) Validate(v interface{}) error {
 		return errIllegalParams
 	}
 	fail := false
-	fail = i32 < *this.Gte
+	fail = i32 < this.Gte
 	if fail {
 		return errOutOfRange
 	}
-	fail = i32 > *this.Lte
+	fail = i32 > this.Lte
 	if fail {
 		return errOutOfRange
 	}
