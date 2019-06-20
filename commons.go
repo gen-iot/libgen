@@ -20,10 +20,12 @@ const (
 type RestrictType int
 
 const (
-	I32Range RestrictType = iota
-	I32Enum
-	StrEnum
-	Any
+	I32Range RestrictType = 1000
+	I32Enum  RestrictType = 1001
+	I32Any   RestrictType = 1002
+	StrEnum  RestrictType = 1003
+	StrAny   RestrictType = 1004
+	Any      RestrictType = 2000
 )
 
 type PropertyType string

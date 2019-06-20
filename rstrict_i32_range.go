@@ -3,7 +3,7 @@ package libgen
 type I32RangeLimiter struct {
 	baseRestrict
 	Gte int32 `json:"gte"`
-	Lte int32 `json:"lte"`
+	Lte int32 `json:"lte" validate:"gtfield=Gte"`
 }
 
 func NewI32RangeLimiter(gte, lte int32) *I32RangeLimiter {
@@ -25,11 +25,11 @@ func (this *I32RangeLimiter) Validate(v interface{}) error {
 		return errIllegalParams
 	}
 	fail := false
-	fail = i32 < this.Gte
+	fail = i32 < *this.Gte
 	if fail {
 		return errOutOfRange
 	}
-	fail = i32 > this.Lte
+	fail = i32 > *this.Lte
 	if fail {
 		return errOutOfRange
 	}

@@ -8,7 +8,7 @@ import (
 
 type StrEnumLimiter struct {
 	baseRestrict
-	Limits []string `json:"limits"`
+	Limits []string `json:"limits" validate:"gte=1"`
 }
 
 func NewStrEnumLimiter(limits []string) *StrEnumLimiter {
