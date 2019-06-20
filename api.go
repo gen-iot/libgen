@@ -58,7 +58,7 @@ type FetchDevicesRequest struct {
 
 type FetchDevicesResponse struct {
 	BaseResponse
-	Devices []*DeviceWithDomain
+	Devices []*DeviceInfo
 }
 
 type ControlDeviceRequest struct {
