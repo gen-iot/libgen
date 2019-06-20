@@ -51,7 +51,7 @@ func doInit(config Config) {
 	gRpc.RegFuncWithName("Ping", onPing)
 	gRpc.Start()
 	if config.Mode == 2 {
-		sockFd, err := liblpc.NewConnFdSimple(config.RemoteAddress)
+		sockFd, err := liblpc.NewConnFd(config.RemoteAddress)
 		std.AssertError(err, "connect err")
 		gCallable = gRpc.NewCallable(int(sockFd), nil)
 	} else {
