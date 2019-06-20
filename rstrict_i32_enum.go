@@ -2,7 +2,7 @@ package libgen
 
 type I32EnumLimiter struct {
 	baseRestrict
-	Limits []int32 `json:"limits"`
+	Limits []int32 `json:"limits" validate:"gte=1"`
 }
 
 func NewI32EnumLimiter(limits []int32) *I32EnumLimiter {
