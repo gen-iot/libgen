@@ -67,6 +67,12 @@ type ControlDeviceRequest struct {
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }
 
+type DeviceStatusNotify struct {
+	Domain       string                 `json:"domain" validate:"required"`
+	Id           string                 `json:"id" validate:"required"`
+	StatusParams map[string]interface{} `json:"ctrlParams" validate:"required"`
+}
+
 type ControlDeviceResponse struct {
 	BaseResponse
 }
