@@ -1,4 +1,4 @@
-//+build client
+//+build !server
 
 package libgen
 

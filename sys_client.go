@@ -1,4 +1,4 @@
-//+build client
+//+build !server
 
 package libgen
 
@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
-	"log"
+	"gitee.com/SuzhenProjects/liblpc"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -21,27 +20,45 @@ var ApiCallTimeout = time.Second * 1
 
 const clientFd = 3
 
-func Init() {
-	initOnce.Do(doInit)
+type Config struct {
+	//1 local ;2 remote
+	Mode          int
+	RemoteAddress string
 }
 
-func doInit() {
+var DefaultConfig = Config{
+
+}
+
+func Init() {
+	InitWithConfig(DefaultConfig)
+}
+
+func InitWithConfig(config Config) {
+	initOnce.Do(func() {
+		doInit(config)
+	})
+}
+
+func doInit(config Config) {
 	fmt.Println("LIBGEN CLIENT INIT")
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
-	//gRpc.RegFun(deviceControl)
+	//todo 根据Manifest决定是否注册
+	gRpc.RegFuncWithName("", onDeviceControl)
+	gRpc.RegFuncWithName("", onDeviceStatus)
 	gRpc.RegFuncWithName("Ping", onPing)
 	gRpc.Start()
+	if config.Mode == 2 {
+		sockFd, err := liblpc.NewConnFdSimple(config.RemoteAddress)
+		std.AssertError(err, "connect err")
+		gCallable = gRpc.NewCallable(int(sockFd), nil)
+	} else {
+		gCallable = gRpc.NewCallable(clientFd, nil)
+	}
+
 	gApiClient = new(ApiClientImpl)
-	sock, err := syscall.Socket(syscall.AF_INET, syscall.SOL_SOCKET, syscall.IPPROTO_TCP)
-	std.AssertError(err, "new sock err")
-	err = syscall.Connect(sock, &syscall.SockaddrInet4{
-		Port: 8000,
-		Addr: [4]byte{192, 168, 50, 48},
-	})
-	std.AssertError(err, "connect err")
-	gCallable = gRpc.NewCallable(sock, nil)
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
 }
 
@@ -51,36 +68,4 @@ func getCallable() rpcx.Callable {
 
 func GetApiClient() *ApiClientImpl {
 	return gApiClient
-}
-
-var gOnDeviceControl OnDeviceControlFun
-
-type OnDeviceControlFun func(req *ControlDeviceRequest) (*ControlDeviceResponse, error)
-type OnDeviceStatusFun func(req *ControlDeviceRequest) (*ControlDeviceResponse, error)
-
-func RegOnDeviceControl(fn OnDeviceControlFun) {
-	gOnDeviceControl = fn
-}
-
-func RegOnDeviceStatus(fn OnDeviceControlFun) {
-	gOnDeviceControl = fn
-}
-
-func onPing(callable rpcx.Callable, req *Ping) (*Pong, error) {
-	log.Println("receive ping req.time =", req.Time, " delta is ", time.Now().Sub(req.Time))
-	return &Pong{Time: time.Now(), Msg: "client pong"}, nil
-}
-
-func onDeviceControl(req *ControlDeviceRequest) (*ControlDeviceResponse, error) {
-	if gOnDeviceControl != nil {
-		return gOnDeviceControl(req)
-	}
-	return new(ControlDeviceResponse), nil
-}
-
-func onDeviceStatus(req *ControlDeviceRequest) (*ControlDeviceResponse, error) {
-	if gOnDeviceControl != nil {
-		return gOnDeviceControl(req)
-	}
-	return new(ControlDeviceResponse), nil
 }
