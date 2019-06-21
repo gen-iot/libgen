@@ -57,7 +57,8 @@ type FetchDevicesRequest struct {
 
 type FetchDevicesResponse struct {
 	BaseResponse
-	Devices []*DeviceInfo
+	Package string    `json:"package"`
+	Devices []*Device `json:"devices"`
 }
 
 type ControlDeviceRequest struct {
