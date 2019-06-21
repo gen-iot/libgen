@@ -21,12 +21,6 @@ func (this *ApiClientImpl) RemoveDeviceModels(req *RemoveDeviceModelsRequest) (*
 	return res, err
 }
 
-func (this *ApiClientImpl) UpdateDeviceModel(req *UpdateDeviceModelRequest) (*BaseResponse, error) {
-	res := new(BaseResponse)
-	err := this.callWrapper("UpdateDeviceModel", req, res)
-	return res, err
-}
-
 func (this *ApiClientImpl) RegisterDevices(req *RegisterDevicesRequest) (*BaseResponse, error) {
 	res := new(BaseResponse)
 	err := this.callWrapper("RegisterDevices", req, res)

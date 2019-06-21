@@ -22,12 +22,6 @@ type RemoveDeviceModelsRequest struct {
 	ModelNames []string `json:"modelNames" validate:"required,gt=0"`
 }
 
-type UpdateDeviceModelRequest struct {
-	BaseRequest
-	Id    string       `json:"id" validate:"required"`
-	Model *DeviceModel `json:"model" validate:"required"`
-}
-
 type RegisterDevicesRequest struct {
 	BaseRequest
 	Devices []*Device `json:"devices" validate:"required,gt=0"`
