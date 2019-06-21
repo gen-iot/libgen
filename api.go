@@ -32,6 +32,7 @@ type RemoveDevicesRequest struct {
 	Ids []string `json:"ids" validate:"required,gt=0"`
 }
 
+// todo spilt to -> deviceInfo , status_properties
 type UpdateDeviceRequest struct {
 	Id         string                 `json:"id" validate:"required"`
 	Name       *string                `json:"name"`
@@ -42,10 +43,8 @@ type UpdateDeviceRequest struct {
 
 type FetchDevicesRequest struct {
 	BaseRequest
-	//if id is not nil or empty will be as the only query condition
-	Id *string `json:"id"`
-	//filter condition , if filed below not nil or empty will be as '&&' query condition
-	Name   *string `json:"name"`
+	Id     *string `json:"id"`   // if id is not nil or empty will be as the only query condition
+	Name   *string `json:"name"` // filter condition , if filed below not nil or empty will be as '&&' query condition
 	Room   *string `json:"room"`
 	Domain *string `json:"domain"`
 }
