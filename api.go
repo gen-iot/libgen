@@ -19,7 +19,7 @@ type DeclareDeviceModelRequest struct {
 
 type RemoveDeviceModelsRequest struct {
 	BaseRequest
-	Ids []string `json:"ids" validate:"required,gt=0"`
+	ModelNames []string `json:"modelNames" validate:"required,gt=0"`
 }
 
 type UpdateDeviceModelRequest struct {
