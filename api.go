@@ -32,13 +32,16 @@ type RemoveDevicesRequest struct {
 	Ids []string `json:"ids" validate:"required,gt=0"`
 }
 
-// todo spilt to -> deviceInfo , status_properties
-type UpdateDeviceRequest struct {
+type UpdateDeviceInfoRequest struct {
+	Id       string                 `json:"id" validate:"required"`
+	Name     *string                `json:"name"`
+	Room     *string                `json:"room"`
+	MetaData map[string]interface{} `json:"metaData"`
+}
+
+type ReportDeviceStatusRequest struct {
 	Id         string                 `json:"id" validate:"required"`
-	Name       *string                `json:"name"`
-	Room       *string                `json:"room"`
 	Properties map[string]interface{} `json:"properties"`
-	MetaData   map[string]interface{} `json:"metaData"`
 }
 
 type FetchDevicesRequest struct {
@@ -91,9 +94,6 @@ type RpcApiClient interface {
 	//remove device models
 	RemoveDeviceModels(req *RemoveDeviceModelsRequest) (*BaseResponse, error)
 
-	//update  device model
-	UpdateDeviceModel(req *UpdateDeviceModelRequest) (*BaseResponse, error)
-
 	//register devices,
 	//each device's modelId must be filled with device model declared ahead
 	RegisterDevices(req *RegisterDevicesRequest) (*BaseResponse, error)
@@ -101,8 +101,11 @@ type RpcApiClient interface {
 	//remove devices
 	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
 
-	//update device,
-	UpdateDevice(req *UpdateDeviceRequest) (*BaseResponse, error)
+	//update device info,
+	UpdateDeviceInfo(req *UpdateDeviceInfoRequest) (*BaseResponse, error)
+
+	//update device status,
+	ReportDeviceStatus(req *ReportDeviceStatusRequest) (*BaseResponse, error)
 
 	//fetch devices
 	FetchDevices(req *FetchDevicesRequest) (*FetchDevicesResponse, error)
