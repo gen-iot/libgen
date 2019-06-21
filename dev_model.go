@@ -1,14 +1,11 @@
 package libgen
 
+import "gitee.com/Puietel/std"
+
 type ModelProperty struct {
 	Type     PropertyType `json:"type" validate:"required"`
 	Name     string       `json:"name" validate:"required"`
 	Restrict Restrict     `json:"restrict" validate:"required"`
-}
-
-type DeviceModel struct {
-	DeviceModelInfo
-	ModelProperties []*ModelProperty `json:"modelProperties"`
 }
 
 // example modelInfo:
@@ -21,6 +18,11 @@ type DeviceModelInfo struct {
 	Name    string `json:"name" validate:"required"`    // model name
 }
 
+type DeviceModel struct {
+	DeviceModelInfo
+	ModelProperties map[string]*ModelProperty `json:"properties"`
+}
+
 type Device struct {
 	ModelInfo  *DeviceModelInfo       `json:"modelInfo" validate:"required"`
 	Id         string                 `json:"devId" validate:"required"`
@@ -30,4 +32,22 @@ type Device struct {
 	MetaData   map[string]interface{} `json:"metadata"`
 }
 
+func NewDeviceModel(pkg string, name string) *DeviceModel {
+	return &DeviceModel{
+		DeviceModelInfo: DeviceModelInfo{
+			Package: pkg,
+			Name:    name,
+		},
+		ModelProperties: make(map[string]*ModelProperty),
+	}
+}
 
+func (this *DeviceModel) AddModelProperty(tp PropertyType, name string, restrict Restrict) {
+	std.Assert(len(name) != 0, "empty name")
+	p := &ModelProperty{
+		Type:     tp,
+		Name:     name,
+		Restrict: restrict,
+	}
+	this.ModelProperties[name] = p
+}
