@@ -13,8 +13,8 @@ type BaseResponse struct {
 
 type DeclareDeviceModelRequest struct {
 	BaseRequest
-	Models          []*DeviceModel `json:"models" validate:"required,gt=0"`
-	OverrideIfExist bool           `json:"overrideIfExist"`
+	Model           *DeviceModel `json:"model" validate:"required"`
+	OverrideIfExist bool         `json:"overrideIfExist"`
 }
 
 type RemoveDeviceModelsRequest struct {
