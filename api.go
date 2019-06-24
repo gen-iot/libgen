@@ -58,21 +58,32 @@ type FetchDevicesResponse struct {
 	Devices []*Device `json:"devices"`
 }
 
+type AppInfo struct {
+	Package string `json:"package" validate:"required"`
+	Name    string `json:"name" validate:"required"`
+}
+
 type ControlDeviceRequest struct {
 	BaseRequest
-	Domain     string                 `json:"domain" validate:"required"`
-	Id         string                 `json:"id" validate:"required"`
+	AppInfo    AppInfo                `json:"appInfo"`
+	DevId      string                 `json:"devId" validate:"required"`
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }
 
 type DeviceStatusNotify struct {
-	Domain       string                 `json:"domain" validate:"required"`
+	AppInfo      AppInfo                `json:"appInfo"`
 	Id           string                 `json:"id" validate:"required"`
 	StatusParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }
 
 type ControlDeviceResponse struct {
 	BaseResponse
+}
+
+type SetOnlineRequest struct {
+	BaseRequest
+	DeviceIds []string `json:"deviceIds" validate:"required"`
+	Online    bool     `json:"online"`
 }
 
 type Ping struct {
@@ -100,6 +111,9 @@ type RpcApiClient interface {
 
 	//remove devices
 	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
+
+	//set online
+	SetOnline(req *SetOnlineRequest) (*BaseResponse, error)
 
 	//update device info,
 	UpdateDeviceInfo(req *UpdateDeviceInfoRequest) (*BaseResponse, error)
