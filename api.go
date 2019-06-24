@@ -58,20 +58,20 @@ type FetchDevicesResponse struct {
 	Devices []*Device `json:"devices"`
 }
 
-type AppInfo struct {
+type PkgInfo struct {
 	Package string `json:"package" validate:"required"`
 	Name    string `json:"name" validate:"required"`
 }
 
 type ControlDeviceRequest struct {
 	BaseRequest
-	AppInfo    AppInfo                `json:"appInfo"`
+	AppInfo    PkgInfo                `json:"appInfo"`
 	DevId      string                 `json:"devId" validate:"required"`
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }
 
 type DeviceStatusNotify struct {
-	AppInfo      AppInfo                `json:"appInfo"`
+	AppInfo      PkgInfo                `json:"appInfo"`
 	Id           string                 `json:"id" validate:"required"`
 	StatusParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }

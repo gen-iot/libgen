@@ -8,33 +8,23 @@ type ModelProperty struct {
 	Restrict Restrict     `json:"restrict" validate:"required"`
 }
 
-// example modelInfo:
-// DeviceModelInfo {
-//		Package :"com.example.example",
-//		Name	:"light",
-//}
-type DeviceModelInfo struct {
-	Package string `json:"package" validate:"required"` // if empty , use current appid
-	Name    string `json:"name" validate:"required"`    // model name
-}
-
 type DeviceModel struct {
-	DeviceModelInfo
+	PkgInfo
 	ModelProperties map[string]*ModelProperty `json:"properties"`
 }
 
 type Device struct {
-	ModelInfo  *DeviceModelInfo       `json:"modelInfo" validate:"required"`
-	Id         string                 `json:"devId" validate:"required"`
-	Name       string                 `json:"name" validate:"required"`
-	Room       string                 `json:"room" validate:"required"`
-	Properties map[string]interface{} `json:"properties"`
-	MetaData   map[string]interface{} `json:"metadata"`
+	ModelPkgInfo *PkgInfo               `json:"modelPkgInfo" validate:"required"`
+	Id           string                 `json:"devId" validate:"required"`
+	Name         string                 `json:"name" validate:"required"`
+	Room         string                 `json:"room" validate:"required"`
+	Properties   map[string]interface{} `json:"properties"`
+	MetaData     map[string]interface{} `json:"metadata"`
 }
 
 func NewDeviceModel(pkg string, name string) *DeviceModel {
 	return &DeviceModel{
-		DeviceModelInfo: DeviceModelInfo{
+		PkgInfo: PkgInfo{
 			Package: pkg,
 			Name:    name,
 		},
