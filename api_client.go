@@ -38,6 +38,13 @@ func (this *ApiClientImpl) UpdateDeviceInfo(req *UpdateDeviceInfoRequest) (*Base
 	err := this.callWrapper("UpdateDeviceInfo", req, res)
 	return res, err
 }
+
+func (this *ApiClientImpl) SetOnline(req *SetOnlineRequest) (*BaseResponse, error) {
+	res := new(BaseResponse)
+	err := this.callWrapper("SetOnline", req, res)
+	return res, err
+}
+
 func (this *ApiClientImpl) ReportDeviceStatus(req *ReportDeviceStatusRequest) (*BaseResponse, error) {
 	res := new(BaseResponse)
 	err := this.callWrapper("ReportDeviceStatus", req, res)
