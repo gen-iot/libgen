@@ -49,6 +49,7 @@ func (this *rpcFunc) Call(remoteCallable Callable, inBytes []byte) (outBytes []b
 	retV := this.fun.Call(paramV)
 	if !retV[1].IsNil() {
 		err = retV[1].Interface().(error)
+		return nil, err
 	}
 	outParam := retV[0].Interface()
 	outBytes, err = std.MsgpackMarshal(outParam)
