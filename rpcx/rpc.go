@@ -105,6 +105,7 @@ const kMaxRpcMsgBodyLen = 1024 * 1024 * 32
 
 func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err error) {
 	if err != nil {
+		std.CloseIgnoreErr(sw)
 		return
 	}
 	for {
