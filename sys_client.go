@@ -22,12 +22,20 @@ const clientFd = 3
 
 type Config struct {
 	//1 local ;2 remote
-	Mode          int
-	RemoteAddress string
+	Mode          int     `json:"mode" validate:"required,oneof=1 2"`
+	RemoteAddress string  `json:"remoteAddress"`
+	PkgInfo       PkgInfo `json:"pkgInfo" validate:"required"`
+	AccessToken   string  `json:"accessToken" validate:"required"`
 }
 
 var DefaultConfig = Config{
-
+	Mode:          1,
+	RemoteAddress: "",
+	AccessToken:   "",
+	PkgInfo: PkgInfo{
+		Package: "",
+		Name:    "",
+	},
 }
 
 func Init() {
@@ -42,6 +50,8 @@ func InitWithConfig(config Config) {
 
 func doInit(config Config) {
 	fmt.Println("LIBGEN CLIENT INIT")
+	err := std.ValidateStruct(config)
+	std.AssertError(err, "config invalid")
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
@@ -54,6 +64,13 @@ func doInit(config Config) {
 		sockFd, err := liblpc.NewConnFd(config.RemoteAddress)
 		std.AssertError(err, "connect err")
 		gCallable = gRpc.NewCallable(int(sockFd), nil)
+		//handshake
+		out := new(BaseResponse)
+		err = gCallable.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
+			PkgInfo:     config.PkgInfo,
+			AccessToken: config.AccessToken,
+		}, out)
+		std.AssertError(err, "connect handshake err")
 	} else {
 		gCallable = gRpc.NewCallable(clientFd, nil)
 	}
