@@ -53,12 +53,14 @@ func (this *apiClient) Call(timeout time.Duration, name string, param interface{
 	future := promise.GetFuture()
 	data, err := future.WaitData(timeout)
 	if err != nil {
+		log.Println("Call :future wait got err ->", err)
 		return err
 	}
 	dataBytes, ok := data.([]byte)
-	std.Assert(ok, "data not bytes!")
+	std.Assert(ok, "Call :data not bytes!")
 	err = std.MsgpackUnmarshal(dataBytes, out)
 	if err != nil {
+		log.Println("Call :MsgpackUnmarshal got err ->", err)
 		return err
 	}
 	return nil
