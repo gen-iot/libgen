@@ -64,6 +64,7 @@ type PkgInfo struct {
 }
 
 type HandshakeRequest struct {
+	BaseRequest
 	PkgInfo
 	AccessToken string `json:"accessToken"`
 }
