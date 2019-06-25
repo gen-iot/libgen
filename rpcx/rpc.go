@@ -11,11 +11,12 @@ import (
 )
 
 type RPC struct {
-	ioLoop       *liblpc.IOEvtLoop
-	rcpFuncMap   map[string]*rpcFunc
-	promiseGroup *std.PromiseGroup
-	lock         *sync.RWMutex
-	startFlag    int32
+	ioLoop          *liblpc.IOEvtLoop
+	rcpFuncMap      map[string]*rpcFunc
+	promiseGroup    *std.PromiseGroup
+	lock            *sync.RWMutex
+	startFlag       int32
+	callableCloseCb func(callable Callable)
 }
 
 const RpcLoopDefaultBufferSize = 1024 * 1024 * 4
@@ -32,6 +33,9 @@ func New() (*RPC, error) {
 		lock:         &sync.RWMutex{},
 		startFlag:    0,
 	}, nil
+}
+func (this *RPC) OnCallableClosed(cb func(callable Callable)) {
+	this.callableCloseCb = cb
 }
 
 func (this *RPC) Loop() liblpc.EventLoop {
@@ -106,6 +110,10 @@ const kMaxRpcMsgBodyLen = 1024 * 1024 * 32
 func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err error) {
 	if err != nil {
 		std.CloseIgnoreErr(sw)
+		if this.callableCloseCb != nil {
+			callable := sw.GetUserData().(Callable)
+			this.callableCloseCb(callable)
+		}
 		return
 	}
 	for {
