@@ -46,10 +46,9 @@ type ReportDeviceStatusRequest struct {
 
 type FetchDevicesRequest struct {
 	BaseRequest
-	Id     *string `json:"id"`   // if id is not nil or empty will be as the only query condition
-	Name   *string `json:"name"` // filter condition , if filed below not nil or empty will be as '&&' query condition
-	Room   *string `json:"room"`
-	Domain *string `json:"domain"`
+	Id      *string  `json:"id"`      // if id is not nil or empty will be as the only query condition
+	PkgInfo *PkgInfo `json:"pkgInfo"` // filter condition , if filed below not nil or empty will be as '&&' query condition
+	Room    *string  `json:"room"`
 }
 
 type FetchDevicesResponse struct {
