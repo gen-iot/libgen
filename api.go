@@ -63,6 +63,11 @@ type PkgInfo struct {
 	Name    string `json:"name" validate:"required"`
 }
 
+type HandshakeRequest struct {
+	PkgInfo
+	AccessToken string `json:"accessToken"`
+}
+
 type ControlDeviceRequest struct {
 	BaseRequest
 	AppInfo    PkgInfo                `json:"appInfo"`
