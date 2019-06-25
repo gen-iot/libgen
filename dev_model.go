@@ -10,7 +10,7 @@ type ModelProperty struct {
 
 type DeviceModel struct {
 	PkgInfo
-	ModelProperties map[string]*ModelProperty `json:"properties"`
+	ModelProperties []*ModelProperty `json:"properties"`
 }
 
 type Device struct {
@@ -28,7 +28,7 @@ func NewDeviceModel(pkg string, name string) *DeviceModel {
 			Package: pkg,
 			Name:    name,
 		},
-		ModelProperties: make(map[string]*ModelProperty),
+		ModelProperties: make([]*ModelProperty, 0),
 	}
 }
 
@@ -39,5 +39,5 @@ func (this *DeviceModel) AddModelProperty(tp PropertyType, name string, restrict
 		Name:     name,
 		Restrict: restrict,
 	}
-	this.ModelProperties[name] = p
+	this.ModelProperties = append(this.ModelProperties, p)
 }
