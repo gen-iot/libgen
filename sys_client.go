@@ -16,7 +16,7 @@ var gCallable rpcx.Callable
 var gRpc *rpcx.RPC
 var gApiClient *ApiClientImpl
 
-var ApiCallTimeout = time.Second * 1
+var ApiCallTimeout = time.Second * 5
 
 const clientFd = 3
 
