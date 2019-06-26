@@ -70,9 +70,9 @@ type HandshakeRequest struct {
 
 type ControlDeviceRequest struct {
 	BaseRequest
-	AppInfo    PkgInfo                `json:"appInfo"`
+	PkgInfo    PkgInfo                `json:"pkgInfo" validate:"required"`
 	DevId      string                 `json:"devId" validate:"required"`
-	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required"`
+	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
 }
 
 type DeviceStatusNotify struct {
