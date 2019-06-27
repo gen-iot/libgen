@@ -57,10 +57,15 @@ func (this *ApiClientImpl) FetchDevices(req *FetchDevicesRequest) (*FetchDevices
 	return res, err
 }
 
-func (this *ApiClientImpl) DeviceControl(req *ControlDeviceRequest) (*BaseResponse, error) {
+func (this *ApiClientImpl) ControlDevice(req *ControlDeviceRequest) (*BaseResponse, error) {
 	res := new(BaseResponse)
-	err := this.callWrapper("DeviceControl", req, res)
+	err := this.callWrapper("ControlDevice", req, res)
 	return res, err
+}
+
+func (this *ApiClientImpl) OnDeviceControl(req *OnDeviceControlRequest) (*BaseResponse, error) {
+	//todo impl OnDeviceControl
+	panic("impl me")
 }
 
 func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {

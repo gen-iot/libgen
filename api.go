@@ -69,14 +69,21 @@ type HandshakeRequest struct {
 }
 
 type ControlDeviceRequest struct {
+	OnDeviceControlRequest
 	BaseRequest
 	PkgInfo    PkgInfo                `json:"pkgInfo" validate:"required"`
 	DevId      string                 `json:"devId" validate:"required"`
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
 }
 
+type OnDeviceControlRequest struct {
+	BaseRequest
+	DevId      string                 `json:"devId" validate:"required"`
+	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
+}
+
 type DeviceStatusNotify struct {
-	AppInfo      PkgInfo                `json:"appInfo"`
+	PkgInfo      PkgInfo                `json:"pkgInfo"`
 	Id           string                 `json:"id" validate:"required"`
 	StatusParams map[string]interface{} `json:"ctrlParams" validate:"required"`
 }
@@ -130,7 +137,10 @@ type RpcApiClient interface {
 	FetchDevices(req *FetchDevicesRequest) (*FetchDevicesResponse, error)
 
 	//control devices
-	DeviceControl(req *ControlDeviceRequest) (*BaseResponse, error)
+	ControlDevice(req *ControlDeviceRequest) (*BaseResponse, error)
+
+	//on devices control
+	OnDeviceControl(req *OnDeviceControlRequest) (*BaseResponse, error)
 
 	//ping
 	Ping(req *Ping) (*Pong, error)
