@@ -159,7 +159,7 @@ func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 	}
 	sendBytes, err := encodeRpcMsg(outMsg)
 	if err != nil {
-		log.Printf("RPC handle REQ ID -> %s, error -> %v", inMsg.Id, err)
+		log.Printf("RPC handle REQ Id -> %s, error -> %v", inMsg.Id, err)
 		return // encode rpcMsg failed
 	}
 	sw.Write(sendBytes, false)

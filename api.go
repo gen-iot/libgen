@@ -47,7 +47,7 @@ type ReportDeviceStatusRequest struct {
 type FetchDevicesRequest struct {
 	BaseRequest
 	PkgInfo *PkgInfo `json:"pkgInfo" validate:"omitempty"` // filter condition , if filed below not nil or empty will be as '&&' query condition
-	DevId   *string  `json:"devId"`                        // if id is not nil or empty will be as the only query condition
+	Id      *string  `json:"id"`                           // if id is not nil or empty will be as the only query condition
 	Room    *string  `json:"room"`
 }
 
@@ -72,13 +72,13 @@ type ControlDeviceRequest struct {
 	OnDeviceControlRequest
 	BaseRequest
 	PkgInfo    PkgInfo                `json:"pkgInfo" validate:"required"`
-	DevId      string                 `json:"devId" validate:"required"`
+	Id         string                 `json:"id" validate:"required"`
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
 }
 
 type OnDeviceControlRequest struct {
 	BaseRequest
-	DevId      string                 `json:"devId" validate:"required"`
+	Id         string                 `json:"id" validate:"required"`
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
 }
 
