@@ -56,7 +56,7 @@ func doInit(config Config) {
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
 	//todo 根据Manifest决定是否注册
-	//gRpc.RegFuncWithName("", onDeviceControl)
+	gRpc.RegFuncWithName("ControlDevice", onDeviceControl)
 	//gRpc.RegFuncWithName("", onDeviceStatus)
 	gRpc.RegFuncWithName("Ping", onPing)
 	gRpc.Start()

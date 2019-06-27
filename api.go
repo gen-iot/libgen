@@ -69,7 +69,6 @@ type HandshakeRequest struct {
 }
 
 type ControlDeviceRequest struct {
-	OnDeviceControlRequest
 	BaseRequest
 	PkgInfo    PkgInfo                `json:"pkgInfo" validate:"required"`
 	Id         string                 `json:"id" validate:"required"`
