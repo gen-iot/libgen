@@ -47,6 +47,12 @@ func InitWithConfig(config Config) {
 	})
 }
 
+func Cleanup() {
+	std.CloseIgnoreErr(gCallable)
+	std.CloseIgnoreErr(gRpc)
+	gApiClient = nil
+}
+
 func doInit(config Config) {
 	fmt.Println("LIBGEN CLIENT INIT")
 	err := std.ValidateStruct(config)
