@@ -20,28 +20,37 @@ var ApiCallTimeout = time.Second * 5
 
 const clientFd = 3
 
-type Config struct {
-	Type          AppType `json:"type" validate:"required,oneof=900 901"`
-	RemoteAddress string  `json:"remoteAddress"`
-	PkgInfo       PkgInfo `json:"pkgInfo" validate:"required"`
-	AccessToken   string  `json:"accessToken" validate:"required"`
+type config struct {
+	Type        AppType `json:"type" validate:"required,oneof=900 901"`
+	Endpoint    string  `json:"endpoint"`
+	PkgInfo     PkgInfo `json:"pkgInfo" validate:"required"`
+	AccessToken string  `json:"accessToken" validate:"required"`
 }
 
-var DefaultConfig = Config{
-	Type:          1,
-	RemoteAddress: "",
-	AccessToken:   "",
+var defaultConfig = config{
+	Type:        LocalApp,
+	Endpoint:    "",
+	AccessToken: "",
 	PkgInfo: PkgInfo{
 		Package: "",
 		Name:    "",
 	},
 }
 
-func Init() {
-	InitWithConfig(DefaultConfig)
+func InitLocal() {
+	initWithConfig(defaultConfig)
 }
 
-func InitWithConfig(config Config) {
+func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string) {
+	initWithConfig(config{
+		Type:        RemoteApp,
+		Endpoint:    endPoint,
+		PkgInfo:     pkgInfo,
+		AccessToken: accessToken,
+	})
+}
+
+func initWithConfig(config config) {
 	initOnce.Do(func() {
 		doInit(config)
 	})
@@ -53,7 +62,7 @@ func Cleanup() {
 	gApiClient = nil
 }
 
-func doInit(config Config) {
+func doInit(config config) {
 	fmt.Println("LIBGEN CLIENT INIT")
 	err := std.ValidateStruct(config)
 	std.AssertError(err, "config invalid")
@@ -67,7 +76,7 @@ func doInit(config Config) {
 	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
 	if config.Type == RemoteApp {
-		sockFd, err := liblpc.NewConnFd(config.RemoteAddress)
+		sockFd, err := liblpc.NewConnFd(config.Endpoint)
 		std.AssertError(err, "connect err")
 		gCallable = gRpc.NewCallable(int(sockFd), nil)
 		//handshake
