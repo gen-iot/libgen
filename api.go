@@ -42,6 +42,7 @@ type UpdateDeviceInfoRequest struct {
 type ReportDeviceStatusRequest struct {
 	Id         string                 `json:"id" validate:"required"`
 	Properties map[string]interface{} `json:"properties"`
+	Online     bool                   `json:"online"`
 }
 
 type FetchDevicesRequest struct {
