@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
+	"gitee.com/SuzhenProjects/liblpc"
 	"log"
 	"sync"
 	"syscall"
@@ -47,4 +48,40 @@ func TestApiClientImpl_Ping(t *testing.T) {
 	}()
 	wg.Wait()
 	log.Println("ping test over")
+}
+
+const remoteAddr = "192.168.50.48:54321"
+
+func TestApiClientImpl_ControlDevice(t *testing.T) {
+	pkg := PkgInfo{
+		Package: "com.gen.kernel",
+		Name:    "Manage",
+	}
+	sockFd, err := liblpc.NewConnFd(remoteAddr)
+	std.AssertError(err, "connect err")
+	rpc, err := rpcx.New()
+	std.AssertError(err, "new rpc")
+	defer std.CloseIgnoreErr(rpc)
+	rpc.Start()
+	callable := rpc.NewCallable(int(sockFd), nil)
+	//handshake
+	out := new(BaseResponse)
+	err = callable.Call(time.Second*10, "Handshake", &HandshakeRequest{
+		PkgInfo:     pkg,
+		AccessToken: "pujie123",
+	}, out)
+	std.AssertError(err, "Handshake failed")
+	rsp := new(ControlDeviceResponse)
+	err = callable.Call(time.Second*10, "ControlDevice", &ControlDeviceRequest{
+		BaseRequest: BaseRequest{},
+		PkgInfo:     PkgInfo{
+			Package: "com.pujie88.iot",
+			Name:    "HotelRemote",
+		},
+		Id:          "016200000000A4FA_0_0_76",
+		CtrlParams: map[string]interface{}{
+			"power": 1,
+		},
+	}, rsp)
+	std.AssertError(err, "control failed")
 }

@@ -21,15 +21,14 @@ var ApiCallTimeout = time.Second * 5
 const clientFd = 3
 
 type Config struct {
-	//1 local ;2 remote
-	Mode          int     `json:"mode" validate:"required,oneof=1 2"`
+	Type          AppType `json:"type" validate:"required,oneof=900 901"`
 	RemoteAddress string  `json:"remoteAddress"`
 	PkgInfo       PkgInfo `json:"pkgInfo" validate:"required"`
 	AccessToken   string  `json:"accessToken" validate:"required"`
 }
 
 var DefaultConfig = Config{
-	Mode:          1,
+	Type:          1,
 	RemoteAddress: "",
 	AccessToken:   "",
 	PkgInfo: PkgInfo{
@@ -48,6 +47,12 @@ func InitWithConfig(config Config) {
 	})
 }
 
+func Cleanup() {
+	std.CloseIgnoreErr(gCallable)
+	std.CloseIgnoreErr(gRpc)
+	gApiClient = nil
+}
+
 func doInit(config Config) {
 	fmt.Println("LIBGEN CLIENT INIT")
 	err := std.ValidateStruct(config)
@@ -56,11 +61,12 @@ func doInit(config Config) {
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
 	//todo 根据Manifest决定是否注册
-	//gRpc.RegFuncWithName("", onDeviceControl)
+	gRpc.RegFuncWithName("ControlDevice", onDeviceControl)
 	//gRpc.RegFuncWithName("", onDeviceStatus)
 	gRpc.RegFuncWithName("Ping", onPing)
+	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
-	if config.Mode == 2 {
+	if config.Type == RemoteApp {
 		sockFd, err := liblpc.NewConnFd(config.RemoteAddress)
 		std.AssertError(err, "connect err")
 		gCallable = gRpc.NewCallable(int(sockFd), nil)
@@ -74,9 +80,14 @@ func doInit(config Config) {
 	} else {
 		gCallable = gRpc.NewCallable(clientFd, nil)
 	}
-
 	gApiClient = new(ApiClientImpl)
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
+}
+
+func onCallableClose(callable rpcx.Callable) {
+	fmt.Println("LIBGEN RPC DISCONNECTED ")
+	//todo 重连
+
 }
 
 func getCallable() rpcx.Callable {
