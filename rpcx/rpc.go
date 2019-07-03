@@ -132,14 +132,14 @@ func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err
 }
 
 func (this *RPC) handleAck(inMsg *rpcRawMsg) {
-	log.Println("RECV ACK id -> ", inMsg.Id)
+	// log.Println("RECV ACK id -> ", inMsg.Id)
 	this.promiseGroup.DonePromise(std.PromiseId(inMsg.Id), inMsg.GetError(), inMsg.Data)
 }
 
 var errRpcFuncNotFound = errors.New("rpc func not found")
 
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
-	log.Println("RECV REQ id -> ", inMsg.Id)
+	// log.Println("RECV REQ id -> ", inMsg.Id)
 	fn := this.getFunc(inMsg.MethodName)
 	outMsg := &rpcRawMsg{
 		Id:         inMsg.Id,
@@ -163,5 +163,5 @@ func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 		return // encode rpcMsg failed
 	}
 	sw.Write(sendBytes, false)
-	log.Println("RPC ACK REQ Id -> ", inMsg.Id)
+	//log.Println("RPC ACK REQ Id -> ", inMsg.Id)
 }
