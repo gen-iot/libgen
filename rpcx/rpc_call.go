@@ -36,7 +36,7 @@ func (this *apiClient) Call(timeout time.Duration, name string, param interface{
 		return err
 	}
 
-	log.Println("SEND REQ id -> ", outMsg.Id)
+	// log.Println("SEND REQ id -> ", outMsg.Id)
 
 	//add promise
 	promise := std.NewPromise()
