@@ -83,9 +83,12 @@ type OnDeviceControlRequest struct {
 }
 
 type DeviceStatusNotify struct {
-	PkgInfo      PkgInfo                `json:"pkgInfo"`
-	Id           string                 `json:"id" validate:"required"`
-	StatusParams map[string]interface{} `json:"ctrlParams" validate:"required"`
+	PkgInfo   PkgInfo                `json:"pkgInfo"`
+	ModelInfo ModelInfo              `json:"modelInfo"`
+	Id        string                 `json:"id" validate:"required"`
+	Name      string                 `json:"name" validate:"required"`
+	Room      string                 `json:"room" validate:"required"`
+	Status    map[string]interface{} `json:"status"`
 }
 
 type ControlDeviceResponse struct {
