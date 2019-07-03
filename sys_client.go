@@ -23,7 +23,7 @@ const clientFd = 3
 type config struct {
 	Type        AppType `json:"type" validate:"required,oneof=900 901"`
 	Endpoint    string  `json:"endpoint"`
-	PkgInfo     PkgInfo `json:"pkgInfo" validate:"required"`
+	PkgInfo     PkgInfo `json:"pkgInfo" validate:"-"`
 	AccessToken string  `json:"accessToken" validate:"required"`
 }
 
