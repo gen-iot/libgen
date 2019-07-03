@@ -103,6 +103,7 @@ func getCallable() rpcx.Callable {
 	return gCallable
 }
 
-func GetApiClient() *ApiClientImpl {
+func GetApiClient() RpcApiClient {
+	std.Assert(gApiClient != nil, "please init first")
 	return gApiClient
 }
