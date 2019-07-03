@@ -27,7 +27,7 @@ func onDeviceControl(callable rpcx.Callable, req *ControlDeviceRequest) (*Contro
 	return nil, errAppNotImpControl
 }
 
-func onDeviceStatus(callable rpcx.Callable, notify *DeviceStatusNotify) (*BaseResponse, error) {
+func onDeviceStatusDelivery(callable rpcx.Callable, notify *DeviceStatusNotify) (*BaseResponse, error) {
 	if gDeviceStatusHandler != nil {
 		go gDeviceStatusHandler(notify)
 	}

@@ -70,7 +70,7 @@ func doInit(config config) {
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
 	gRpc.RegFuncWithName("ControlDevice", onDeviceControl)
-	gRpc.RegFuncWithName("MessageDelivery", onDeviceStatus)
+	gRpc.RegFuncWithName("DeliveryDeviceStatus", onDeviceStatusDelivery)
 	gRpc.RegFuncWithName("Ping", pong)
 	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
