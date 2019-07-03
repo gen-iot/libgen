@@ -18,7 +18,7 @@ func TestApiClientImpl_Ping(t *testing.T) {
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	//gRpc.RegFun(deviceControl)
-	rpc.RegFuncWithName("Ping", onPing)
+	rpc.RegFuncWithName("Ping", pong)
 	rpc.Start()
 	sock, err := syscall.Socket(syscall.AF_INET, syscall.SOL_SOCKET, syscall.IPPROTO_TCP)
 	std.AssertError(err, "new sock err")

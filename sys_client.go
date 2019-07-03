@@ -69,10 +69,9 @@ func doInit(config config) {
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
-	//todo 根据Manifest决定是否注册
 	gRpc.RegFuncWithName("ControlDevice", onDeviceControl)
-	//gRpc.RegFuncWithName("", onDeviceStatus)
-	gRpc.RegFuncWithName("Ping", onPing)
+	gRpc.RegFuncWithName("MessageDelivery", onDeviceStatus)
+	gRpc.RegFuncWithName("Ping", pong)
 	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
 	if config.Type == RemoteApp {

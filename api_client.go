@@ -63,11 +63,6 @@ func (this *ApiClientImpl) ControlDevice(req *ControlDeviceRequest) (*BaseRespon
 	return res, err
 }
 
-func (this *ApiClientImpl) OnDeviceControl(req *OnDeviceControlRequest) (*BaseResponse, error) {
-	//todo impl OnDeviceControl
-	panic("impl me")
-}
-
 func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {
 	res := new(Pong)
 	err := gCallable.Call(ApiCallTimeout, "Ping", req, res)

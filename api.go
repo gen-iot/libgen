@@ -139,9 +139,6 @@ type RpcApiClient interface {
 	//control devices
 	ControlDevice(req *ControlDeviceRequest) (*BaseResponse, error)
 
-	//on devices control
-	OnDeviceControl(req *OnDeviceControlRequest) (*BaseResponse, error)
-
 	//ping
 	Ping(req *Ping) (*Pong, error)
 }

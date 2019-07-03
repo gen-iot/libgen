@@ -13,7 +13,7 @@ type DeviceStatusHandler func(notify *DeviceStatusNotify)
 var gDeviceControlHandler DeviceControlHandler
 var gDeviceStatusHandler DeviceStatusHandler
 
-func onPing(callable rpcx.Callable, req *Ping) (*Pong, error) {
+func pong(callable rpcx.Callable, req *Ping) (*Pong, error) {
 	log.Println("receive ping req.time =", req.Time, " delta is ", time.Now().Sub(req.Time))
 	return &Pong{Time: time.Now(), Msg: "client pong"}, nil
 }
