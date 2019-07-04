@@ -39,9 +39,9 @@ func (this *ApiClientImpl) UpdateDeviceInfo(req *UpdateDeviceInfoRequest) (*Base
 	return res, err
 }
 
-func (this *ApiClientImpl) SetOnline(req *SetOnlineRequest) (*BaseResponse, error) {
+func (this *ApiClientImpl) SetDeviceOnline(req *SetDevOnlineRequest) (*BaseResponse, error) {
 	res := new(BaseResponse)
-	err := this.callWrapper("SetOnline", req, res)
+	err := this.callWrapper("SetDeviceOnline", req, res)
 	return res, err
 }
 

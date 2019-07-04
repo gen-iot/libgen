@@ -13,7 +13,6 @@ import (
 )
 
 func TestApiClientImpl_Ping(t *testing.T) {
-	Init()
 	wg := sync.WaitGroup{}
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
@@ -50,7 +49,7 @@ func TestApiClientImpl_Ping(t *testing.T) {
 	log.Println("ping test over")
 }
 
-const remoteAddr = "192.168.50.48:54321"
+const remoteAddr = "192.168.50.232:54321"
 
 func TestApiClientImpl_ControlDevice(t *testing.T) {
 	pkg := PkgInfo{
@@ -78,7 +77,7 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 			Package: "com.pujie88.iot",
 			Name:    "HotelRemote",
 		},
-		Id:          "016200000000A4FA_0_0_76",
+		Id:          "014100000000936A_0_0_67",
 		CtrlParams: map[string]interface{}{
 			"power": 1,
 		},

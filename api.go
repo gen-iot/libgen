@@ -95,7 +95,7 @@ type ControlDeviceResponse struct {
 	BaseResponse
 }
 
-type SetOnlineRequest struct {
+type SetDevOnlineRequest struct {
 	BaseRequest
 	DeviceIds []string `json:"deviceIds" validate:"required"`
 	Online    bool     `json:"online"`
@@ -128,7 +128,7 @@ type RpcApiClient interface {
 	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
 
 	//set online
-	SetOnline(req *SetOnlineRequest) (*BaseResponse, error)
+	SetDeviceOnline(req *SetDevOnlineRequest) (*BaseResponse, error)
 
 	//update device info,
 	UpdateDeviceInfo(req *UpdateDeviceInfoRequest) (*BaseResponse, error)
