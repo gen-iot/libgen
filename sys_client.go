@@ -98,7 +98,7 @@ func onCallableClose(callable rpcx.Callable) {
 
 }
 
-func getCallable() rpcx.Callable {
+func GetRawCallable() rpcx.Callable {
 	return gCallable
 }
 

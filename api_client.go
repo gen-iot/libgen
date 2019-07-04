@@ -6,7 +6,7 @@ type ApiClientImpl struct {
 }
 
 func (this *ApiClientImpl) callWrapper(method string, req interface{}, res interface{}) error {
-	return getCallable().Call(ApiCallTimeout, method, req, res)
+	return GetRawCallable().Call(ApiCallTimeout, method, req, res)
 }
 
 func (this *ApiClientImpl) DeclareDeviceModel(req *DeclareDeviceModelRequest) (*BaseResponse, error) {
