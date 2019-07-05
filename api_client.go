@@ -2,11 +2,44 @@
 
 package libgen
 
+import (
+	"gitee.com/SuzhenProjects/libgen/rpcx"
+	"github.com/pkg/errors"
+	"sync"
+)
+
 type ApiClientImpl struct {
+	rwLock   *sync.RWMutex
+	callable rpcx.Callable
 }
 
+func NewApiClientImpl() *ApiClientImpl {
+	return &ApiClientImpl{
+		rwLock:   &sync.RWMutex{},
+		callable: nil,
+	}
+}
+
+func (this *ApiClientImpl) setCallable(callable rpcx.Callable) {
+	this.rwLock.Lock()
+	defer this.rwLock.Unlock()
+	this.callable = callable
+}
+
+func (this *ApiClientImpl) getCallable() rpcx.Callable {
+	this.rwLock.RLock()
+	defer this.rwLock.RUnlock()
+	return this.callable
+}
+
+var errConnectionClosed = errors.New("the connection to gen not established")
+
 func (this *ApiClientImpl) callWrapper(method string, req interface{}, res interface{}) error {
-	return GetRawCallable().Call(ApiCallTimeout, method, req, res)
+	callable := this.getCallable()
+	if callable == nil {
+		return errConnectionClosed
+	}
+	return callable.Call(ApiCallTimeout, method, req, res)
 }
 
 func (this *ApiClientImpl) DeclareDeviceModel(req *DeclareDeviceModelRequest) (*BaseResponse, error) {
@@ -65,6 +98,6 @@ func (this *ApiClientImpl) ControlDevice(req *ControlDeviceRequest) (*BaseRespon
 
 func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {
 	res := new(Pong)
-	err := gCallable.Call(ApiCallTimeout, "Ping", req, res)
+	err := this.callWrapper("Ping", req, res)
 	return res, err
 }
