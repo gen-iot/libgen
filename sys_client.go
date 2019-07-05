@@ -77,24 +77,44 @@ func doInit(config config) {
 	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
 	gApiClient = NewApiClientImpl()
-	gApiClient.setCallable(newCallable(config))
+	go connectToGen()
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
 }
+func connectToGen() {
+	var callable rpcx.Callable = nil
+	var err error = nil
+	for {
+		callable, err = newCallable(gConfig)
+		if err != nil {
+			fmt.Println("LIBGEN CLIENT INIT ERROR , CONNECT ERROR :", err)
+			time.Sleep(time.Second * 5)
+			continue
+		}
+		break
+	}
+	//handshake
+	out := new(BaseResponse)
+	err = callable.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
+		PkgInfo:     gConfig.PkgInfo,
+		AccessToken: gConfig.AccessToken,
+	}, out)
+	if err != nil {
+		fmt.Println("LIBGEN CLIENT INIT ERROR , HANDSHAKE FAILED :", err)
+		std.CloseIgnoreErr(callable)
+		return
+	}
+	gApiClient.setCallable(callable)
+}
 
-func newCallable(conf config) (callable rpcx.Callable) {
+func newCallable(conf config) (callable rpcx.Callable, err error) {
 	if conf.Type == RemoteApp {
 		sockFd, err := liblpc.NewConnFd(conf.Endpoint)
-		fmt.Println("LIBGEN CLIENT INIT ERROR , CONNECT FAILED :", err)
+		if err != nil {
+			return
+		}
 		//std.AssertError(err, "connect err")
 		callable = gRpc.NewCallable(int(sockFd), nil)
-		//handshake
-		out := new(BaseResponse)
-		err = callable.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
-			PkgInfo:     conf.PkgInfo,
-			AccessToken: conf.AccessToken,
-		}, out)
-		fmt.Println("LIBGEN CLIENT INIT ERROR , HANDSHAKE FAILED :", err)
-		//std.AssertError(err, "connect handshake err")
+		return
 	} else {
 		callable = gRpc.NewCallable(clientFd, nil)
 	}
@@ -102,8 +122,8 @@ func newCallable(conf config) (callable rpcx.Callable) {
 }
 
 func onCallableClose(callable rpcx.Callable) {
-	fmt.Println("LIBGEN RPC DISCONNECTED ")
-	gApiClient.setCallable(newCallable(gConfig))
+	fmt.Println("LIBGEN RPC DISCONNECTED ,RECONNECTING")
+	connectToGen()
 }
 
 func GetRawCallable() rpcx.Callable {
