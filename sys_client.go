@@ -78,16 +78,21 @@ func doInit(config config) {
 	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
 	gApiClient = NewApiClientImpl()
-	go connectToGen()
+	connectToGen()
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
 }
 func connectToGen() {
 	var callable rpcx.Callable = nil
 	var err error = nil
+	i := 0
 	for {
 		callable, err = newCallable(gConfig)
 		if err != nil {
 			fmt.Println("LIBGEN CLIENT INIT ERROR , CONNECT ERROR :", err)
+			i++
+			if i >= 100 {
+				panic("LIBGEN CLIENT INIT ERROR , AFTER 100 TIMES CONNECT RETRY")
+			}
 			time.Sleep(time.Second * 5)
 			continue
 		}
