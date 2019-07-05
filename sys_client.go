@@ -123,7 +123,7 @@ func newCallable(conf config) (callable rpcx.Callable, err error) {
 
 func onCallableClose(callable rpcx.Callable) {
 	fmt.Println("LIBGEN RPC DISCONNECTED ,RECONNECTING")
-	connectToGen()
+	go connectToGen()
 }
 
 func GetRawCallable() rpcx.Callable {
