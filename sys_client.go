@@ -7,6 +7,7 @@ import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
 	"gitee.com/SuzhenProjects/liblpc"
+	"github.com/pkg/errors"
 	"sync"
 	"time"
 )
@@ -106,19 +107,22 @@ func connectToGen() {
 	gApiClient.setCallable(callable)
 }
 
-func newCallable(conf config) (callable rpcx.Callable, err error) {
+var errUnknownAppType = errors.New("unknown app type , app type must 'RemoteApp' or 'LocalApp'")
+
+func newCallable(conf config) (rpcx.Callable, error) {
 	if conf.Type == RemoteApp {
 		sockFd, err := liblpc.NewConnFd(conf.Endpoint)
 		if err != nil {
-			return
+			return nil, err
 		}
 		//std.AssertError(err, "connect err")
-		callable = gRpc.NewCallable(int(sockFd), nil)
-		return
-	} else {
-		callable = gRpc.NewCallable(clientFd, nil)
+		callable := gRpc.NewCallable(int(sockFd), nil)
+		return callable, nil
+	} else if conf.Type == LocalApp {
+		callable := gRpc.NewCallable(clientFd, nil)
+		return callable, nil
 	}
-	return
+	return nil, errUnknownAppType
 }
 
 func onCallableClose(callable rpcx.Callable) {
