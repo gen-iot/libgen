@@ -7,7 +7,6 @@ import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
 	"gitee.com/SuzhenProjects/liblpc"
-	"github.com/pkg/errors"
 	"sync"
 	"time"
 )
@@ -15,8 +14,8 @@ import (
 var initOnce = sync.Once{}
 var gRpc *rpcx.RPC
 var gApiClient *ApiClientImpl
-var gRwLock = &sync.RWMutex{}
 var gConfig = defaultConfig
+var gOnConnected func() = nil
 
 var ApiCallTimeout = time.Second * 5
 
@@ -39,22 +38,78 @@ var defaultConfig = config{
 	},
 }
 
-func InitLocal() {
+func InitLocal(onConnected func()) {
 	initWithConfig(defaultConfig)
+	gOnConnected = onConnected
+	connect()
 }
 
-func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string) {
+func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string, onConnected func()) {
 	initWithConfig(config{
 		Type:        RemoteApp,
 		Endpoint:    endPoint,
 		PkgInfo:     pkgInfo,
 		AccessToken: accessToken,
 	})
+	gOnConnected = onConnected
+	connect()
+}
+
+func newRemoteCallable(endpoint string, timeout time.Duration) (rpcx.Callable, error) {
+	sockFd, err := liblpc.NewConnFd(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	cancelFn, future := gRpc.NewClientCallable(int(sockFd), nil)
+	// sync wait
+	data, err := future.WaitData(timeout)
+	if err != nil {
+		cancelFn()
+		return nil, err
+	}
+	return data.(rpcx.Callable), nil
+}
+
+func connect() {
+	std.Assert(gConfig.Type == LocalApp || gConfig.Type == RemoteApp, "app type must 'RemoteApp' or 'LocalApp'")
+	var callable rpcx.Callable = nil
+	if gConfig.Type == LocalApp {
+		callable = gRpc.NewConnCallable(clientFd, nil)
+	} else {
+		for {
+			var err error = nil
+			callable, err = newRemoteCallable(gConfig.Endpoint, time.Second*5)
+			if err != nil {
+				goto retry
+			}
+			//handshake
+			out := new(BaseResponse)
+			err = callable.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
+				PkgInfo:     gConfig.PkgInfo,
+				AccessToken: gConfig.AccessToken,
+			}, out)
+			if err != nil {
+				fmt.Println("LIBGEN CLIENT INIT ERROR , HANDSHAKE FAILED :", err)
+				std.CloseIgnoreErr(callable)
+				return
+			}
+			gApiClient.setCallable(callable)
+		}
+	retry:
+		{
+			time.Sleep(time.Second * 5)
+		}
+	}
+	gApiClient.setCallable(callable)
+	if gOnConnected != nil {
+		gOnConnected()
+	}
 }
 
 func initWithConfig(config config) {
 	initOnce.Do(func() {
-		doInit(config)
+		gConfig = config
+		doInit()
 	})
 }
 
@@ -64,11 +119,8 @@ func Cleanup() {
 	gApiClient = nil
 }
 
-func doInit(config config) {
+func doInit() {
 	fmt.Println("LIBGEN CLIENT INIT")
-	gConfig = config
-	err := std.ValidateStruct(config)
-	std.AssertError(err, "config invalid")
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
@@ -78,67 +130,13 @@ func doInit(config config) {
 	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
 	gApiClient = NewApiClientImpl()
-	connectToGen()
 	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
-}
-func connectToGen() {
-	var callable rpcx.Callable = nil
-	var err error = nil
-	i := 0
-	for {
-		callable, err = newCallable(gConfig)
-		if err != nil {
-			fmt.Println("LIBGEN CLIENT INIT ERROR , CONNECT ERROR :", err)
-			i++
-			if i >= 100 {
-				panic("LIBGEN CLIENT INIT ERROR , AFTER 100 TIMES CONNECT RETRY")
-			}
-			time.Sleep(time.Second * 5)
-			continue
-		}
-		break
-	}
-	//handshake
-	out := new(BaseResponse)
-	err = callable.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
-		PkgInfo:     gConfig.PkgInfo,
-		AccessToken: gConfig.AccessToken,
-	}, out)
-	if err != nil {
-		fmt.Println("LIBGEN CLIENT INIT ERROR , HANDSHAKE FAILED :", err)
-		std.CloseIgnoreErr(callable)
-		return
-	}
-	gApiClient.setCallable(callable)
-}
-
-var errUnknownAppType = errors.New("unknown app type , app type must 'RemoteApp' or 'LocalApp'")
-
-func newCallable(conf config) (rpcx.Callable, error) {
-	if conf.Type == RemoteApp {
-		sockFd, err := liblpc.NewConnFd(conf.Endpoint)
-		if err != nil {
-			return nil, err
-		}
-		cancelFn, future := gRpc.NewClientCallable(int(sockFd), nil)
-		// sync wait
-		data, err := future.WaitData(time.Second * 5)
-		if err != nil {
-			cancelFn()
-			return nil, err
-		}
-		return data.(rpcx.Callable), nil
-
-	} else if conf.Type == LocalApp {
-		callable := gRpc.NewConnCallable(clientFd, nil)
-		return callable, nil
-	}
-	return nil, errUnknownAppType
 }
 
 func onCallableClose(callable rpcx.Callable) {
-	fmt.Println("LIBGEN RPC DISCONNECTED ,RECONNECTING")
-	//todo reconnect
+	fmt.Println("LIBGEN RPC DISCONNECTED , RECONNECTING ")
+	gApiClient.setCallable(nil)
+	go connect()
 }
 
 func GetRawCallable() rpcx.Callable {
