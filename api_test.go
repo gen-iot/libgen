@@ -26,7 +26,7 @@ func TestApiClientImpl_Ping(t *testing.T) {
 		Addr: [4]byte{192, 168, 50, 48},
 	})
 	std.AssertError(err, "connect err")
-	callable := rpc.NewCallable(sock, nil)
+	callable := rpc.NewConnCallable(sock, nil)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -62,7 +62,7 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 	std.AssertError(err, "new rpc")
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
-	callable := rpc.NewCallable(int(sockFd), nil)
+	callable := rpc.NewConnCallable(int(sockFd), nil)
 	//handshake
 	out := new(BaseResponse)
 	err = callable.Call(time.Second*10, "Handshake", &HandshakeRequest{

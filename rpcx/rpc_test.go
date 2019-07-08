@@ -38,7 +38,7 @@ func startLocalRpc(fd int, wg *sync.WaitGroup) {
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
 	rpc.RegFun(sum)
-	rpc.NewCallable(fd, nil)
+	rpc.NewConnCallable(fd, nil)
 	wg.Wait()
 }
 
@@ -48,7 +48,7 @@ func startMockRemoteRpc(fd int, wg *sync.WaitGroup) {
 	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
-	callable := rpc.NewCallable(fd, nil)
+	callable := rpc.NewConnCallable(fd, nil)
 	after := time.After(time.Second * 5)
 	for {
 		select {
@@ -106,8 +106,8 @@ func TestRemoteTcpRpc(t *testing.T) {
 	std.AssertError(err, "new rpc failed")
 	rpc.Start()
 	rpc.RegFuncWithName("Ping", ____Ping)
-	callable := rpc.NewCallable(fd, nil)
-	fmt.Println("NewCallable")
+	callable := rpc.NewConnCallable(fd, nil)
+	fmt.Println("NewConnCallable")
 	clientRsp := new(libgen.Pong)
 	for {
 		runtime.KeepAlive(conn)
@@ -140,8 +140,8 @@ func TestRemoteTcpRpcV2(t *testing.T) {
 	std.AssertError(err, "new rpc failed")
 	rpc.Start()
 	rpc.RegFuncWithName("Ping", ____Ping)
-	callable := rpc.NewCallable(nfd, nil)
-	fmt.Println("NewCallable")
+	callable := rpc.NewConnCallable(nfd, nil)
+	fmt.Println("NewConnCallable")
 	clientRsp := new(libgen.Pong)
 	for {
 		time.Sleep(5 * time.Millisecond)

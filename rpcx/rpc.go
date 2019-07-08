@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type RPC struct {
@@ -94,15 +95,45 @@ func (this *RPC) Close() error {
 	return this.ioLoop.Close()
 }
 
-func (this *RPC) NewCallable(fd int, userData interface{}) Callable {
+func (this *RPC) NewCallable(stream *liblpc.BufferedStream, userData interface{}) Callable {
 	s := &apiClient{
-		stream: liblpc.NewFdBufferedStream(this.ioLoop, fd, this.genericRead),
+		stream: stream,
 		ctx:    this,
 	}
 	s.SetUserData(userData)
 	s.stream.SetUserData(s)
 	s.stream.Start()
 	return s
+}
+
+func (this *RPC) NewConnCallable(fd int, userData interface{}) Callable {
+	stream := liblpc.NewBufferedConnStream(this.ioLoop, fd, this.genericRead)
+	return this.NewCallable(stream, userData)
+}
+
+type ClientCallableOnConnect = func(callable Callable, err error)
+
+func (this *RPC) NewClientCallable(fd int, userData interface{}, timeout time.Duration, cb ClientCallableOnConnect) {
+	std.Assert(cb != nil, "client callable onConnect cb nil!")
+
+	cliStream := liblpc.NewBufferedClientStream(this.ioLoop, fd, this.genericRead)
+	call := this.NewCallable(cliStream, userData)
+	timer := time.AfterFunc(timeout, func() {
+		_ = call.Close()
+	})
+	cliStream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
+		stopSuccess := timer.Stop()
+		if !stopSuccess {
+			// timer already stopped
+			return
+		}
+		if err != nil {
+			cb(nil, err)
+		} else {
+			cb(call, nil)
+		}
+	})
+
 }
 
 const kMaxRpcMsgBodyLen = 1024 * 1024 * 32

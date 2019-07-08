@@ -15,7 +15,7 @@ type Callable interface {
 }
 
 type apiClient struct {
-	stream *liblpc.FdBufferedStream
+	stream *liblpc.BufferedStream
 	ctx    *RPC
 	liblpc.BaseUserData
 }
