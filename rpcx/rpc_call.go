@@ -14,17 +14,21 @@ type Callable interface {
 	io.Closer
 }
 
-type apiClient struct {
+type proxyClient struct {
 	stream *liblpc.BufferedStream
 	ctx    *RPC
 	liblpc.BaseUserData
 }
 
-func (this *apiClient) Close() error {
+func (this *proxyClient) start() {
+	this.stream.Start()
+}
+
+func (this *proxyClient) Close() error {
 	return this.stream.Close()
 }
 
-func (this *apiClient) Call(timeout time.Duration, name string, param interface{}, out interface{}) error {
+func (this *proxyClient) Call(timeout time.Duration, name string, param interface{}, out interface{}) error {
 	std.Assert(this.stream != nil, "stream is nil!")
 	outMsg := &rpcRawMsg{
 		Id:         std.GenRandomUUID(),

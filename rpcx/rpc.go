@@ -94,37 +94,39 @@ func (this *RPC) Close() error {
 	return this.ioLoop.Close()
 }
 
-func (this *RPC) NewCallable(stream *liblpc.BufferedStream, userData interface{}) Callable {
-	s := &apiClient{
+func (this *RPC) newCallable(stream *liblpc.BufferedStream, userData interface{}) *proxyClient {
+	s := &proxyClient{
 		stream: stream,
 		ctx:    this,
 	}
 	s.SetUserData(userData)
 	s.stream.SetUserData(s)
-	s.stream.Start()
 	return s
 }
 
 func (this *RPC) NewConnCallable(fd int, userData interface{}) Callable {
 	stream := liblpc.NewBufferedConnStream(this.ioLoop, fd, this.genericRead)
-	return this.NewCallable(stream, userData)
+	pCall := this.newCallable(stream, userData)
+	pCall.start()
+	return pCall
 }
 
 type ClientCallableOnConnect = func(callable Callable, err error)
 
 func (this *RPC) NewClientCallable(fd int, userData interface{}) (cancelFn func(), future std.Future) {
 	cliStream := liblpc.NewBufferedClientStream(this.ioLoop, fd, this.genericRead)
-	call := this.NewCallable(cliStream, userData)
+	pCall := this.newCallable(cliStream, userData)
 	promise := std.NewPromise()
 	cliStream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
 		if err != nil {
 			promise.DoneData(err, nil)
 		} else {
-			promise.DoneData(nil, call)
+			promise.DoneData(nil, pCall)
 		}
 	})
+	pCall.start()
 	return func() {
-		_ = call.Close()
+		_ = pCall.Close()
 	}, promise.GetFuture()
 }
 
@@ -170,7 +172,7 @@ func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 		Type:       rpcAckMsg,
 	}
 	if fn != nil {
-		apiCli := sw.GetUserData().(*apiClient)
+		apiCli := sw.GetUserData().(*proxyClient)
 		outBytes, err := fn.Call(apiCli, inMsg.Data)
 		if err != nil {
 			outMsg.SetError(err)
