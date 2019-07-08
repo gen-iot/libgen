@@ -120,9 +120,15 @@ func newCallable(conf config) (rpcx.Callable, error) {
 		if err != nil {
 			return nil, err
 		}
-		//std.AssertError(err, "connect err")
-		callable := gRpc.NewConnCallable(int(sockFd), nil)
-		return callable, nil
+		cancelFn, future := gRpc.NewClientCallable(int(sockFd), nil)
+		// sync wait
+		data, err := future.WaitData(time.Second * 5)
+		if err != nil {
+			cancelFn()
+			return nil, err
+		}
+		return data.(rpcx.Callable), nil
+
 	} else if conf.Type == LocalApp {
 		callable := gRpc.NewConnCallable(clientFd, nil)
 		return callable, nil
@@ -130,49 +136,9 @@ func newCallable(conf config) (rpcx.Callable, error) {
 	return nil, errUnknownAppType
 }
 
-type Content struct {
-	call      rpcx.Callable
-	cancelDie func()
-}
-
-var callMap = map[string]*Content{}
-
-func onCallableReady(callable rpcx.Callable) {
-	s := callable.GetUserData().(string)
-	callMap[s].cancelDie()
-}
-
 func onCallableClose(callable rpcx.Callable) {
 	fmt.Println("LIBGEN RPC DISCONNECTED ,RECONNECTING")
-	fd, err := liblpc.NewConnFd("")
-	std.AssertError(err, "new conn fd")
-	id := std.GenRandomUUID()
-	call := gRpc.NewConnCallable(int(fd), std.GenRandomUUID())
-	aliveC := make(chan bool)
-	dieFn := func() {
-		close(aliveC)
-	}
-	callMap[id] = &Content{
-		call:      call,
-		cancelDie: dieFn,
-	}
-	go func() {
-		t := time.NewTimer(time.Second * 30)
-		defer t.Stop()
-		for {
-			select {
-			case <-t.C:
-				//die
-				dieFn()
-				return
-
-			case <-aliveC:
-				//alive
-				return
-			}
-		}
-	}()
-	//go connectToGen()
+	//todo reconnect
 }
 
 func GetRawCallable() rpcx.Callable {

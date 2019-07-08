@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"sync"
 	"sync/atomic"
-	"time"
 )
 
 type RPC struct {
@@ -113,27 +112,20 @@ func (this *RPC) NewConnCallable(fd int, userData interface{}) Callable {
 
 type ClientCallableOnConnect = func(callable Callable, err error)
 
-func (this *RPC) NewClientCallable(fd int, userData interface{}, timeout time.Duration, cb ClientCallableOnConnect) {
-	std.Assert(cb != nil, "client callable onConnect cb nil!")
-
+func (this *RPC) NewClientCallable(fd int, userData interface{}) (cancelFn func(), future std.Future) {
 	cliStream := liblpc.NewBufferedClientStream(this.ioLoop, fd, this.genericRead)
 	call := this.NewCallable(cliStream, userData)
-	timer := time.AfterFunc(timeout, func() {
-		_ = call.Close()
-	})
+	promise := std.NewPromise()
 	cliStream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
-		stopSuccess := timer.Stop()
-		if !stopSuccess {
-			// timer already stopped
-			return
-		}
 		if err != nil {
-			cb(nil, err)
+			promise.DoneData(err, nil)
 		} else {
-			cb(call, nil)
+			promise.DoneData(nil, call)
 		}
 	})
-
+	return func() {
+		_ = call.Close()
+	}, promise.GetFuture()
 }
 
 const kMaxRpcMsgBodyLen = 1024 * 1024 * 32
