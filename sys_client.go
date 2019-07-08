@@ -72,6 +72,7 @@ func newRemoteCallable(endpoint string, timeout time.Duration) (rpcx.Callable, e
 
 func connect() {
 	std.Assert(gConfig.Type == LocalApp || gConfig.Type == RemoteApp, "app type must 'RemoteApp' or 'LocalApp'")
+	fmt.Println("LIBGEN CLIENT CONNECTING ...")
 	var callable rpcx.Callable = nil
 	if gConfig.Type == LocalApp {
 		callable = gRpc.NewConnCallable(clientFd, nil)
@@ -80,7 +81,7 @@ func connect() {
 			var err error = nil
 			callable, err = newRemoteCallable(gConfig.Endpoint, time.Second*5)
 			if err != nil {
-				goto retry
+				continue
 			}
 			//handshake
 			out := new(BaseResponse)
@@ -93,11 +94,7 @@ func connect() {
 				std.CloseIgnoreErr(callable)
 				return
 			}
-			gApiClient.setCallable(callable)
-		}
-	retry:
-		{
-			time.Sleep(time.Second * 5)
+			break
 		}
 	}
 	gApiClient.setCallable(callable)
