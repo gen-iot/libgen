@@ -41,7 +41,7 @@ var defaultConfig = config{
 func InitLocal(onConnected func()) {
 	initWithConfig(defaultConfig)
 	gOnConnected = onConnected
-	connect()
+	go connect()
 }
 
 func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string, onConnected func()) {
@@ -52,7 +52,7 @@ func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string, onConnecte
 		AccessToken: accessToken,
 	})
 	gOnConnected = onConnected
-	connect()
+	go connect()
 }
 
 func newRemoteCallable(endpoint string, timeout time.Duration) (rpcx.Callable, error) {
