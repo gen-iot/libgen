@@ -78,9 +78,12 @@ func connect() {
 		callable = gRpc.NewConnCallable(clientFd, nil)
 	} else {
 		for {
+			fmt.Println("LIBGEN CLIENT RE CONNECTING ...")
 			var err error = nil
 			callable, err = newRemoteCallable(gConfig.Endpoint, time.Second*5)
 			if err != nil {
+				fmt.Println("LIBGEN CLIENT CONNECT FAILED : ", err)
+				time.Sleep(time.Second * 5)
 				continue
 			}
 			//handshake
