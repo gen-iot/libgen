@@ -7,6 +7,7 @@ import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
 	"gitee.com/SuzhenProjects/liblpc"
+	"os"
 	"sync"
 	"time"
 )
@@ -120,7 +121,13 @@ func Cleanup() {
 }
 
 func doInit() {
-	fmt.Println("LIBGEN CLIENT INIT")
+	fmt.Printf("LIBGEN CLIENT INIT , MODE=%s\n", AppType2Str(gConfig.Type))
+	initSuccessMsg := "LIBGEN CLIENT INIT SUCCESS"
+	if gConfig.Type == LocalApp {
+		appIdentifier := os.Getenv("X_GEN_APP_IDENTIFIER")
+		fmt.Printf("LIBGEN INIT, APP IDENTIFIER=[%s]\n", appIdentifier)
+		initSuccessMsg = fmt.Sprintf("%s: APP IDENTIFIER=[%s]\n", initSuccessMsg, appIdentifier)
+	}
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
@@ -130,7 +137,7 @@ func doInit() {
 	gRpc.OnCallableClosed(onCallableClose)
 	gRpc.Start()
 	gApiClient = NewApiClientImpl()
-	fmt.Println("LIBGEN CLIENT INIT SUCCESS")
+	fmt.Println(initSuccessMsg)
 }
 
 func onCallableClose(callable rpcx.Callable) {

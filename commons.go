@@ -12,6 +12,17 @@ const (
 	RemoteApp AppType = 901
 )
 
+func AppType2Str(t AppType) string {
+	switch t {
+	case LocalApp:
+		return "LOCAL"
+	case RemoteApp:
+		return "REMOTE"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 type TimeoutType int
 
 const (
