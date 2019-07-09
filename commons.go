@@ -19,6 +19,8 @@ func AppType2Str(t AppType) string {
 		return "LOCAL"
 	case RemoteApp:
 		return "REMOTE"
+	case VirtualApp:
+		return "VIRTUAL"
 	default:
 		return "UNKNOWN"
 	}
