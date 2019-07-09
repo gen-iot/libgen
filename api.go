@@ -112,6 +112,11 @@ func (this *Ping) String() string {
 
 type Pong = Ping
 
+type SystemSummaryResponse struct {
+	GenId   string `json:"genId"`
+	Version string `json:"version"`
+}
+
 // client side
 type RpcApiClient interface {
 	//declare device models,only device model declared can be used in device
@@ -141,6 +146,8 @@ type RpcApiClient interface {
 
 	//control devices
 	ControlDevice(req *ControlDeviceRequest) (*BaseResponse, error)
+
+	SystemSummary() (*SystemSummaryResponse, error)
 
 	//ping
 	Ping(req *Ping) (*Pong, error)

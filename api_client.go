@@ -101,3 +101,11 @@ func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {
 	err := this.callWrapper("Ping", req, res)
 	return res, err
 }
+
+var emptyReq = make(map[string]interface{})
+
+func (this *ApiClientImpl) SystemSummary() (*SystemSummaryResponse, error) {
+	out := new(SystemSummaryResponse)
+	err := this.callWrapper("Ping", emptyReq, out)
+	return out, err
+}
