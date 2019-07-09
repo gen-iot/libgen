@@ -42,7 +42,7 @@ var defaultConfig = config{
 func InitLocal(onConnected func()) {
 	initWithConfig(defaultConfig)
 	gOnConnected = onConnected
-	go connect()
+	connect()
 }
 
 func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string, onConnected func()) {
