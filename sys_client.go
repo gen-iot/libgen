@@ -126,7 +126,7 @@ func doInit() {
 	if gConfig.Type == LocalApp {
 		appIdentifier := os.Getenv("X_GEN_APP_IDENTIFIER")
 		fmt.Printf("LIBGEN INIT, APP IDENTIFIER=[%s]\n", appIdentifier)
-		initSuccessMsg = fmt.Sprintf("%s: APP IDENTIFIER=[%s]\n", initSuccessMsg, appIdentifier)
+		initSuccessMsg = fmt.Sprintf("%s: APP IDENTIFIER=[%s]", initSuccessMsg, appIdentifier)
 	}
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
