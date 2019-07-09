@@ -106,6 +106,12 @@ var emptyReq = make(map[string]interface{})
 
 func (this *ApiClientImpl) SystemSummary() (*SystemSummaryResponse, error) {
 	out := new(SystemSummaryResponse)
-	err := this.callWrapper("Ping", emptyReq, out)
+	err := this.callWrapper("SystemSummary", emptyReq, out)
+	return out, err
+}
+
+func (this *ApiClientImpl) ListRooms() (*ListRoomsResponse, error) {
+	out := new(ListRoomsResponse)
+	err := this.callWrapper("ListRooms", emptyReq, out)
 	return out, err
 }

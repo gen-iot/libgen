@@ -117,6 +117,10 @@ type SystemSummaryResponse struct {
 	Version string `json:"version"`
 }
 
+type ListRoomsResponse struct {
+	Rooms []string `json:"rooms"`
+}
+
 // client side
 type RpcApiClient interface {
 	//declare device models,only device model declared can be used in device
@@ -148,6 +152,8 @@ type RpcApiClient interface {
 	ControlDevice(req *ControlDeviceRequest) (*BaseResponse, error)
 
 	SystemSummary() (*SystemSummaryResponse, error)
+
+	ListRooms() (*ListRoomsResponse, error)
 
 	//ping
 	Ping(req *Ping) (*Pong, error)
