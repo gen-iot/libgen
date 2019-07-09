@@ -8,8 +8,9 @@ import (
 type AppType int
 
 const (
-	LocalApp  AppType = 900
-	RemoteApp AppType = 901
+	LocalApp   AppType = 900
+	RemoteApp  AppType = 901
+	VirtualApp AppType = 902
 )
 
 func AppType2Str(t AppType) string {
