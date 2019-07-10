@@ -29,6 +29,10 @@ func (this *rpcFunc) decodeInParam(data []byte) (interface{}, error) {
 	if !isPtr {
 		newOut = reflect.ValueOf(newOut).Elem().Interface()
 	}
+	err = std.ValidateStruct(newOut)
+	if err != nil {
+		return nil, err
+	}
 	return newOut, nil
 }
 
