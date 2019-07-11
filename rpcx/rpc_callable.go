@@ -18,7 +18,7 @@ type Callable interface {
 type rpcCli struct {
 	stream *liblpc.BufferedStream
 	ctx    *RPC
-	mid []MiddlewareFunc
+	middleware
 	liblpc.BaseUserData
 }
 
@@ -36,41 +36,85 @@ func (this *rpcCli) Call(timeout time.Duration, name string, param interface{}, 
 
 func (this *rpcCli) CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error {
 	std.Assert(this.stream != nil, "stream is nil!")
-	outMsg := &rpcRawMsg{
-		Id:         std.GenRandomUUID(),
+	msgId := std.GenRandomUUID()
+	msg := &rpcRawMsg{
+		Id:         msgId,
 		MethodName: name,
 		Headers:    headers,
 		Type:       rpcReqMsg,
 	}
-	err := outMsg.SetData(param)
-	if err != nil {
-		return err
-	}
-	// log.Println("SEND REQ id -> ", outMsg.Id)
+	// log.Println("SEND REQ id -> ", msg.Id)
 	//add promise
-	promise := std.NewPromise()
-	promiseId := std.PromiseId(outMsg.Id)
-	this.ctx.promiseGroup.AddPromise(promiseId, promise)
-	defer this.ctx.promiseGroup.RemovePromise(promiseId)
-	//write out
-	outBytes, err := encodeRpcMsg(outMsg)
+	ctx := newContext(this, msg)
+	ctx.SetRequest(param)
+	finvoke := this.buildInvoke(timeout, ctx, out)
+	h := this.buildChain(In, finvoke)
+	err := h(ctx)
 	if err != nil {
 		return err
 	}
-	this.stream.Write(outBytes, false)
-	//wait for data
-	future := promise.GetFuture()
-	data, err := future.WaitData(timeout)
+	h = this.buildChain(Out, finvoke)
+	err = h(ctx)
 	if err != nil {
-		log.Println("Call :future wait got err ->", err)
 		return err
 	}
-	dataBytes, ok := data.([]byte)
-	std.Assert(ok, "Call :data not bytes!")
-	err = std.MsgpackUnmarshal(dataBytes, out)
-	if err != nil {
-		log.Println("Call :MsgpackUnmarshal got err ->", err)
-		return err
+	return ctx.Error()
+}
+
+func (this *rpcCli) buildInvoke(timeout time.Duration, ctx *contextImpl, out interface{}) HandleFunc {
+	d := In
+	var nextFn func(ctx *contextImpl) = nil
+	return func(Context) error {
+		switch d {
+		case In:
+			nextFn = this.invoke(timeout, out, ctx)
+			d = Out
+		case Out:
+			if nextFn != nil {
+				nextFn(ctx)
+			}
+		}
+		return nil
 	}
-	return nil
+}
+
+func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextImpl) (nextFn func(ctx *contextImpl)) {
+	err := ctx.inMsg.SetData(ctx.in)
+	if err != nil {
+		ctx.SetError(err)
+		return nil
+	}
+	ctx.setDirection(Out)
+	return func(ctx *contextImpl) {
+		log.Println("in invoke")
+		promise := std.NewPromise()
+		promiseId := std.PromiseId(ctx.Id())
+		//write out
+		outBytes, err := encodeRpcMsg(ctx.inMsg)
+		if err != nil {
+			ctx.SetError(err)
+			return
+		}
+		this.ctx.promiseGroup.AddPromise(promiseId, promise)
+		defer this.ctx.promiseGroup.RemovePromise(promiseId)
+		//
+		this.stream.Write(outBytes, false)
+		//wait for data
+		future := promise.GetFuture()
+		data, err := future.WaitData(timeout)
+		if err != nil {
+			log.Println("call :future wait got err ->", err)
+			ctx.SetError(err)
+			return
+		}
+		dataBytes, ok := data.([]byte)
+		std.Assert(ok, "call :data not bytes!")
+		err = std.MsgpackUnmarshal(dataBytes, out)
+		if err != nil {
+			log.Println("call :MsgpackUnmarshal got err ->", err)
+			ctx.SetError(err)
+		}
+		log.Println("set response")
+		ctx.SetResponse(out)
+	}
 }

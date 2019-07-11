@@ -17,7 +17,7 @@ type RPC struct {
 	lock            *sync.RWMutex
 	startFlag       int32
 	callableCloseCb func(callable Callable)
-	middlewares     []MiddlewareFunc
+	middleware
 }
 
 const RpcLoopDefaultBufferSize = 1024 * 1024 * 4
@@ -33,35 +33,10 @@ func New() (*RPC, error) {
 		promiseGroup: std.NewPromiseGroup(),
 		lock:         &sync.RWMutex{},
 		startFlag:    0,
-		middlewares:  make([]MiddlewareFunc, 0),
 	}, nil
 }
 func (this *RPC) OnCallableClosed(cb func(callable Callable)) {
 	this.callableCloseCb = cb
-}
-
-func (this *RPC) Use(m MiddlewareFunc) {
-	this.middlewares = append(this.middlewares, m)
-}
-
-func (this *RPC) buildCallChain(direct Direction, h HandleFunc) HandleFunc {
-	switch direct {
-	case In:
-		{
-			for i := 0; i < len(this.middlewares); i++ {
-				h = this.middlewares[i](h)
-			}
-		}
-	case Out:
-		{
-			for i := len(this.middlewares) - 1; i > 0; i-- {
-				h = this.middlewares[i](h)
-			}
-		}
-	default:
-		std.Assert(false, "unknown direction")
-	}
-	return h
 }
 
 func (this *RPC) Loop() liblpc.EventLoop {
@@ -124,10 +99,9 @@ func (this *RPC) newCallable(stream *liblpc.BufferedStream, userData interface{}
 	s := &rpcCli{
 		stream: stream,
 		ctx:    this,
-		mid:    make([]MiddlewareFunc, 0),
 	}
 	//
-	s.mid = append(s.mid, m...)
+	s.Use(m...)
 	//
 	s.SetUserData(userData)
 	s.stream.SetUserData(s)
@@ -211,43 +185,28 @@ func (this *RPC) lastWriteFn(outMsg *rpcRawMsg, ctx Context) {
 var gRpcSerialization = std.MsgPackSerialization
 
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
-	outMsg := &rpcRawMsg{
-		Id:         inMsg.Id,
-		MethodName: inMsg.MethodName,
-		Type:       rpcAckMsg,
-	}
 	// log.Println("RECV REQ id -> ", inMsg.Id)
+	cli := sw.GetUserData().(*rpcCli)
+	ctx := newContext(cli, inMsg)
 	fn := this.getFunc(inMsg.MethodName)
 	if fn != nil {
-		cli := sw.GetUserData().(*rpcCli)
-		ctx := newContext(cli, inMsg)
-		ctx.SetHeaders(inMsg.Headers)
-		//
-		h := fn.buildInvoke(ctx)
-		h = this.buildCallChain(In, h)
+		invoke := fn.buildInvoke(ctx)
+		h := this.buildChain(In, invoke)
 		err := h(ctx)
 		if err != nil {
 			ctx.SetError(err)
 		}
 		if err == nil && ctx.Direction() == In {
-			h = this.buildCallChain(Out, h)
+			h = this.buildChain(Out, invoke)
 			err = h(ctx)
 			if err != nil {
 				ctx.SetError(err)
 			}
 		}
-		if ctx.Error() != nil {
-			outMsg.SetError(ctx.Error())
-		} else {
-			err = outMsg.SetData(ctx.Response())
-			if err != nil {
-				outMsg.SetError(err)
-			}
-		}
 	} else {
-		outMsg.SetError(errRpcFuncNotFound)
+		ctx.SetError(errRpcFuncNotFound)
 	}
-
+	outMsg := ctx.buildOutMsg()
 	sendBytes, err := encodeRpcMsg(outMsg)
 	if err != nil {
 		log.Printf("RPC handle REQ Id -> %s, error -> %v", inMsg.Id, err)

@@ -19,7 +19,7 @@ func (this *rpcFunc) buildInvoke(ctx *contextImpl) HandleFunc {
 	return func(_ Context) error {
 		switch dir {
 		case In:
-			nextFn = this.Call(ctx)
+			nextFn = this.call(ctx)
 			dir = Out
 		case Out:
 			if nextFn != nil {
@@ -55,18 +55,8 @@ func (this *rpcFunc) decodeInParam(data []byte) (interface{}, error) {
 
 var errInvokeErr = errors.New("invoke failed")
 
-func (this *rpcFunc) Call(ctx *contextImpl) (outFn func(ctx *contextImpl)) {
-	defer func() {
-		//
-		panicErr := recover()
-		if panicErr == nil {
-			return
-		}
-		outFn = nil
-		log.Println("call error ", panicErr)
-		ctx.SetError(errInvokeErr)
-	}()
-	inParam, err := this.decodeInParam(ctx.rawInMsg.Data)
+func (this *rpcFunc) call(ctx *contextImpl) (outFn func(ctx *contextImpl)) {
+	inParam, err := this.decodeInParam(ctx.inMsg.Data)
 	if err != nil {
 		ctx.SetError(err)
 		return nil
@@ -74,6 +64,16 @@ func (this *rpcFunc) Call(ctx *contextImpl) (outFn func(ctx *contextImpl)) {
 	ctx.SetRequest(inParam)
 	ctx.setDirection(In)
 	return func(ctx *contextImpl) {
+		defer func() {
+			//
+			panicErr := recover()
+			if panicErr == nil {
+				return
+			}
+			outFn = nil
+			log.Println("call error ", panicErr)
+			ctx.SetError(errInvokeErr)
+		}()
 		inParam = ctx.Request()
 		paramV := []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(inParam)}
 		retV := this.fun.Call(paramV)
