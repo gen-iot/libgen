@@ -43,6 +43,7 @@ func (this *contextImpl) Id() string {
 
 func (this *contextImpl) SetRequest(in interface{}) {
 	this.in = in
+	_ = this.inMsg.SetData(in)
 }
 
 func (this *contextImpl) RequestBytes() []byte {
