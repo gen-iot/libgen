@@ -103,7 +103,7 @@ func connect() {
 	gApiClient.setCallable(callable)
 	fmt.Println("LIBGEN CLIENT CONNECTED")
 	if gOnConnected != nil {
-		gOnConnected()
+		go gOnConnected()
 	}
 }
 
