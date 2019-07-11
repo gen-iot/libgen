@@ -183,10 +183,15 @@ func (this *RPC) lastWriteFn(outMsg *rpcRawMsg, ctx Context) {
 	}
 }
 
+func emptyHandlerFunc(ctx Context)  {
+
+}
+
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 	cli := sw.GetUserData().(*rpcCli)
 	ctx := newContext(cli, inMsg)
 	fn := this.getFunc(inMsg.MethodName)
+	var proxy HandleFunc = nil
 	if fn != nil {
 		inParam, err := fn.decodeInParam(inMsg.Data)
 		if err != nil {
@@ -194,11 +199,15 @@ func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 		} else {
 			ctx.SetRequest(inParam)
 		}
-		h := this.buildChain(fn.call)
-		h(ctx)
+		proxy = fn.call
 	} else {
+		proxy = emptyHandlerFunc
 		ctx.SetError(errRpcFuncNotFound)
 	}
+	//
+	proxy = this.buildChain(proxy)
+	proxy(ctx)
+	//
 	outMsg := ctx.buildOutMsg()
 	sendBytes, err := encodeRpcMsg(outMsg)
 	if err != nil {

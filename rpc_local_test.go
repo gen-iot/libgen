@@ -53,7 +53,8 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 	callable := rpc.NewConnCallable(fd, nil,
 		middleware.Validate(std.DefaultValidatorEN()),
 		middleware.Recover(true),
-		middleware.Dump())
+		middleware.Dump(),
+		)
 	after := time.After(time.Second * 5)
 	for {
 		select {
