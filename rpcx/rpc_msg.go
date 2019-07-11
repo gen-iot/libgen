@@ -52,11 +52,15 @@ func (this *rpcRawMsg) SetError(err error) {
 }
 
 func (this *rpcRawMsg) BindData(v interface{}) error {
-	return std.MsgpackUnmarshal(this.Data, v)
+	return gRpcSerialization.UnMarshal(this.Data, v)
 }
 
 func (this *rpcRawMsg) SetData(v interface{}) error {
-	bytes, err := std.MsgpackMarshal(v)
+	if v == nil {
+		this.Data = nil
+		return nil
+	}
+	bytes, err := gRpcSerialization.Marshal(v)
 	if err != nil {
 		return err
 	}
@@ -90,7 +94,7 @@ func decodeRpcMsg(buf std.ReadableBuffer, maxBodyLen int) (*rpcRawMsg, error) {
 		buf.PopN(kDataOffset)
 		data := buf.ReadN(int(dataLen))
 		outMsg := new(rpcRawMsg)
-		err := std.MsgpackUnmarshal(data, outMsg)
+		err := gRpcSerialization.UnMarshal(data, outMsg)
 		if err != nil {
 			log.Println("unmarshal rpcx msg failed -> ", err)
 			continue
@@ -102,7 +106,7 @@ func decodeRpcMsg(buf std.ReadableBuffer, maxBodyLen int) (*rpcRawMsg, error) {
 func encodeRpcMsg(msg *rpcRawMsg) ([]byte, error) {
 	std.Assert(len(msg.Id) == 32, "msgId.Len != 32")
 	buffer := std.NewByteBuffer()
-	datas, err := std.MsgpackMarshal(msg)
+	datas, err := gRpcSerialization.Marshal(msg)
 	if err != nil {
 		return nil, err
 	}
