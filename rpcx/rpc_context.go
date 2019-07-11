@@ -8,6 +8,8 @@ type Context interface {
 	SetMethod(string)
 	Method() string
 
+	RequestBytes() []byte
+
 	SetRequest(in interface{})
 	Request() interface{}
 
@@ -16,7 +18,6 @@ type Context interface {
 
 	SetError(err error)
 	Error() error
-
 }
 
 type contextImpl struct {
@@ -42,6 +43,10 @@ func (this *contextImpl) Id() string {
 
 func (this *contextImpl) SetRequest(in interface{}) {
 	this.in = in
+}
+
+func (this *contextImpl) RequestBytes() []byte {
+	return this.inMsg.Data
 }
 
 func (this *contextImpl) Request() interface{} {
@@ -87,7 +92,7 @@ func (this *contextImpl) buildOutMsg() *rpcRawMsg {
 
 func newContext(call Callable, inMsg *rpcRawMsg) *contextImpl {
 	return &contextImpl{
-		call:      call,
-		inMsg:     inMsg,
+		call:  call,
+		inMsg: inMsg,
 	}
 }
