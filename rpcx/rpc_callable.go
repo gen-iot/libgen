@@ -43,78 +43,53 @@ func (this *rpcCli) CallWithHeader(timeout time.Duration, name string, headers m
 		Headers:    headers,
 		Type:       rpcReqMsg,
 	}
-	// log.Println("SEND REQ id -> ", msg.Id)
 	//add promise
 	ctx := newContext(this, msg)
 	ctx.SetRequest(param)
-	finvoke := this.buildInvoke(timeout, ctx, out)
-	h := this.buildChain(In, finvoke)
-	err := h(ctx)
-	if err != nil {
-		return err
-	}
-	h = this.buildChain(Out, finvoke)
-	err = h(ctx)
-	if err != nil {
-		return err
-	}
+	f := this.buildInvoke(timeout, ctx, out)
+	h := this.buildChain(f)
+	h(ctx)
 	return ctx.Error()
 }
 
 func (this *rpcCli) buildInvoke(timeout time.Duration, ctx *contextImpl, out interface{}) HandleFunc {
-	d := In
-	var nextFn func(ctx *contextImpl) = nil
-	return func(Context) error {
-		switch d {
-		case In:
-			nextFn = this.invoke(timeout, out, ctx)
-			d = Out
-		case Out:
-			if nextFn != nil {
-				nextFn(ctx)
-			}
-		}
-		return nil
+	return func(Context) {
+		this.invoke(timeout, out, ctx)
 	}
 }
 
-func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextImpl) (nextFn func(ctx *contextImpl)) {
+func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextImpl) {
 	err := ctx.inMsg.SetData(ctx.in)
 	if err != nil {
 		ctx.SetError(err)
-		return nil
+		return
 	}
-	ctx.setDirection(Out)
-	return func(ctx *contextImpl) {
-		log.Println("in invoke")
-		promise := std.NewPromise()
-		promiseId := std.PromiseId(ctx.Id())
-		//write out
-		outBytes, err := encodeRpcMsg(ctx.inMsg)
-		if err != nil {
-			ctx.SetError(err)
-			return
-		}
-		this.ctx.promiseGroup.AddPromise(promiseId, promise)
-		defer this.ctx.promiseGroup.RemovePromise(promiseId)
-		//
-		this.stream.Write(outBytes, false)
-		//wait for data
-		future := promise.GetFuture()
-		data, err := future.WaitData(timeout)
-		if err != nil {
-			log.Println("call :future wait got err ->", err)
-			ctx.SetError(err)
-			return
-		}
-		dataBytes, ok := data.([]byte)
-		std.Assert(ok, "call :data not bytes!")
-		err = std.MsgpackUnmarshal(dataBytes, out)
-		if err != nil {
-			log.Println("call :MsgpackUnmarshal got err ->", err)
-			ctx.SetError(err)
-		}
-		log.Println("set response")
-		ctx.SetResponse(out)
+	promise := std.NewPromise()
+	promiseId := std.PromiseId(ctx.Id())
+	//write out
+	outBytes, err := encodeRpcMsg(ctx.inMsg)
+	if err != nil {
+		ctx.SetError(err)
+		return
 	}
+	this.ctx.promiseGroup.AddPromise(promiseId, promise)
+	defer this.ctx.promiseGroup.RemovePromise(promiseId)
+	//
+	this.stream.Write(outBytes, false)
+	//wait for data
+	future := promise.GetFuture()
+	data, err := future.WaitData(timeout)
+	if err != nil {
+		log.Println("call :future wait got err ->", err)
+		ctx.SetError(err)
+		return
+	}
+	dataBytes, ok := data.([]byte)
+	std.Assert(ok, "call :data not bytes!")
+	err = std.MsgpackUnmarshal(dataBytes, out)
+	if err != nil {
+		log.Println("call :MsgpackUnmarshal got err ->", err)
+		ctx.SetError(err)
+	}
+	ctx.SetResponse(out)
 }

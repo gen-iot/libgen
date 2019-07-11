@@ -162,9 +162,10 @@ func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err
 }
 
 func (this *RPC) handleAck(inMsg *rpcRawMsg) {
-	// log.Println("RECV ACK id -> ", inMsg.Id)
 	this.promiseGroup.DonePromise(std.PromiseId(inMsg.Id), inMsg.GetError(), inMsg.Data)
 }
+
+var gRpcSerialization = std.MsgPackSerialization
 
 var errRpcFuncNotFound = errors.New("rpc func not found")
 
@@ -182,27 +183,19 @@ func (this *RPC) lastWriteFn(outMsg *rpcRawMsg, ctx Context) {
 	}
 }
 
-var gRpcSerialization = std.MsgPackSerialization
-
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
-	// log.Println("RECV REQ id -> ", inMsg.Id)
 	cli := sw.GetUserData().(*rpcCli)
 	ctx := newContext(cli, inMsg)
 	fn := this.getFunc(inMsg.MethodName)
 	if fn != nil {
-		invoke := fn.buildInvoke(ctx)
-		h := this.buildChain(In, invoke)
-		err := h(ctx)
+		inParam, err := fn.decodeInParam(inMsg.Data)
 		if err != nil {
 			ctx.SetError(err)
+		} else {
+			ctx.SetRequest(inParam)
 		}
-		if err == nil && ctx.Direction() == In {
-			h = this.buildChain(Out, invoke)
-			err = h(ctx)
-			if err != nil {
-				ctx.SetError(err)
-			}
-		}
+		h := this.buildChain(fn.call)
+		h(ctx)
 	} else {
 		ctx.SetError(errRpcFuncNotFound)
 	}
@@ -213,5 +206,4 @@ func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 		return // encode rpcMsg failed
 	}
 	sw.Write(sendBytes, false)
-	//log.Println("RPC ACK REQ Id -> ", inMsg.Id)
 }

@@ -3,6 +3,7 @@ package libgen
 import (
 	"gitee.com/Puietel/std"
 	"gitee.com/SuzhenProjects/libgen/rpcx"
+	"gitee.com/SuzhenProjects/libgen/rpcx/middleware"
 	"gitee.com/SuzhenProjects/liblpc"
 	"log"
 	"os"
@@ -12,23 +13,23 @@ import (
 	"time"
 )
 
-type Req struct {
-	A  int
+type testReq struct {
+	A  int `validate:"eq=100"`
 	B  int
 	Tm time.Time
 }
 
-type Rsp struct {
+type testRsp struct {
 	Sum int
 }
 
-func sum(ctx rpcx.Context, req *Req) (*Rsp, error) {
+func sum(ctx rpcx.Context, req *testReq) (*testRsp, error) {
 	log.Println("req delta time -> ", time.Now().Sub(req.Tm))
-	headers := ctx.Headers(rpcx.In)
-	if len(headers) != 0 {
-		log.Println("header -> ", headers)
-	}
-	return &Rsp{
+	//headers := ctx.Headers(rpcx.In)
+	//if len(headers) != 0 {
+	//	log.Println("header -> ", headers)
+	//}
+	return &testRsp{
 		Sum: req.A + req.B,
 	}, nil
 }
@@ -49,7 +50,10 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
-	callable := rpc.NewConnCallable(fd, nil, createTraceMiddleware("mid1"), createTraceMiddleware("mid2"))
+	callable := rpc.NewConnCallable(fd, nil,
+		middleware.Validate(std.DefaultValidatorEN()),
+		middleware.Recover(true),
+		middleware.Dump())
 	after := time.After(time.Second * 5)
 	for {
 		select {
@@ -57,7 +61,7 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 			return
 		default:
 		}
-		out := new(Rsp)
+		out := new(testRsp)
 		//header := map[string]string{}
 		//for i := 0; i < 5; i++ {
 		//	k := fmt.Sprintf("key-%d", i)
@@ -66,7 +70,7 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 		//}
 		err = callable.CallWithHeader(time.Second*5, "sum",
 			nil,
-			&Req{
+			&testReq{
 				A:  10,
 				B:  100,
 				Tm: time.Now(),
@@ -94,16 +98,12 @@ func TestRpc(t *testing.T) {
 
 func createTraceMiddleware(tag string) rpcx.MiddlewareFunc {
 	return func(next rpcx.HandleFunc) rpcx.HandleFunc {
-		return func(ctx rpcx.Context) error {
-			switch ctx.Direction() {
-			case rpcx.In:
-				req := ctx.Request().(*Req)
-				req.Tm = req.Tm.Add(time.Second * 1)
-				log.Printf("%s-In\n", tag)
-			case rpcx.Out:
-				log.Printf("%s-Out\n", tag)
-			}
-			return next(ctx)
+		return func(ctx rpcx.Context) {
+			log.Printf("%s In\n", tag)
+			req := ctx.Request().(*testReq)
+			req.Tm = req.Tm.Add(time.Second * 1)
+			next(ctx)
+			log.Printf("%s Out\n", tag)
 		}
 	}
 }

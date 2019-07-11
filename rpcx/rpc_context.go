@@ -8,9 +8,6 @@ type Context interface {
 	SetMethod(string)
 	Method() string
 
-	SetHeaders(d Direction, h map[string]string)
-	Headers(d Direction) map[string]string
-
 	SetRequest(in interface{})
 	Request() interface{}
 
@@ -20,7 +17,6 @@ type Context interface {
 	SetError(err error)
 	Error() error
 
-	Direction() Direction
 }
 
 type contextImpl struct {
@@ -28,7 +24,6 @@ type contextImpl struct {
 	in        interface{}
 	out       interface{}
 	err       error
-	direction Direction
 	inMsg     *rpcRawMsg
 	outHeader map[string]string
 }
@@ -39,23 +34,6 @@ func (this *contextImpl) Method() string {
 
 func (this *contextImpl) SetMethod(method string) {
 	this.inMsg.MethodName = method
-}
-
-func (this *contextImpl) Headers(d Direction) map[string]string {
-	if d == In {
-		return this.inMsg.Headers
-	} else if d == Out {
-		return this.outHeader
-	}
-	return nil
-}
-
-func (this *contextImpl) SetHeaders(d Direction, h map[string]string) {
-	if d == In {
-		this.inMsg.Headers = h
-	} else if d == Out {
-		this.outHeader = h
-	}
 }
 
 func (this *contextImpl) Id() string {
@@ -90,14 +68,6 @@ func (this *contextImpl) Callable() Callable {
 	return this.call
 }
 
-func (this *contextImpl) Direction() Direction {
-	return this.direction
-}
-
-func (this *contextImpl) setDirection(d Direction) {
-	this.direction = d
-}
-
 func (this *contextImpl) buildOutMsg() *rpcRawMsg {
 	out := &rpcRawMsg{
 		Id:         this.Id(),
@@ -118,7 +88,6 @@ func (this *contextImpl) buildOutMsg() *rpcRawMsg {
 func newContext(call Callable, inMsg *rpcRawMsg) *contextImpl {
 	return &contextImpl{
 		call:      call,
-		direction: In,
 		inMsg:     inMsg,
 	}
 }
