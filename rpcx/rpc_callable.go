@@ -9,39 +9,44 @@ import (
 )
 
 type Callable interface {
+	io.Closer
 	liblpc.UserDataStorage
 	Call(timeout time.Duration, name string, param interface{}, out interface{}) error
-	io.Closer
+	CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error
 }
 
-type proxyClient struct {
+type rpcCli struct {
 	stream *liblpc.BufferedStream
 	ctx    *RPC
+	mid []MiddlewareFunc
 	liblpc.BaseUserData
 }
 
-func (this *proxyClient) start() {
+func (this *rpcCli) start() {
 	this.stream.Start()
 }
 
-func (this *proxyClient) Close() error {
+func (this *rpcCli) Close() error {
 	return this.stream.Close()
 }
 
-func (this *proxyClient) Call(timeout time.Duration, name string, param interface{}, out interface{}) error {
+func (this *rpcCli) Call(timeout time.Duration, name string, param interface{}, out interface{}) error {
+	return this.CallWithHeader(timeout, name, nil, param, out)
+}
+
+func (this *rpcCli) CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error {
 	std.Assert(this.stream != nil, "stream is nil!")
 	outMsg := &rpcRawMsg{
 		Id:         std.GenRandomUUID(),
 		MethodName: name,
+		Headers:    headers,
 		Type:       rpcReqMsg,
 	}
 	err := outMsg.SetData(param)
 	if err != nil {
 		return err
 	}
-
 	// log.Println("SEND REQ id -> ", outMsg.Id)
-
 	//add promise
 	promise := std.NewPromise()
 	promiseId := std.PromiseId(outMsg.Id)

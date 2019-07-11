@@ -6,13 +6,6 @@ import (
 	"log"
 )
 
-type MsgFmt uint8
-
-const (
-	JSON MsgFmt = iota + 0x01
-	MSGPACK
-)
-
 // HEADER(FE FE) 2 |DATA_LEN 4| DATA N|
 
 const kHeaderLen = 2
@@ -34,11 +27,12 @@ const (
 )
 
 type rpcRawMsg struct {
-	Id         string     `json:"msgId"`
-	MethodName string     `json:"methodName"`
-	Type       rpcMsgType `json:"type"` // req or ack
-	Err        *string    `json:"err"`  // fast path for ack error
-	Data       []byte     `json:"data"` // req = param
+	Id         string            `json:"msgId"`
+	MethodName string            `json:"methodName"`
+	Headers    map[string]string `json:"headers"`
+	Type       rpcMsgType        `json:"type"` // req or ack
+	Err        *string           `json:"err"`  // fast path for ack error
+	Data       []byte            `json:"data"` // req = param
 }
 
 func (this *rpcRawMsg) GetError() error {

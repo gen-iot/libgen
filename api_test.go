@@ -84,3 +84,17 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 	}, rsp)
 	std.AssertError(err, "control failed")
 }
+
+
+func TestDupSocket(t *testing.T) {
+	fd1, err := liblpc.NewTcpSocketFd(4, false, true)
+	std.AssertError(err,"new sock")
+	baiduAddr, err := liblpc.ResolveTcpAddr("www.baidu.com:80")
+	std.AssertError(err,"resolve baidu addr err")
+	err = syscall.Connect(int(fd1), baiduAddr)
+	std.AssertError(err,"connect err")
+	fd2, err := liblpc.NewTcpSocketFd(4, true, true)
+	std.AssertError(err,"new sock2")
+	err = syscall.Dup2(int(fd1), int(fd2))
+	std.AssertError(err,"dup sock err")
+}

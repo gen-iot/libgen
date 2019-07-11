@@ -2,7 +2,6 @@ package rpcx
 
 import (
 	"errors"
-	"gitee.com/Puietel/std"
 	"log"
 	"reflect"
 )
@@ -14,6 +13,23 @@ type rpcFunc struct {
 	outP0Type reflect.Type
 }
 
+func (this *rpcFunc) buildInvoke(ctx *contextImpl) HandleFunc {
+	dir := In
+	var nextFn func(ctx *contextImpl) = nil
+	return func(_ Context) error {
+		switch dir {
+		case In:
+			nextFn = this.Call(ctx)
+			dir = Out
+		case Out:
+			if nextFn != nil {
+				nextFn(ctx)
+			}
+		}
+		return nil
+	}
+}
+
 func (this *rpcFunc) decodeInParam(data []byte) (interface{}, error) {
 	elementType := this.inP0Type
 	isPtr := false
@@ -22,43 +38,52 @@ func (this *rpcFunc) decodeInParam(data []byte) (interface{}, error) {
 		isPtr = true
 	}
 	newOut := reflect.New(elementType).Interface()
-	err := std.MsgpackUnmarshal(data, newOut)
+	err := gRpcSerialization.UnMarshal(data, newOut)
 	if err != nil {
 		return nil, err
 	}
 	if !isPtr {
 		newOut = reflect.ValueOf(newOut).Elem().Interface()
 	}
-	err = std.ValidateStruct(newOut)
-	if err != nil {
-		return nil, err
-	}
+	// todo replace with validate middleware
+	//err = std.ValidateStruct(newOut)
+	//if err != nil {
+	//	return nil, err
+	//}
 	return newOut, nil
 }
 
-func (this *rpcFunc) Call(remoteCallable Callable, inBytes []byte) (outBytes []byte, err error) {
+var errInvokeErr = errors.New("invoke failed")
+
+func (this *rpcFunc) Call(ctx *contextImpl) (outFn func(ctx *contextImpl)) {
 	defer func() {
+		//
 		panicErr := recover()
 		if panicErr == nil {
 			return
 		}
+		outFn = nil
 		log.Println("call error ", panicErr)
-		err = errors.New("invoke failed")
+		ctx.SetError(errInvokeErr)
 	}()
-	inParam, err := this.decodeInParam(inBytes)
+	inParam, err := this.decodeInParam(ctx.rawInMsg.Data)
 	if err != nil {
-		return nil, err
+		ctx.SetError(err)
+		return nil
 	}
-	paramV := []reflect.Value{reflect.ValueOf(remoteCallable), reflect.ValueOf(inParam)}
-	retV := this.fun.Call(paramV)
-	if !retV[1].IsNil() {
-		err = retV[1].Interface().(error)
-		return nil, err
+	ctx.SetRequest(inParam)
+	ctx.setDirection(In)
+	return func(ctx *contextImpl) {
+		inParam = ctx.Request()
+		paramV := []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(inParam)}
+		retV := this.fun.Call(paramV)
+		if !retV[1].IsNil() {
+			err = retV[1].Interface().(error)
+			ctx.SetError(err)
+			return
+		}
+		outParam := retV[0].Interface()
+		ctx.SetResponse(outParam)
+		ctx.setDirection(Out)
 	}
-	outParam := retV[0].Interface()
-	outBytes, err = std.MsgpackMarshal(outParam)
-	if err != nil {
-		return nil, err
-	}
-	return outBytes, nil
 }

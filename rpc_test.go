@@ -1,10 +1,11 @@
-package rpcx
+package libgen
 
 import (
 	"fmt"
 	"gitee.com/Puietel/std"
-	"gitee.com/SuzhenProjects/libgen"
+	"gitee.com/SuzhenProjects/libgen/rpcx"
 	"gitee.com/SuzhenProjects/liblpc"
+	"log"
 	"net"
 	"os"
 	"runtime"
@@ -25,15 +26,19 @@ type Rsp struct {
 	Sum int
 }
 
-func sum(call Callable, req *Req) (*Rsp, error) {
-	fmt.Println("req delta time -> ", time.Now().Sub(req.Tm))
+func sum(call rpcx.Context, req *Req) (*Rsp, error) {
+	log.Println("req delta time -> ", time.Now().Sub(req.Tm))
+	headers := call.Headers()
+	if len(headers) != 0 {
+		log.Println("header -> ", headers)
+	}
 	return &Rsp{
 		Sum: req.A + req.B,
 	}, nil
 }
 
 func startLocalRpc(fd int, wg *sync.WaitGroup) {
-	rpc, err := New()
+	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
@@ -44,7 +49,7 @@ func startLocalRpc(fd int, wg *sync.WaitGroup) {
 
 func startMockRemoteRpc(fd int, wg *sync.WaitGroup) {
 	defer wg.Done()
-	rpc, err := New()
+	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
@@ -57,11 +62,19 @@ func startMockRemoteRpc(fd int, wg *sync.WaitGroup) {
 		default:
 		}
 		out := new(Rsp)
-		err = callable.Call(time.Second*5, "sum", &Req{
-			A:  10,
-			B:  100,
-			Tm: time.Now(),
-		}, out)
+		//header := map[string]string{}
+		//for i := 0; i < 5; i++ {
+		//	k := fmt.Sprintf("key-%d", i)
+		//	v := fmt.Sprintf("val-%d", i)
+		//	header[k] = v
+		//}
+		err = callable.CallWithHeader(time.Second*5, "sum",
+			nil,
+			&Req{
+				A:  10,
+				B:  100,
+				Tm: time.Now(),
+			}, out)
 		std.AssertError(err, "call error")
 		std.Assert(out.Sum == 10+100, "result error")
 	}
@@ -83,9 +96,9 @@ func TestRpc(t *testing.T) {
 	startLocalRpc(fds[0], wg)
 }
 
-func ____Ping(callable Callable, req *libgen.Ping) (*libgen.Pong, error) {
+func ____Ping(ctx rpcx.Context, req *Ping) (*Pong, error) {
 	fmt.Println("recv ping ->", req, ", delta is = ", time.Now().Sub(req.Time))
-	return &libgen.Pong{
+	return &Pong{
 		Time: time.Now(), Msg: "KERNEL PONG",
 	}, nil
 }
@@ -102,17 +115,17 @@ func TestRemoteTcpRpc(t *testing.T) {
 	f, err := conn.File()
 	std.AssertError(err, "getFd")
 	fd := int(f.Fd())
-	rpc, err := New()
+	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	rpc.Start()
 	rpc.RegFuncWithName("Ping", ____Ping)
 	callable := rpc.NewConnCallable(fd, nil)
 	fmt.Println("NewConnCallable")
-	clientRsp := new(libgen.Pong)
+	clientRsp := new(Pong)
 	for {
 		runtime.KeepAlive(conn)
 		time.Sleep(500 * time.Millisecond)
-		err = callable.Call(time.Second, "Ping", &libgen.Ping{
+		err = callable.Call(time.Second, "Ping", &Ping{
 			Time: time.Now(),
 			Msg:  "ping from server",
 		}, clientRsp)
@@ -136,16 +149,16 @@ func TestRemoteTcpRpcV2(t *testing.T) {
 	std.AssertError(err, "listen err")
 	nfd, _, err := syscall.Accept4(listenFd, syscall.O_NONBLOCK|syscall.O_CLOEXEC)
 	std.AssertError(err, "accept err")
-	rpc, err := New()
+	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	rpc.Start()
 	rpc.RegFuncWithName("Ping", ____Ping)
 	callable := rpc.NewConnCallable(nfd, nil)
 	fmt.Println("NewConnCallable")
-	clientRsp := new(libgen.Pong)
+	clientRsp := new(Pong)
 	for {
 		time.Sleep(5 * time.Millisecond)
-		err = callable.Call(time.Second, "Ping", &libgen.Ping{
+		err = callable.Call(time.Second, "Ping", &Ping{
 			Time: time.Now(),
 			Msg:  "ping from server",
 		}, clientRsp)

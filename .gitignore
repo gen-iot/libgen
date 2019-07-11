@@ -1,4 +1,4 @@
 .idea/
 Gopkg.lock
 vendor/
-rpcx/*.prof
+cpu_prof.prof
