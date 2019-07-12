@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// todo add config: 1. skipIfNil bool : if req or rsp is nil ,skip
 func Validate(v std.Validator) rpcx.MiddlewareFunc {
 	std.Assert(v != nil, "validator is nil")
 	return func(next rpcx.HandleFunc) rpcx.HandleFunc {
