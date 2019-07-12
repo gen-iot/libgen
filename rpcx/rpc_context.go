@@ -1,6 +1,9 @@
 package rpcx
 
-import "gitee.com/SuzhenProjects/liblpc"
+import (
+	"gitee.com/Puietel/std"
+	"gitee.com/SuzhenProjects/liblpc"
+)
 
 type Context interface {
 	Callable() Callable
@@ -10,8 +13,14 @@ type Context interface {
 	SetMethod(string)
 	Method() string
 
+	RequestHeader() map[string]string
+	SetRequestHeader(map[string]string)
+
 	SetRequest(in interface{})
 	Request() interface{}
+
+	ResponseHeader() map[string]string
+	SetResponseHeader(map[string]string)
 
 	SetResponse(out interface{})
 	Response() interface{}
@@ -30,6 +39,30 @@ type contextImpl struct {
 	reqMsg *rpcRawMsg
 	ackMsg *rpcRawMsg
 	liblpc.BaseUserData
+}
+
+func (this *contextImpl) RequestHeader() map[string]string {
+	if this.reqMsg == nil {
+		return nil
+	}
+	return this.reqMsg.Headers
+}
+
+func (this *contextImpl) SetRequestHeader(h map[string]string) {
+	std.Assert(this.reqMsg != nil, "request is nil")
+	this.reqMsg.Headers = h
+}
+
+func (this *contextImpl) ResponseHeader() map[string]string {
+	if this.ackMsg == nil {
+		return nil
+	}
+	return this.ackMsg.Headers
+}
+
+func (this *contextImpl) SetResponseHeader(h map[string]string) {
+	std.Assert(this.ackMsg != nil, "response not ready")
+	this.ackMsg.Headers = h
 }
 
 func (this *contextImpl) Method() string {
@@ -74,11 +107,12 @@ func (this *contextImpl) Callable() Callable {
 }
 
 func (this *contextImpl) buildOutMsg() *rpcRawMsg {
-	out := &rpcRawMsg{
+	this.ackMsg = &rpcRawMsg{
 		Id:         this.Id(),
 		MethodName: this.Method(),
 		Type:       rpcAckMsg,
 	}
+	out := this.ackMsg
 	if this.err != nil {
 		out.SetError(this.err)
 	} else {
