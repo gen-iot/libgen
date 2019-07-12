@@ -1,5 +1,7 @@
 package rpcx
 
+import "gitee.com/SuzhenProjects/liblpc"
+
 type Context interface {
 	Callable() Callable
 
@@ -16,6 +18,8 @@ type Context interface {
 
 	SetError(err error)
 	Error() error
+
+	liblpc.UserDataStorage
 }
 
 type contextImpl struct {
@@ -25,6 +29,7 @@ type contextImpl struct {
 	err    error
 	reqMsg *rpcRawMsg
 	ackMsg *rpcRawMsg
+	liblpc.BaseUserData
 }
 
 func (this *contextImpl) Method() string {
