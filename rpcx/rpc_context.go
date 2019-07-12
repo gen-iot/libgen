@@ -41,6 +41,16 @@ type contextImpl struct {
 	liblpc.BaseUserData
 }
 
+func (this *contextImpl) reset() {
+	this.call = nil
+	this.in = nil
+	this.out = nil
+	this.err = nil
+	this.reqMsg = nil
+	this.ackMsg = nil
+	this.SetUserData(nil)
+}
+
 func (this *contextImpl) RequestHeader() map[string]string {
 	if this.reqMsg == nil {
 		return nil
@@ -124,9 +134,7 @@ func (this *contextImpl) buildOutMsg() *rpcRawMsg {
 	return out
 }
 
-func newContext(call Callable, inMsg *rpcRawMsg) *contextImpl {
-	return &contextImpl{
-		call:   call,
-		reqMsg: inMsg,
-	}
+func (this *contextImpl) init(call Callable, inMsg *rpcRawMsg) {
+	this.call = call
+	this.reqMsg = inMsg
 }

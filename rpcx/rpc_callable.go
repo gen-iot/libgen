@@ -18,7 +18,7 @@ type Callable interface {
 
 type rpcCli struct {
 	stream *liblpc.BufferedStream
-	ctx    *RPC
+	rpc    *RPC
 	middleware
 	liblpc.BaseUserData
 }
@@ -45,7 +45,12 @@ func (this *rpcCli) CallWithHeader(timeout time.Duration, name string, headers m
 		Type:       rpcReqMsg,
 	}
 	//add promise
-	ctx := newContext(this, msg)
+	ctx := this.rpc.grabCtx()
+	defer func() {
+		ctx.reset()
+		this.rpc.releaseCtx(ctx)
+	}()
+	ctx.init(this, msg)
 	ctx.SetRequest(param)
 	f := this.buildInvoke(timeout, ctx, out)
 	h := this.buildChain(f)
@@ -87,8 +92,8 @@ func (this *rpcCli) Perform(timeout time.Duration, c Context) {
 		ctx.SetError(err)
 		return
 	}
-	this.ctx.promiseGroup.AddPromise(promiseId, promise)
-	defer this.ctx.promiseGroup.RemovePromise(promiseId)
+	this.rpc.promiseGroup.AddPromise(promiseId, promise)
+	defer this.rpc.promiseGroup.RemovePromise(promiseId)
 	//
 	this.stream.Write(outBytes, false)
 	//wait for data

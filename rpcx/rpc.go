@@ -19,6 +19,7 @@ type RPC struct {
 	callableCloseCb func(callable Callable)
 	middleware
 	preUseMiddleware middleware
+	ctxPool          sync.Pool
 }
 
 const RpcLoopDefaultBufferSize = 1024 * 1024 * 4
@@ -28,13 +29,27 @@ func New() (*RPC, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RPC{
+	rpc := &RPC{
 		ioLoop:       loop,
 		rcpFuncMap:   make(map[string]*rpcFunc),
 		promiseGroup: std.NewPromiseGroup(),
 		lock:         &sync.RWMutex{},
 		startFlag:    0,
-	}, nil
+	}
+	rpc.ctxPool.New = func() interface{} {
+		return new(contextImpl)
+	}
+	return rpc, nil
+}
+
+func (this *RPC) grabCtx() *contextImpl {
+	ctxImpl := this.ctxPool.Get().(*contextImpl)
+	return ctxImpl
+}
+
+func (this *RPC) releaseCtx(ctx *contextImpl) {
+	std.Assert(ctx != nil, "return ctx is nil")
+	this.ctxPool.Put(ctx)
 }
 
 func (this *RPC) PreUse(m ...MiddlewareFunc) {
@@ -107,7 +122,7 @@ func (this *RPC) Close() error {
 func (this *RPC) newCallable(stream *liblpc.BufferedStream, userData interface{}, m []MiddlewareFunc) *rpcCli {
 	s := &rpcCli{
 		stream: stream,
-		ctx:    this,
+		rpc:    this,
 	}
 	//
 	s.Use(m...)
@@ -218,7 +233,12 @@ func (this *RPC) execHandler(c Context) {
 
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 	cli := sw.GetUserData().(*rpcCli)
-	ctx := newContext(cli, inMsg)
+	ctx := this.grabCtx()
+	defer func() {
+		ctx.reset()
+		this.releaseCtx(ctx)
+	}()
+	ctx.init(cli, inMsg)
 	//
 	var proxy HandleFunc = nil
 	if this.preUseMiddleware.Len() == 0 {
