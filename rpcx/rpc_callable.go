@@ -13,7 +13,7 @@ type Callable interface {
 	liblpc.UserDataStorage
 	Call(timeout time.Duration, name string, param interface{}, out interface{}) error
 	CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error
-	PerformContext(timeout time.Duration, ctx Context)
+	Perform(timeout time.Duration, ctx Context)
 }
 
 type rpcCli struct {
@@ -60,7 +60,7 @@ func (this *rpcCli) buildInvoke(timeout time.Duration, ctx *contextImpl, out int
 }
 
 func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextImpl) {
-	this.PerformContext(timeout, ctx)
+	this.Perform(timeout, ctx)
 	if ctx.Error() != nil || ctx.ackMsg == nil {
 		return
 	}
@@ -72,7 +72,7 @@ func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextI
 	ctx.SetResponse(out)
 }
 
-func (this *rpcCli) PerformContext(timeout time.Duration, c Context) {
+func (this *rpcCli) Perform(timeout time.Duration, c Context) {
 	ctx := c.(*contextImpl)
 	err := ctx.reqMsg.SetData(ctx.in)
 	if err != nil {
