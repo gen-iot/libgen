@@ -11,6 +11,8 @@ type rpcFunc struct {
 	fun       reflect.Value
 	inP0Type  reflect.Type
 	outP0Type reflect.Type
+	mid       middleware
+	handleF   HandleFunc
 }
 
 func (this *rpcFunc) decodeInParam(data []byte) (interface{}, error) {
@@ -34,7 +36,7 @@ func (this *rpcFunc) decodeInParam(data []byte) (interface{}, error) {
 var errInvokeErr = errors.New("invoke failed")
 var errInParamNil = errors.New("inParam is nil")
 
-func (this *rpcFunc) call(c Context) {
+func (this *rpcFunc) invoke(c Context) {
 	ctx := c.(*contextImpl)
 	defer func() {
 		//

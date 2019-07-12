@@ -58,7 +58,7 @@ func (this *RPC) getFunc(name string) *rpcFunc {
 	return fn
 }
 
-func (this *RPC) RegFuncWithName(fname string, f interface{}) {
+func (this *RPC) RegFuncWithName(fname string, f interface{}, m ...MiddlewareFunc) {
 	fv, ok := f.(reflect.Value)
 	if !ok {
 		fv = reflect.ValueOf(f)
@@ -72,22 +72,25 @@ func (this *RPC) RegFuncWithName(fname string, f interface{}) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	//
-	this.rcpFuncMap[fname] = &rpcFunc{
+	fn := &rpcFunc{
 		name:      fname,
 		fun:       fv,
 		inP0Type:  fvType.In(1),
 		outP0Type: fvType.Out(0),
 	}
+	fn.mid.Use(m...)
+	fn.handleF = fn.mid.buildChain(fn.invoke)
+	this.rcpFuncMap[fname] = fn
 }
 
-func (this *RPC) RegFun(f interface{}) {
+func (this *RPC) RegFun(f interface{}, m ...MiddlewareFunc) {
 	fv, ok := f.(reflect.Value)
 	if !ok {
 		fv = reflect.ValueOf(f)
 	}
 	std.Assert(fv.Kind() == reflect.Func, "f not func!")
 	fname := getFuncName(fv)
-	this.RegFuncWithName(fname, fv)
+	this.RegFuncWithName(fname, fv, m...)
 }
 
 func (this *RPC) Start() {
@@ -203,7 +206,7 @@ func (this *RPC) execHandler(c Context) {
 		} else {
 			ctx.SetRequest(inParam)
 		}
-		fnProxy = fn.call
+		fnProxy = fn.handleF
 	} else {
 		fnProxy = emptyHandlerFunc
 		ctx.SetError(errRpcFuncNotFound)
