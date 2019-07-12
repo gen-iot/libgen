@@ -13,6 +13,7 @@ type Callable interface {
 	liblpc.UserDataStorage
 	Call(timeout time.Duration, name string, param interface{}, out interface{}) error
 	CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error
+	PerformContext(timeout time.Duration, ctx Context)
 }
 
 type rpcCli struct {
@@ -59,7 +60,21 @@ func (this *rpcCli) buildInvoke(timeout time.Duration, ctx *contextImpl, out int
 }
 
 func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextImpl) {
-	err := ctx.inMsg.SetData(ctx.in)
+	this.PerformContext(timeout, ctx)
+	if ctx.Error() != nil || ctx.ackMsg == nil {
+		return
+	}
+	err := std.MsgpackUnmarshal(ctx.ackMsg.Data, out)
+	if err != nil {
+		log.Println("call :MsgpackUnmarshal got err ->", err)
+		ctx.SetError(err)
+	}
+	ctx.SetResponse(out)
+}
+
+func (this *rpcCli) PerformContext(timeout time.Duration, c Context) {
+	ctx := c.(*contextImpl)
+	err := ctx.reqMsg.SetData(ctx.in)
 	if err != nil {
 		ctx.SetError(err)
 		return
@@ -67,7 +82,7 @@ func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextI
 	promise := std.NewPromise()
 	promiseId := std.PromiseId(ctx.Id())
 	//write out
-	outBytes, err := encodeRpcMsg(ctx.inMsg)
+	outBytes, err := encodeRpcMsg(ctx.reqMsg)
 	if err != nil {
 		ctx.SetError(err)
 		return
@@ -78,18 +93,13 @@ func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextI
 	this.stream.Write(outBytes, false)
 	//wait for data
 	future := promise.GetFuture()
-	data, err := future.WaitData(timeout)
+	ackMsgObj, err := future.WaitData(timeout)
 	if err != nil {
 		log.Println("call :future wait got err ->", err)
 		ctx.SetError(err)
 		return
 	}
-	dataBytes, ok := data.([]byte)
-	std.Assert(ok, "call :data not bytes!")
-	err = std.MsgpackUnmarshal(dataBytes, out)
-	if err != nil {
-		log.Println("call :MsgpackUnmarshal got err ->", err)
-		ctx.SetError(err)
-	}
-	ctx.SetResponse(out)
+	ackMsg, ok := ackMsgObj.(*rpcRawMsg)
+	std.Assert(ok, "type mismatched ,rpcRawMsg")
+	ctx.ackMsg = ackMsg
 }

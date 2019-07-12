@@ -14,7 +14,7 @@ import (
 )
 
 type testReq struct {
-	A  int `validate:"eq=100"`
+	A  int
 	B  int
 	Tm time.Time
 }
@@ -54,7 +54,7 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 		middleware.Validate(std.DefaultValidatorEN()),
 		middleware.Recover(true),
 		middleware.Dump(),
-		)
+	)
 	after := time.After(time.Second * 5)
 	for {
 		select {

@@ -18,6 +18,7 @@ type RPC struct {
 	startFlag       int32
 	callableCloseCb func(callable Callable)
 	middleware
+	preUseMiddleware middleware
 }
 
 const RpcLoopDefaultBufferSize = 1024 * 1024 * 4
@@ -35,6 +36,11 @@ func New() (*RPC, error) {
 		startFlag:    0,
 	}, nil
 }
+
+func (this *RPC) PreUse(m ...MiddlewareFunc) {
+	this.preUseMiddleware.Use(m...)
+}
+
 func (this *RPC) OnCallableClosed(cb func(callable Callable)) {
 	this.callableCloseCb = cb
 }
@@ -162,7 +168,7 @@ func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err
 }
 
 func (this *RPC) handleAck(inMsg *rpcRawMsg) {
-	this.promiseGroup.DonePromise(std.PromiseId(inMsg.Id), inMsg.GetError(), inMsg.Data)
+	this.promiseGroup.DonePromise(std.PromiseId(inMsg.Id), inMsg.GetError(), inMsg)
 }
 
 var gRpcSerialization = std.MsgPackSerialization
@@ -183,29 +189,40 @@ func (this *RPC) lastWriteFn(outMsg *rpcRawMsg, ctx Context) {
 	}
 }
 
-func emptyHandlerFunc(ctx Context)  {
-
+func emptyHandlerFunc(_ Context) {
 }
 
-func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
-	cli := sw.GetUserData().(*rpcCli)
-	ctx := newContext(cli, inMsg)
-	fn := this.getFunc(inMsg.MethodName)
-	var proxy HandleFunc = nil
+func (this *RPC) execHandler(c Context) {
+	ctx := c.(*contextImpl)
+	fn := this.getFunc(ctx.reqMsg.MethodName)
+	var fnProxy HandleFunc = nil
 	if fn != nil {
-		inParam, err := fn.decodeInParam(inMsg.Data)
+		inParam, err := fn.decodeInParam(ctx.reqMsg.Data)
 		if err != nil {
 			ctx.SetError(err)
 		} else {
 			ctx.SetRequest(inParam)
 		}
-		proxy = fn.call
+		fnProxy = fn.call
 	} else {
-		proxy = emptyHandlerFunc
+		fnProxy = emptyHandlerFunc
 		ctx.SetError(errRpcFuncNotFound)
 	}
 	//
-	proxy = this.buildChain(proxy)
+	fnProxy = this.buildChain(fnProxy)
+	fnProxy(ctx)
+}
+
+func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
+	cli := sw.GetUserData().(*rpcCli)
+	ctx := newContext(cli, inMsg)
+	//
+	var proxy HandleFunc = nil
+	if this.preUseMiddleware.Len() == 0 {
+		proxy = this.preUseMiddleware.buildChain(this.execHandler)
+	} else {
+		proxy = this.execHandler
+	}
 	proxy(ctx)
 	//
 	outMsg := ctx.buildOutMsg()

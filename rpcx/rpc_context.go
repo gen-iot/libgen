@@ -8,8 +8,6 @@ type Context interface {
 	SetMethod(string)
 	Method() string
 
-	RequestBytes() []byte
-
 	SetRequest(in interface{})
 	Request() interface{}
 
@@ -25,29 +23,25 @@ type contextImpl struct {
 	in        interface{}
 	out       interface{}
 	err       error
-	inMsg     *rpcRawMsg
-	outHeader map[string]string
+	reqMsg    *rpcRawMsg
+	ackMsg    *rpcRawMsg
 }
 
 func (this *contextImpl) Method() string {
-	return this.inMsg.MethodName
+	return this.reqMsg.MethodName
 }
 
 func (this *contextImpl) SetMethod(method string) {
-	this.inMsg.MethodName = method
+	this.reqMsg.MethodName = method
 }
 
 func (this *contextImpl) Id() string {
-	return this.inMsg.Id
+	return this.reqMsg.Id
 }
 
 func (this *contextImpl) SetRequest(in interface{}) {
 	this.in = in
-	_ = this.inMsg.SetData(in)
-}
-
-func (this *contextImpl) RequestBytes() []byte {
-	return this.inMsg.Data
+	_ = this.reqMsg.SetData(in)
 }
 
 func (this *contextImpl) Request() interface{} {
@@ -93,7 +87,7 @@ func (this *contextImpl) buildOutMsg() *rpcRawMsg {
 
 func newContext(call Callable, inMsg *rpcRawMsg) *contextImpl {
 	return &contextImpl{
-		call:  call,
-		inMsg: inMsg,
+		call:   call,
+		reqMsg: inMsg,
 	}
 }
