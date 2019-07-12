@@ -19,12 +19,12 @@ type Context interface {
 }
 
 type contextImpl struct {
-	call      Callable
-	in        interface{}
-	out       interface{}
-	err       error
-	reqMsg    *rpcRawMsg
-	ackMsg    *rpcRawMsg
+	call   Callable
+	in     interface{}
+	out    interface{}
+	err    error
+	reqMsg *rpcRawMsg
+	ackMsg *rpcRawMsg
 }
 
 func (this *contextImpl) Method() string {

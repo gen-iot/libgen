@@ -39,7 +39,7 @@ func startLocalRpcService(fd int, wg *sync.WaitGroup) {
 	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
-	rpc.RegFun(sum)
+	rpc.RegFunc(sum)
 	rpc.NewConnCallable(fd, nil)
 	wg.Wait()
 }

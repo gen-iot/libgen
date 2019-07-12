@@ -83,7 +83,7 @@ func (this *RPC) RegFuncWithName(fname string, f interface{}, m ...MiddlewareFun
 	this.rcpFuncMap[fname] = fn
 }
 
-func (this *RPC) RegFun(f interface{}, m ...MiddlewareFunc) {
+func (this *RPC) RegFunc(f interface{}, m ...MiddlewareFunc) {
 	fv, ok := f.(reflect.Value)
 	if !ok {
 		fv = reflect.ValueOf(f)
