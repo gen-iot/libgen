@@ -11,31 +11,47 @@ import (
 type Callable interface {
 	io.Closer
 	liblpc.UserDataStorage
+	Start()
 	Call(timeout time.Duration, name string, param interface{}, out interface{}) error
 	CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error
 	Perform(timeout time.Duration, ctx Context)
+	CloseSignal() <-chan error // usage : err,ok := CloseSignal(); !ok -> return , ok -> check error
+	ReadySignal() <-chan error // usage : err,ok := ReadySignal(); !ok -> return , ok -> check error
 }
 
-type rpcCli struct {
+type rpcCallImpl struct {
 	stream *liblpc.BufferedStream
 	rpc    *RPC
 	middleware
 	liblpc.BaseUserData
+	cloSig   chan error
+	readySig chan error
 }
 
-func (this *rpcCli) start() {
+func (this *rpcCallImpl) Start() {
+	std.NewSignalClose()
 	this.stream.Start()
 }
 
-func (this *rpcCli) Close() error {
+func (this *rpcCallImpl) CloseSignal() <-chan error {
+	return this.cloSig
+}
+
+func (this *rpcCallImpl) ReadySignal() <-chan error {
+	return this.readySig
+}
+
+func (this *rpcCallImpl) Close() error {
+	close(this.cloSig)
+	close(this.readySig)
 	return this.stream.Close()
 }
 
-func (this *rpcCli) Call(timeout time.Duration, name string, param interface{}, out interface{}) error {
+func (this *rpcCallImpl) Call(timeout time.Duration, name string, param interface{}, out interface{}) error {
 	return this.CallWithHeader(timeout, name, nil, param, out)
 }
 
-func (this *rpcCli) CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error {
+func (this *rpcCallImpl) CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error {
 	std.Assert(this.stream != nil, "stream is nil!")
 	msgId := std.GenRandomUUID()
 	msg := &rpcRawMsg{
@@ -58,13 +74,13 @@ func (this *rpcCli) CallWithHeader(timeout time.Duration, name string, headers m
 	return ctx.Error()
 }
 
-func (this *rpcCli) buildInvoke(timeout time.Duration, ctx *contextImpl, out interface{}) HandleFunc {
+func (this *rpcCallImpl) buildInvoke(timeout time.Duration, ctx *contextImpl, out interface{}) HandleFunc {
 	return func(Context) {
 		this.invoke(timeout, out, ctx)
 	}
 }
 
-func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextImpl) {
+func (this *rpcCallImpl) invoke(timeout time.Duration, out interface{}, ctx *contextImpl) {
 	this.Perform(timeout, ctx)
 	if ctx.Error() != nil || ctx.ackMsg == nil {
 		return
@@ -77,7 +93,7 @@ func (this *rpcCli) invoke(timeout time.Duration, out interface{}, ctx *contextI
 	ctx.SetResponse(out)
 }
 
-func (this *rpcCli) Perform(timeout time.Duration, c Context) {
+func (this *rpcCallImpl) Perform(timeout time.Duration, c Context) {
 	ctx := c.(*contextImpl)
 	err := ctx.reqMsg.SetData(ctx.in)
 	if err != nil {

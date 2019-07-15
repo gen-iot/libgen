@@ -11,12 +11,11 @@ import (
 )
 
 type RPC struct {
-	ioLoop          *liblpc.IOEvtLoop
-	rcpFuncMap      map[string]*rpcFunc
-	promiseGroup    *std.PromiseGroup
-	lock            *sync.RWMutex
-	startFlag       int32
-	callableCloseCb func(callable Callable)
+	ioLoop       *liblpc.IOEvtLoop
+	rcpFuncMap   map[string]*rpcFunc
+	promiseGroup *std.PromiseGroup
+	lock         *sync.RWMutex
+	startFlag    int32
 	middleware
 	preUseMiddleware middleware
 	ctxPool          sync.Pool
@@ -54,10 +53,6 @@ func (this *RPC) releaseCtx(ctx *contextImpl) {
 
 func (this *RPC) PreUse(m ...MiddlewareFunc) {
 	this.preUseMiddleware.Use(m...)
-}
-
-func (this *RPC) OnCallableClosed(cb func(callable Callable)) {
-	this.callableCloseCb = cb
 }
 
 func (this *RPC) Loop() liblpc.EventLoop {
@@ -119,10 +114,12 @@ func (this *RPC) Close() error {
 	return this.ioLoop.Close()
 }
 
-func (this *RPC) newCallable(stream *liblpc.BufferedStream, userData interface{}, m []MiddlewareFunc) *rpcCli {
-	s := &rpcCli{
-		stream: stream,
-		rpc:    this,
+func (this *RPC) newCallable(stream *liblpc.BufferedStream, userData interface{}, m []MiddlewareFunc) *rpcCallImpl {
+	s := &rpcCallImpl{
+		stream:   stream,
+		rpc:      this,
+		cloSig:   make(chan error),
+		readySig: make(chan error),
 	}
 	//
 	s.Use(m...)
@@ -133,44 +130,60 @@ func (this *RPC) newCallable(stream *liblpc.BufferedStream, userData interface{}
 	return s
 }
 
+func (this *RPC) callableClosed(sw liblpc.StreamWriter, err error) {
+	log.Println("RPC READ ERROR ", err)
+	std.CloseIgnoreErr(sw)
+	udata := sw.GetUserData()
+	if udata == nil {
+		return
+	}
+	if call, ok := udata.(Callable); ok {
+		std.CloseIgnoreErr(call)
+	}
+	return
+}
+
 func (this *RPC) NewConnCallable(fd int, userData interface{}, m ...MiddlewareFunc) Callable {
 	stream := liblpc.NewBufferedConnStream(this.ioLoop, fd, this.genericRead)
 	pCall := this.newCallable(stream, userData, m)
-	pCall.start()
+	stream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
+		pCall.readySig <- err
+		std.CloseIgnoreErr(pCall)
+	})
+	stream.SetOnClose(func(sw liblpc.StreamWriter, err error) {
+		pCall.cloSig <- err
+		std.CloseIgnoreErr(pCall)
+	})
 	return pCall
 }
 
-type ClientCallableOnConnect = func(callable Callable, err error)
+type ClientCallableOnConnect func(callable Callable, err error)
 
-func (this *RPC) NewClientCallable(fd int, userData interface{}, m ...MiddlewareFunc) (cancelFn func(), future std.Future) {
-	cliStream := liblpc.NewBufferedClientStream(this.ioLoop, fd, this.genericRead)
-	pCall := this.newCallable(cliStream, userData, m)
-	promise := std.NewPromise()
-	cliStream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
-		if err != nil {
-			promise.DoneData(err, nil)
-		} else {
-			promise.DoneData(nil, pCall)
-		}
+func (this *RPC) NewClientCallable(
+	addr *liblpc.SyscallSockAddr,
+	userData interface{},
+	m ...MiddlewareFunc) (Callable, error) {
+	fd, err := liblpc.NewConnFd2(addr.Version, addr.Sockaddr)
+	if err != nil {
+		return nil, err
+	}
+	stream := liblpc.NewBufferedClientStream(this.ioLoop, int(fd), this.genericRead)
+	pCall := this.newCallable(stream, userData, m)
+	stream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
+		pCall.readySig <- err
+		std.CloseIgnoreErr(pCall)
 	})
-	pCall.start()
-	return func() {
-		_ = pCall.Close()
-	}, promise.GetFuture()
+	stream.SetOnClose(func(sw liblpc.StreamWriter, err error) {
+		pCall.cloSig <- err
+		std.CloseIgnoreErr(pCall)
+	})
+	return pCall, nil
 }
 
 const kMaxRpcMsgBodyLen = 1024 * 1024 * 32
 
-func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer, err error) {
-	if err != nil {
-		log.Println("RPC READ ERROR ", err)
-		std.CloseIgnoreErr(sw)
-		if this.callableCloseCb != nil {
-			callable := sw.GetUserData().(Callable)
-			this.callableCloseCb(callable)
-		}
-		return
-	}
+func (this *RPC) genericRead(sw liblpc.StreamWriter, buf std.ReadableBuffer) {
+
 	for {
 		rawMsg, err := decodeRpcMsg(buf, kMaxRpcMsgBodyLen)
 		if err != nil {
@@ -232,7 +245,7 @@ func (this *RPC) execHandler(c Context) {
 }
 
 func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
-	cli := sw.GetUserData().(*rpcCli)
+	cli := sw.GetUserData().(*rpcCallImpl)
 	ctx := this.grabCtx()
 	defer func() {
 		ctx.reset()
