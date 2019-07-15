@@ -85,7 +85,7 @@ func newRemoteCallable(endpoint string) (rpcx.Callable, error) {
 }
 
 func createCallable() (rpcx.Callable, error) {
-	std.Assert(strings.Compare(AppType2Str(gConfig.Type), "UNKNOWN") == 0, "unknown app type")
+	std.Assert(strings.Compare(AppType2Str(gConfig.Type), "UNKNOWN") != 0, "unknown app type")
 	if gConfig.Type == LocalApp {
 		callable := gRpc.NewConnCallable(clientFd, nil)
 		return callable, nil
