@@ -135,6 +135,7 @@ func callableWatcher() {
 		if err = doHandshake(call); err != nil {
 			log.Println("LIBGEN CLIENT CONNECT FAILED , HANDSHAKE FAILED :", err, " , RECONNECT IN 5s......")
 			std.CloseIgnoreErr(call)
+			time.Sleep(time.Second * 5)
 			continue
 		}
 		log.Println("LIBGEN CLIENT CONNECTED")
