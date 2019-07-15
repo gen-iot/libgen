@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+	"sync/atomic"
 )
 
 var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
@@ -45,4 +46,29 @@ func getValueElement(v reflect.Value) reflect.Value {
 		return v.Elem()
 	}
 	return v
+}
+
+type sigGuard struct {
+	sig  chan error
+	flag int32
+}
+
+func newSigGuard() *sigGuard {
+	return &sigGuard{
+		sig:  make(chan error, 1),
+		flag: 0,
+	}
+}
+
+func (this *sigGuard) Signal() <-chan error {
+	return this.sig
+}
+
+func (this *sigGuard) Send(err error) bool {
+	if atomic.CompareAndSwapInt32(&this.flag, 0, 1) {
+		this.sig <- err
+		close(this.sig)
+		return true
+	}
+	return false
 }

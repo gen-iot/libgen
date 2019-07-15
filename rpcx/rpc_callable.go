@@ -24,8 +24,8 @@ type rpcCallImpl struct {
 	rpc    *RPC
 	middleware
 	liblpc.BaseUserData
-	cloSig   chan error
-	readySig chan error
+	cloSig   *sigGuard
+	readySig *sigGuard
 }
 
 func (this *rpcCallImpl) Start() {
@@ -34,16 +34,16 @@ func (this *rpcCallImpl) Start() {
 }
 
 func (this *rpcCallImpl) CloseSignal() <-chan error {
-	return this.cloSig
+	return this.cloSig.Signal()
 }
 
 func (this *rpcCallImpl) ReadySignal() <-chan error {
-	return this.readySig
+	return this.readySig.Signal()
 }
 
 func (this *rpcCallImpl) Close() error {
-	close(this.cloSig)
-	close(this.readySig)
+	this.cloSig.Send(nil)
+	this.readySig.Send(nil)
 	return this.stream.Close()
 }
 
