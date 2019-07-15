@@ -40,7 +40,8 @@ func startLocalRpcService(fd int, wg *sync.WaitGroup) {
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
 	rpc.RegFunc(sum)
-	rpc.NewConnCallable(fd, nil)
+	call := rpc.NewConnCallable(fd, nil)
+	call.Start()
 	wg.Wait()
 }
 
@@ -55,6 +56,8 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 		middleware.Recover(true),
 		middleware.Dump(),
 	)
+	callable.Start()
+	<-callable.ReadySignal()
 	after := time.After(time.Second * 5)
 	for {
 		select {

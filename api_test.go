@@ -27,6 +27,7 @@ func TestApiClientImpl_Ping(t *testing.T) {
 	})
 	std.AssertError(err, "connect err")
 	callable := rpc.NewConnCallable(sock, nil)
+	callable.Start()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -73,11 +74,11 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 	rsp := new(ControlDeviceResponse)
 	err = callable.Call(time.Second*10, "ControlDevice", &ControlDeviceRequest{
 		BaseRequest: BaseRequest{},
-		PkgInfo:     PkgInfo{
+		PkgInfo: PkgInfo{
 			Package: "com.pujie88.iot",
 			Name:    "HotelRemote",
 		},
-		Id:          "014100000000936A_0_0_67",
+		Id: "014100000000936A_0_0_67",
 		CtrlParams: map[string]interface{}{
 			"power": 1,
 		},
@@ -85,16 +86,15 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 	std.AssertError(err, "control failed")
 }
 
-
 func TestDupSocket(t *testing.T) {
 	fd1, err := liblpc.NewTcpSocketFd(4, false, true)
-	std.AssertError(err,"new sock")
+	std.AssertError(err, "new sock")
 	baiduAddr, err := liblpc.ResolveTcpAddr("www.baidu.com:80")
-	std.AssertError(err,"resolve baidu addr err")
+	std.AssertError(err, "resolve baidu addr err")
 	err = syscall.Connect(int(fd1), baiduAddr)
-	std.AssertError(err,"connect err")
+	std.AssertError(err, "connect err")
 	fd2, err := liblpc.NewTcpSocketFd(4, true, true)
-	std.AssertError(err,"new sock2")
+	std.AssertError(err, "new sock2")
 	err = syscall.Dup2(int(fd1), int(fd2))
-	std.AssertError(err,"dup sock err")
+	std.AssertError(err, "dup sock err")
 }
