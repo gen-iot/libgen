@@ -95,6 +95,9 @@ func createCallable() (rpcx.Callable, error) {
 }
 
 func doHandshake(call rpcx.Callable) error {
+	if gConfig.Type == LocalApp {
+		return nil
+	}
 	//handshake
 	out := new(BaseResponse)
 	err := call.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
@@ -135,14 +138,15 @@ func callableWatcher() {
 			continue
 		}
 		log.Println("LIBGEN CLIENT CONNECTED")
-		// close
-		select {
-		case <-call.CloseSignal():
-			{
-				gApiClient.setCallable(nil)
-			}
+		gApiClient.setCallable(call)
+		if gOnConnected != nil {
+			gOnConnected()
 		}
+		// close
+		err = <-call.CloseSignal()
+		gApiClient.setCallable(nil)
 		log.Println("LIBGEN CLIENT DISCONNECTED", " , RECONNECT IN 5s......")
+		time.Sleep(time.Second * 5)
 	}
 }
 
