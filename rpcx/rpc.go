@@ -264,7 +264,7 @@ func (this *RPC) handleReq(sw liblpc.StreamWriter, inMsg *rpcRawMsg) {
 	ctx.init(cli, inMsg)
 	//
 	proxy := this.buildChain(this.execHandler)
-	if this.preUseMiddleware.Len() == 0 {
+	if this.preUseMiddleware.Len() != 0 {
 		proxy = this.preUseMiddleware.buildChain(this.execHandler)
 	}
 	proxy(ctx)
