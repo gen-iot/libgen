@@ -59,7 +59,7 @@ func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string, onConnecte
 	go callableWatcher()
 }
 
-func waitRemoteConnReady(call rpcx.Callable, timeout time.Duration) error {
+func waitRemoteConnReady(call *rpcx.SignalCallable, timeout time.Duration) error {
 	timer := time.NewTimer(timeout)
 	defer timer.Stop()
 	select {
@@ -116,8 +116,9 @@ func callableWatcher() {
 		default:
 		}
 		//
-		call, err := createCallable()
+		rcall, err := createCallable()
 		std.AssertError(err, "create callable failed")
+		call := rpcx.NewSignalCallable(rcall)
 		call.Start()
 		err = waitRemoteConnReady(call, time.Second*5)
 		log.Println("LIBGEN CLIENT CONNECTING ...")
