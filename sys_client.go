@@ -85,7 +85,7 @@ func newRemoteCallable(endpoint string) (rpcx.Callable, error) {
 }
 
 func createCallable() (rpcx.Callable, error) {
-	std.Assert(strings.Compare(AppType2Str(gConfig.Type), "UNKNOWN") == 0, "unknown app type")
+	std.Assert(strings.Compare(AppType2Str(gConfig.Type), "UNKNOWN") != 0, "unknown app type")
 	if gConfig.Type == LocalApp {
 		callable := gRpc.NewConnCallable(clientFd, nil)
 		return callable, nil
@@ -95,6 +95,9 @@ func createCallable() (rpcx.Callable, error) {
 }
 
 func doHandshake(call rpcx.Callable) error {
+	if gConfig.Type == LocalApp {
+		return nil
+	}
 	//handshake
 	out := new(BaseResponse)
 	err := call.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
@@ -133,17 +136,19 @@ func callableWatcher() {
 		if err = doHandshake(call); err != nil {
 			log.Println("LIBGEN CLIENT CONNECT FAILED , HANDSHAKE FAILED :", err, " , RECONNECT IN 5s......")
 			std.CloseIgnoreErr(call)
+			time.Sleep(time.Second * 5)
 			continue
 		}
 		log.Println("LIBGEN CLIENT CONNECTED")
-		// close
-		select {
-		case <-call.CloseSignal():
-			{
-				gApiClient.setCallable(nil)
-			}
+		gApiClient.setCallable(call)
+		if gOnConnected != nil {
+			gOnConnected()
 		}
+		// close
+		err = <-call.CloseSignal()
+		gApiClient.setCallable(nil)
 		log.Println("LIBGEN CLIENT DISCONNECTED", " , RECONNECT IN 5s......")
+		time.Sleep(time.Second * 5)
 	}
 }
 
