@@ -1,6 +1,6 @@
 package libgen
 
-import "gitee.com/Puietel/std"
+import "gitee.com/gen-iot/std"
 
 type ModelProperty struct {
 	Type     PropertyType `json:"type" validate:"required"`

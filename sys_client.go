@@ -4,9 +4,9 @@ package libgen
 
 import (
 	"fmt"
-	"gitee.com/Puietel/std"
-	"gitee.com/SuzhenProjects/libgen/rpcx"
-	"gitee.com/SuzhenProjects/liblpc"
+	"gitee.com/gen-iot/liblpc"
+	"gitee.com/gen-iot/rpcx"
+	"gitee.com/gen-iot/std"
 	"github.com/pkg/errors"
 	"log"
 	"os"

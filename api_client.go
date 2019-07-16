@@ -3,7 +3,7 @@
 package libgen
 
 import (
-	"gitee.com/SuzhenProjects/libgen/rpcx"
+	"gitee.com/gen-iot/rpcx"
 	"github.com/pkg/errors"
 	"sync"
 )
