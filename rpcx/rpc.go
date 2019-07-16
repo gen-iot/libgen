@@ -116,10 +116,8 @@ func (this *RPC) Close() error {
 
 func (this *RPC) newCallable(stream *liblpc.BufferedStream, userData interface{}, m []MiddlewareFunc) *rpcCallImpl {
 	s := &rpcCallImpl{
-		stream:   stream,
-		rpc:      this,
-		cloSig:   newSigGuard(),
-		readySig: newSigGuard(),
+		stream: stream,
+		rpc:    this,
 	}
 	//
 	s.Use(m...)
@@ -147,13 +145,17 @@ func (this *RPC) NewConnCallable(fd int, userData interface{}, m ...MiddlewareFu
 	stream := liblpc.NewBufferedConnStream(this.ioLoop, fd, this.genericRead)
 	pCall := this.newCallable(stream, userData, m)
 	stream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
-		pCall.readySig.Send(err)
+		if pCall.readyCb != nil {
+			pCall.readyCb(pCall, err)
+		}
 		if err != nil {
 			std.CloseIgnoreErr(pCall)
 		}
 	})
 	stream.SetOnClose(func(sw liblpc.StreamWriter, err error) {
-		pCall.cloSig.Send(err)
+		if pCall.closeCb != nil {
+			pCall.closeCb(pCall, err)
+		}
 		std.CloseIgnoreErr(pCall)
 	})
 	return pCall
@@ -172,13 +174,17 @@ func (this *RPC) NewClientCallable(
 	stream := liblpc.NewBufferedClientStream(this.ioLoop, int(fd), this.genericRead)
 	pCall := this.newCallable(stream, userData, m)
 	stream.SetOnConnect(func(sw liblpc.StreamWriter, err error) {
-		pCall.readySig.Send(err)
+		if pCall.readyCb != nil {
+			pCall.readyCb(pCall, err)
+		}
 		if err != nil {
 			std.CloseIgnoreErr(pCall)
 		}
 	})
 	stream.SetOnClose(func(sw liblpc.StreamWriter, err error) {
-		pCall.cloSig.Send(err)
+		if pCall.closeCb != nil {
+			pCall.closeCb(pCall, err)
+		}
 		std.CloseIgnoreErr(pCall)
 	})
 	return pCall, nil

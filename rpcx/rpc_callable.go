@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+type CallableCallback func(callable Callable, err error)
+
 type Callable interface {
 	io.Closer
 	liblpc.UserDataStorage
@@ -15,35 +17,24 @@ type Callable interface {
 	Call(timeout time.Duration, name string, param interface{}, out interface{}) error
 	CallWithHeader(timeout time.Duration, name string, headers map[string]string, param interface{}, out interface{}) error
 	Perform(timeout time.Duration, ctx Context)
-	CloseSignal() <-chan error // usage : err,ok := CloseSignal(); !ok -> return , ok -> check error
-	ReadySignal() <-chan error // usage : err,ok := ReadySignal(); !ok -> return , ok -> check error
+	SetOnReady(cb CallableCallback)
+	SetOnClose(cb CallableCallback)
 }
 
 type rpcCallImpl struct {
-	stream *liblpc.BufferedStream
-	rpc    *RPC
+	stream  *liblpc.BufferedStream
+	rpc     *RPC
+	readyCb CallableCallback
+	closeCb CallableCallback
 	middleware
 	liblpc.BaseUserData
-	cloSig   *sigGuard
-	readySig *sigGuard
 }
 
 func (this *rpcCallImpl) Start() {
-	std.NewSignalClose()
 	this.stream.Start()
 }
 
-func (this *rpcCallImpl) CloseSignal() <-chan error {
-	return this.cloSig.Signal()
-}
-
-func (this *rpcCallImpl) ReadySignal() <-chan error {
-	return this.readySig.Signal()
-}
-
 func (this *rpcCallImpl) Close() error {
-	this.cloSig.Send(nil)
-	this.readySig.Send(nil)
 	return this.stream.Close()
 }
 
@@ -123,4 +114,12 @@ func (this *rpcCallImpl) Perform(timeout time.Duration, c Context) {
 	ackMsg, ok := ackMsgObj.(*rpcRawMsg)
 	std.Assert(ok, "type mismatched ,rpcRawMsg")
 	ctx.ackMsg = ackMsg
+}
+
+func (this *rpcCallImpl) SetOnReady(cb CallableCallback) {
+	this.readyCb = cb
+}
+
+func (this *rpcCallImpl) SetOnClose(cb CallableCallback) {
+	this.closeCb = cb
 }
