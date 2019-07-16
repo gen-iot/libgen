@@ -56,8 +56,9 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 		middleware.Recover(true),
 		middleware.Dump(),
 	)
-	callable.Start()
-	<-callable.ReadySignal()
+	cliCall := rpcx.NewSignalCallable(callable)
+	cliCall.Start()
+	<-cliCall.ReadySignal()
 	after := time.After(time.Second * 5)
 	for {
 		select {
