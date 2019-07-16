@@ -37,9 +37,10 @@ func sum(ctx rpcx.Context, req *testReq) (*testRsp, error) {
 func startLocalRpcService(fd int, wg *sync.WaitGroup) {
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpcx")
+	rpc.PreUse(createTraceMiddleware("pre use"))
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
-	rpc.RegFunc(sum)
+	rpc.RegFunc(sum, createTraceMiddleware("use"))
 	call := rpc.NewConnCallable(fd, nil)
 	call.Start()
 	wg.Wait()
@@ -52,9 +53,9 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 	defer std.CloseIgnoreErr(rpc)
 	rpc.Start()
 	callable := rpc.NewConnCallable(fd, nil,
-		middleware.Validate(std.DefaultValidatorEN()),
+		//middleware.Validate(std.DefaultValidatorEN()),
 		middleware.Recover(true),
-		middleware.Dump(),
+		//middleware.Dump(),
 	)
 	cliCall := rpcx.NewSignalCallable(callable)
 	cliCall.Start()
@@ -85,7 +86,7 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 	}
 }
 
-func TestRpc(t *testing.T) {
+func TestRpcWithLocalSocketPair(t *testing.T) {
 	file, err := os.OpenFile("cpu_prof.prof", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0755)
 	std.AssertError(err, "create prof failed")
 	defer std.CloseIgnoreErr(file)
@@ -105,8 +106,6 @@ func createTraceMiddleware(tag string) rpcx.MiddlewareFunc {
 	return func(next rpcx.HandleFunc) rpcx.HandleFunc {
 		return func(ctx rpcx.Context) {
 			log.Printf("%s In\n", tag)
-			req := ctx.Request().(*testReq)
-			req.Tm = req.Tm.Add(time.Second * 1)
 			next(ctx)
 			log.Printf("%s Out\n", tag)
 		}
