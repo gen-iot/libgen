@@ -1,8 +1,8 @@
 package libgen
 
 import (
+	"errors"
 	"gitee.com/gen-iot/rpcx"
-	"github.com/pkg/errors"
 	"log"
 	"time"
 )

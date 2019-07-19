@@ -3,11 +3,11 @@
 package libgen
 
 import (
+	"errors"
 	"fmt"
 	"gitee.com/gen-iot/liblpc"
 	"gitee.com/gen-iot/rpcx"
 	"gitee.com/gen-iot/std"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"strings"

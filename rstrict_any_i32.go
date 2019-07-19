@@ -1,7 +1,7 @@
 package libgen
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 	"reflect"
 )
 
