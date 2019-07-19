@@ -107,6 +107,11 @@ type Ping struct {
 	Msg  string    `json:"msg"`
 }
 
+type TransportDataRequest struct {
+	Sender *PkgInfo `json:"sender" validate:"required"`
+	Data   []byte   `json:"data" validate:"required"`
+}
+
 func (this *Ping) String() string {
 	return fmt.Sprintf("time = %s , extraMsg = %s", this.Time.String(), this.Msg)
 }

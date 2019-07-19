@@ -9,9 +9,11 @@ import (
 
 type DeviceControlHandler func(req *ControlDeviceRequest) (*ControlDeviceResponse, error)
 type DeviceStatusHandler func(notify *DeviceStatusNotify)
+type TransportDataHandler func(req *TransportDataRequest) error
 
 var gDeviceControlHandler DeviceControlHandler
 var gDeviceStatusHandler DeviceStatusHandler
+var gDataTransportHandler TransportDataHandler
 
 func pong(ctx rpcx.Context, req *Ping) (*Pong, error) {
 	log.Println("receive ping req.time =", req.Time, " delta is ", time.Now().Sub(req.Time))
@@ -34,10 +36,21 @@ func onDeviceStatusDelivery(ctx rpcx.Context, notify *DeviceStatusNotify) (*Base
 	return &BaseResponse{}, nil
 }
 
+func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (*BaseResponse, error) {
+	if gDataTransportHandler != nil {
+		return &BaseResponse{}, gDataTransportHandler(req)
+	}
+	return &BaseResponse{}, nil
+}
+
 func RegOnDeviceControlHandler(fn DeviceControlHandler) {
 	gDeviceControlHandler = fn
 }
 
 func RegOnDeviceStatusHandler(fn DeviceStatusHandler) {
 	gDeviceStatusHandler = fn
+}
+
+func RegOnDataTransport(fn TransportDataHandler) {
+	gDataTransportHandler = fn
 }

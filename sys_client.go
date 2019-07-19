@@ -179,6 +179,7 @@ func doInit() {
 	gRpc.RegFuncWithName("ControlDevice", onDeviceControl)
 	gRpc.RegFuncWithName("DeliveryDeviceStatus", onDeviceStatusDelivery)
 	gRpc.RegFuncWithName("Ping", pong)
+	gRpc.RegFuncWithName("TransportData", onDataTransport)
 	gRpc.Start()
 	gApiClient = NewApiClientImpl()
 	fmt.Println(initSuccessMsg)
