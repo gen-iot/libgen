@@ -89,6 +89,7 @@ type DeviceStatusNotify struct {
 	Name      string                 `json:"name" validate:"required"`
 	Room      string                 `json:"room" validate:"required"`
 	Status    map[string]interface{} `json:"status"`
+	Online    bool                   `json:"online"`
 }
 
 type ControlDeviceResponse struct {
