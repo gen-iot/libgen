@@ -137,6 +137,9 @@ type RpcApiClient interface {
 	//remove devices
 	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
 
+	//remove all app devices
+	RemoveAppDevice(req *BaseRequest) (*BaseResponse, error)
+
 	//set online
 	SetDeviceOnline(req *SetOnlineRequest) (*BaseResponse, error)
 
