@@ -66,6 +66,12 @@ func (this *ApiClientImpl) RemoveDevices(req *RemoveDevicesRequest) (*BaseRespon
 	return res, err
 }
 
+func (this *ApiClientImpl) RemoveAppDevice(req *BaseRequest) (*BaseResponse, error) {
+	res := new(BaseResponse)
+	err := this.callWrapper("RemoveAppDevice", req, res)
+	return res, err
+}
+
 func (this *ApiClientImpl) UpdateDeviceInfo(req *UpdateDeviceInfoRequest) (*BaseResponse, error) {
 	res := new(BaseResponse)
 	err := this.callWrapper("UpdateDeviceInfo", req, res)

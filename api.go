@@ -89,6 +89,7 @@ type DeviceStatusNotify struct {
 	Name      string                 `json:"name" validate:"required"`
 	Room      string                 `json:"room" validate:"required"`
 	Status    map[string]interface{} `json:"status"`
+	Online    bool                   `json:"online"`
 }
 
 type ControlDeviceResponse struct {
@@ -135,6 +136,9 @@ type RpcApiClient interface {
 
 	//remove devices
 	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
+
+	//remove all app devices
+	RemoveAppDevice(req *BaseRequest) (*BaseResponse, error)
 
 	//set online
 	SetDeviceOnline(req *SetOnlineRequest) (*BaseResponse, error)
