@@ -100,7 +100,7 @@ func doHandshake(call rpcx.Callable) error {
 	}
 	//handshake
 	out := new(BaseResponse)
-	err := call.Call(ApiCallTimeout, "Handshake", &HandshakeRequest{
+	err := call.Call1(ApiCallTimeout, "Handshake", &HandshakeRequest{
 		PkgInfo:     gConfig.PkgInfo,
 		AccessToken: gConfig.AccessToken,
 	}, out)
