@@ -9,7 +9,7 @@ import (
 
 type DeviceControlHandler func(req *ControlDeviceRequest) (*ControlDeviceResponse, error)
 type DeviceStatusHandler func(notify *DeviceStatusNotify)
-type TransportDataHandler func(req *TransportDataRequest) error
+type TransportDataHandler func(req *TransportDataRequest) (map[string]interface{}, error)
 
 var gDeviceControlHandler DeviceControlHandler
 var gDeviceStatusHandler DeviceStatusHandler
@@ -36,11 +36,11 @@ func onDeviceStatusDelivery(ctx rpcx.Context, notify *DeviceStatusNotify) (*Base
 	return &BaseResponse{}, nil
 }
 
-func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (*BaseResponse, error) {
+func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (map[string]interface{}, error) {
 	if gDataTransportHandler != nil {
-		return &BaseResponse{}, gDataTransportHandler(req)
+		return gDataTransportHandler(req)
 	}
-	return &BaseResponse{}, nil
+	return map[string]interface{}{}, nil
 }
 
 func RegOnDeviceControlHandler(fn DeviceControlHandler) {
