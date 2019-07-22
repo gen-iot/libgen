@@ -39,7 +39,7 @@ func (this *ApiClientImpl) callWrapper(method string, req interface{}, res inter
 	if callable == nil {
 		return errConnectionClosed
 	}
-	return callable.Call(ApiCallTimeout, method, req, res)
+	return callable.Call1(ApiCallTimeout, method, req, res)
 }
 
 func (this *ApiClientImpl) DeclareDeviceModel(req *DeclareDeviceModelRequest) (*BaseResponse, error) {
