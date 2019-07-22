@@ -35,7 +35,7 @@ func TestApiClientImpl_Ping(t *testing.T) {
 		for {
 			log.Println("ping test count :", count)
 			res := new(Pong)
-			err = callable.Call(ApiCallTimeout, "Ping", &Ping{Time: time.Now(), Msg: fmt.Sprintf("client ping %d", count)}, res)
+			err = callable.Call5(ApiCallTimeout, "Ping", &Ping{Time: time.Now(), Msg: fmt.Sprintf("client ping %d", count)}, res)
 			std.AssertError(err, "ping error")
 			log.Println("ping res msg >> ", res.Msg)
 			time.Sleep(time.Millisecond * 1)
@@ -66,13 +66,13 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 	callable := rpc.NewConnCallable(int(sockFd), nil)
 	//handshake
 	out := new(BaseResponse)
-	err = callable.Call(time.Second*10, "Handshake", &HandshakeRequest{
+	err = callable.Call5(time.Second*10, "Handshake", &HandshakeRequest{
 		PkgInfo:     pkg,
 		AccessToken: "pujie123",
 	}, out)
 	std.AssertError(err, "Handshake failed")
 	rsp := new(ControlDeviceResponse)
-	err = callable.Call(time.Second*10, "ControlDevice", &ControlDeviceRequest{
+	err = callable.Call5(time.Second*10, "ControlDevice", &ControlDeviceRequest{
 		BaseRequest: BaseRequest{},
 		PkgInfo: PkgInfo{
 			Package: "com.pujie88.iot",

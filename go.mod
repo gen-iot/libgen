@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	gitee.com/gen-iot/liblpc v1.0.1
-	gitee.com/gen-iot/rpcx v1.0.1
+	gitee.com/gen-iot/rpcx v1.0.2
 	gitee.com/gen-iot/std v1.0.3
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/kr/pty v1.1.8 // indirect
