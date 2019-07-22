@@ -1,7 +1,7 @@
 package libgen
 
 import (
-	"gitee.com/SuzhenProjects/liblpc"
+	"gitee.com/gen-iot/liblpc"
 	"gitee.com/gen-iot/rpcx"
 	"gitee.com/gen-iot/rpcx/middleware"
 	"gitee.com/gen-iot/std"
