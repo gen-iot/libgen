@@ -4,7 +4,7 @@ package libgen
 
 import (
 	"errors"
-	"gitee.com/gen-iot/rpcx"
+	"github.com/gen-iot/rpcx"
 	"sync"
 )
 

@@ -2,9 +2,9 @@ package libgen
 
 import (
 	"fmt"
-	"gitee.com/SuzhenProjects/liblpc"
-	"gitee.com/gen-iot/rpcx"
-	"gitee.com/gen-iot/std"
+	"github.com/SuzhenProjects/liblpc"
+	"github.com/gen-iot/rpcx"
+	"github.com/gen-iot/std"
 	"log"
 	"syscall"
 	"testing"

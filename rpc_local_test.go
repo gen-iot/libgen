@@ -1,10 +1,10 @@
 package libgen
 
 import (
-	"gitee.com/gen-iot/liblpc"
-	"gitee.com/gen-iot/rpcx"
-	"gitee.com/gen-iot/rpcx/middleware"
-	"gitee.com/gen-iot/std"
+	"github.com/gen-iot/liblpc"
+	"github.com/gen-iot/rpcx"
+	"github.com/gen-iot/rpcx/middleware"
+	"github.com/gen-iot/std"
 	"log"
 	"os"
 	"runtime/pprof"
