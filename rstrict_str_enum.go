@@ -1,48 +1,51 @@
 package libgen
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 )
 
+// 如果include和exclude集合均为空,则该limiter效果等同于AnyStrEnum
 type StrEnumLimiter struct {
 	baseRestrict
-	Limits []string `json:"limits" validate:"gte=1"`
+	Includes []string `json:"includes"`
 }
 
-func NewStrEnumLimiter(limits []string) *StrEnumLimiter {
+func NewStrEnumLimiter(include ...string) *StrEnumLimiter {
 	return &StrEnumLimiter{
 		baseRestrict: baseRestrict{
 			RestrictType: StrEnum,
 		},
-		Limits: limits,
+		Includes: include,
 	}
 }
 
+func NewAnyStrLimiter() Restrict {
+	out := NewStrEnumLimiter()
+	out.RestrictType = StrAny
+	return out
+}
+
+func (this *StrEnumLimiter) Check(v string) error {
+	includeOk := len(this.Includes) == 0
+	for idx := range this.Includes {
+		if strings.Compare(v, this.Includes[idx]) == 0 {
+			includeOk = true
+			break
+		}
+	}
+	if includeOk {
+		return nil
+	}
+	return errOutOfEnum
+}
+
 func (this *StrEnumLimiter) Validate(v interface{}) error {
-	if len(this.Limits) == 0 {
-		return errOutOfEnum
+	if v == nil {
+		return errIllegalParams
 	}
 	s, err := any2Str(v)
 	if err != nil {
 		return err
 	}
-	for idx := range this.Limits {
-		if strings.Compare(this.Limits[idx], s) == 0 {
-			return nil
-		}
-	}
-	return errOutOfEnum
-}
-
-func any2Str(v interface{}) (string, error) {
-	switch s := v.(type) {
-	case *string:
-		return *s, nil
-	case string:
-		return s, nil
-	default:
-		return "", errors.New(fmt.Sprintf("%T cant convert to string", v))
-	}
+	return this.Check(s)
 }
