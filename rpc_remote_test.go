@@ -2,7 +2,7 @@ package libgen
 
 import (
 	"fmt"
-	"github.com/SuzhenProjects/liblpc"
+	"github.com/gen-iot/liblpc"
 	"github.com/gen-iot/rpcx"
 	"github.com/gen-iot/std"
 	"log"
@@ -80,7 +80,7 @@ func TestRemoteTcpRpcV2(t *testing.T) {
 	clientRsp := new(Pong)
 	for {
 		time.Sleep(5 * time.Millisecond)
-		err = callable.Call(time.Second, "Ping", &Ping{
+		err = callable.Call1(time.Second, "Ping", &Ping{
 			Time: time.Now(),
 			Msg:  "ping from server",
 		}, clientRsp)
