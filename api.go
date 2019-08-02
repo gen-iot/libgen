@@ -5,30 +5,20 @@ import (
 	"time"
 )
 
-type BaseRequest struct {
-}
-
-type BaseResponse struct {
-}
-
 type DeclareDeviceModelRequest struct {
-	BaseRequest
 	Model           *DeviceModel `json:"model" validate:"required"`
 	OverrideIfExist bool         `json:"overrideIfExist"`
 }
 
 type RemoveDeviceModelsRequest struct {
-	BaseRequest
 	ModelNames []string `json:"modelNames" validate:"required,gt=0"`
 }
 
 type RegisterDevicesRequest struct {
-	BaseRequest
 	Devices []*Device `json:"devices" validate:"required,gt=0"`
 }
 
 type RemoveDevicesRequest struct {
-	BaseRequest
 	Ids []string `json:"ids" validate:"required,gt=0"`
 }
 
@@ -46,14 +36,12 @@ type ReportDeviceStatusRequest struct {
 }
 
 type FetchDevicesRequest struct {
-	BaseRequest
 	PkgInfo *PkgInfo `json:"pkgInfo" validate:"omitempty"` // filter condition , if filed below not nil or empty will be as '&&' query condition
 	Id      *string  `json:"id"`                           // if id is not nil or empty will be as the only query condition
 	Room    *string  `json:"room"`
 }
 
 type FetchDevicesResponse struct {
-	BaseResponse
 	Package string    `json:"package"`
 	Devices []*Device `json:"devices"`
 }
@@ -64,20 +52,17 @@ type PkgInfo struct {
 }
 
 type HandshakeRequest struct {
-	BaseRequest
 	PkgInfo
 	AccessToken string `json:"accessToken"`
 }
 
 type ControlDeviceRequest struct {
-	BaseRequest
 	PkgInfo    PkgInfo                `json:"pkgInfo" validate:"required"`
 	Id         string                 `json:"id" validate:"required"`
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
 }
 
 type OnDeviceControlRequest struct {
-	BaseRequest
 	Id         string                 `json:"id" validate:"required"`
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
 }
@@ -92,12 +77,7 @@ type DeviceStatusNotify struct {
 	Online    bool                   `json:"online"`
 }
 
-type ControlDeviceResponse struct {
-	BaseResponse
-}
-
 type SetOnlineRequest struct {
-	BaseRequest
 	DeviceIds []string `json:"deviceIds" validate:"required"`
 	Online    bool     `json:"online"`
 }
@@ -130,35 +110,35 @@ type ListRoomsResponse struct {
 // client side
 type RpcApiClient interface {
 	//declare device models,only device model declared can be used in device
-	DeclareDeviceModel(req *DeclareDeviceModelRequest) (*BaseResponse, error)
+	DeclareDeviceModel(req *DeclareDeviceModelRequest) error
 
 	//remove device models
-	RemoveDeviceModels(req *RemoveDeviceModelsRequest) (*BaseResponse, error)
+	RemoveDeviceModels(req *RemoveDeviceModelsRequest) error
 
 	//register devices,
 	//each device's modelId must be filled with device model declared ahead
-	RegisterDevices(req *RegisterDevicesRequest) (*BaseResponse, error)
+	RegisterDevices(req *RegisterDevicesRequest) error
 
 	//remove devices
-	RemoveDevices(req *RemoveDevicesRequest) (*BaseResponse, error)
+	RemoveDevices(req *RemoveDevicesRequest) error
 
 	//remove all app devices
-	RemoveAppDevice(req *BaseRequest) (*BaseResponse, error)
+	RemoveAppDevice() error
 
 	//set online
-	SetDeviceOnline(req *SetOnlineRequest) (*BaseResponse, error)
+	SetDeviceOnline(req *SetOnlineRequest) error
 
 	//update device info,
-	UpdateDeviceInfo(req *UpdateDeviceInfoRequest) (*BaseResponse, error)
+	UpdateDeviceInfo(req *UpdateDeviceInfoRequest) error
 
 	//update device status,
-	ReportDeviceStatus(req *ReportDeviceStatusRequest) (*BaseResponse, error)
+	ReportDeviceStatus(req *ReportDeviceStatusRequest) error
 
 	//fetch devices
 	FetchDevices(req *FetchDevicesRequest) (*FetchDevicesResponse, error)
 
 	//control devices
-	ControlDevice(req *ControlDeviceRequest) (*BaseResponse, error)
+	ControlDevice(req *ControlDeviceRequest) error
 
 	SystemSummary() (*SystemSummaryResponse, error)
 

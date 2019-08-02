@@ -42,12 +42,14 @@ var defaultConfig = config{
 	},
 }
 
+//noinspection ALL
 func InitLocal(onConnected func()) {
 	initWithConfig(defaultConfig)
 	gOnConnected = onConnected
 	go callableWatcher()
 }
 
+//noinspection ALL
 func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string, onConnected func()) {
 	initWithConfig(config{
 		Type:        RemoteApp,
@@ -99,12 +101,10 @@ func doHandshake(call rpcx.Callable) error {
 		return nil
 	}
 	//handshake
-	out := new(BaseResponse)
-	err := call.Call5(ApiCallTimeout, "Handshake", &HandshakeRequest{
+	return call.Call1(ApiCallTimeout, "Handshake", &HandshakeRequest{
 		PkgInfo:     gConfig.PkgInfo,
 		AccessToken: gConfig.AccessToken,
-	}, out)
-	return err
+	})
 }
 
 var libgenExitSignal = make(chan bool)
@@ -159,6 +159,7 @@ func initWithConfig(config config) {
 	})
 }
 
+//noinspection ALL
 func Cleanup() {
 	std.CloseIgnoreErr(GetRawCallable())
 	std.CloseIgnoreErr(gRpc)
@@ -190,6 +191,7 @@ func GetRawCallable() rpcx.Callable {
 	return gApiClient.getCallable()
 }
 
+//noinspection ALL
 func GetApiClient() RpcApiClient {
 	std.Assert(gApiClient != nil, "please init first")
 	return gApiClient
