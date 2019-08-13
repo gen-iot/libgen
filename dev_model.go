@@ -20,10 +20,11 @@ type Device struct {
 	Id         string                 `json:"devId" validate:"required"`
 	Name       string                 `json:"name" validate:"required"`
 	Room       string                 `json:"room" validate:"required"`
-	Properties map[string]interface{} `json:"properties"`
-	MetaData   map[string]interface{} `json:"metadata"`
+	Properties map[string]interface{} `json:"properties,omitempty"`
+	MetaData   map[string]interface{} `json:"metadata,omitempty"`
 }
 
+//noinspection ALL
 func NewDeviceModel(pkg string, name string) *DeviceModel {
 	return &DeviceModel{
 		ModelInfo: ModelInfo{

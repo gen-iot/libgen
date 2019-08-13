@@ -66,6 +66,18 @@ func (this *ApiClientImpl) call3Wrapper(method string, res interface{}) error {
 	return callable.Call3(ApiCallTimeout, method, res)
 }
 
+func (this *ApiClientImpl) SystemSummary() (*SystemSummaryResponse, error) {
+	out := new(SystemSummaryResponse)
+	err := this.call3Wrapper("SystemSummary", out)
+	return out, err
+}
+
+func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {
+	res := new(Pong)
+	err := this.call5Wrapper("Ping", req, res)
+	return res, err
+}
+
 func (this *ApiClientImpl) DeclareDeviceModel(req *DeclareDeviceModelRequest) error {
 	return this.call1Wrapper("DeclareDeviceModel", req)
 }
@@ -98,30 +110,24 @@ func (this *ApiClientImpl) ReportDeviceStatus(req *ReportDeviceStatusRequest) er
 	return this.call1Wrapper("ReportDeviceStatus", req)
 }
 
-func (this *ApiClientImpl) FetchDevices(req *FetchDevicesRequest) (*FetchDevicesResponse, error) {
-	res := new(FetchDevicesResponse)
-	err := this.call5Wrapper("FetchDevices", req, res)
-	return res, err
-}
-
 func (this *ApiClientImpl) ControlDevice(req *ControlDeviceRequest) error {
 	return this.call1Wrapper("ControlDevice", req)
-}
-
-func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {
-	res := new(Pong)
-	err := this.call5Wrapper("Ping", req, res)
-	return res, err
-}
-
-func (this *ApiClientImpl) SystemSummary() (*SystemSummaryResponse, error) {
-	out := new(SystemSummaryResponse)
-	err := this.call3Wrapper("SystemSummary", out)
-	return out, err
 }
 
 func (this *ApiClientImpl) ListRooms() (*ListRoomsResponse, error) {
 	out := new(ListRoomsResponse)
 	err := this.call3Wrapper("ListRooms", out)
 	return out, err
+}
+
+func (this *ApiClientImpl) ListDeviceModels(req *ListDeviceModelRequest) (*ListDeviceModelResponse, error) {
+	out := new(ListDeviceModelResponse)
+	err := this.call5Wrapper("ListDeviceModels", req, out)
+	return out, err
+}
+
+func (this *ApiClientImpl) ListDevicesByRoom(req *ListDevicesByRoomRequest) (*ListDevicesByRoomResult, error) {
+	res := new(ListDevicesByRoomResult)
+	err := this.call5Wrapper("ListDevicesByRoom", req, res)
+	return res, err
 }
