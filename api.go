@@ -20,7 +20,7 @@ type RemoveDeviceModelsRequest struct {
 }
 
 type RegisterDevicesRequest struct {
-	Devices []*Device `json:"devices" validate:"required,gt=0"`
+	Devices []*Device `json:"devices" validate:"required,dive"`
 }
 
 type RemoveDevicesRequest struct {
@@ -103,7 +103,7 @@ type DeviceModelRuntime struct {
 }
 
 type ListDeviceModelRequest struct {
-	Includes []*ModelInfo `json:"includes" validate:"omitempty,required"`
+	Includes []*ModelInfo `json:"includes" validate:"omitempty,required,dive"`
 }
 type ListDeviceModelResponse struct {
 	Models []*DeviceModelRuntime `json:"models"`
@@ -111,7 +111,7 @@ type ListDeviceModelResponse struct {
 
 type ListDevicesByRoomRequest struct {
 	Rooms    []string     `json:"rooms" validate:"gt=0"`
-	Includes []*ModelInfo `json:"includes" validate:"omitempty,required"`
+	Includes []*ModelInfo `json:"includes" validate:"omitempty,required,dive"`
 }
 
 type RoomDeviceResultItem struct {
