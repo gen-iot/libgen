@@ -23,6 +23,7 @@ type testRsp struct {
 	Sum int
 }
 
+//noinspection ALL
 func sum(ctx rpcx.Context, req *testReq) (*testRsp, error) {
 	log.Println("req delta time -> ", time.Now().Sub(req.Tm))
 	//headers := ctx.Headers(rpcx.In)
@@ -74,8 +75,7 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 		//	v := fmt.Sprintf("val-%d", i)
 		//	header[k] = v
 		//}
-		err = callable.CallWithHeader(time.Second*5, "sum",
-			nil,
+		err = callable.Call5(time.Second*5, "sum",
 			&testReq{
 				A:  10,
 				B:  100,

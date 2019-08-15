@@ -65,15 +65,12 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 	rpc.Start()
 	callable := rpc.NewConnCallable(int(sockFd), nil)
 	//handshake
-	out := new(BaseResponse)
-	err = callable.Call5(time.Second*10, "Handshake", &HandshakeRequest{
+	err = callable.Call1(time.Second*10, "Handshake", &HandshakeRequest{
 		PkgInfo:     pkg,
 		AccessToken: "pujie123",
-	}, out)
+	})
 	std.AssertError(err, "Handshake failed")
-	rsp := new(ControlDeviceResponse)
-	err = callable.Call5(time.Second*10, "ControlDevice", &ControlDeviceRequest{
-		BaseRequest: BaseRequest{},
+	err = callable.Call1(time.Second*10, "ControlDevice", &ControlDeviceRequest{
 		PkgInfo: PkgInfo{
 			Package: "com.pujie88.iot",
 			Name:    "HotelRemote",
@@ -82,7 +79,7 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 		CtrlParams: map[string]interface{}{
 			"power": 1,
 		},
-	}, rsp)
+	})
 	std.AssertError(err, "control failed")
 }
 

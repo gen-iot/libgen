@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+//noinspection ALL
 func ____Ping(ctx rpcx.Context, req *Ping) (*Pong, error) {
 	fmt.Println("recv ping ->", req, ", delta is = ", time.Now().Sub(req.Time))
 	return &Pong{
@@ -80,7 +81,7 @@ func TestRemoteTcpRpcV2(t *testing.T) {
 	clientRsp := new(Pong)
 	for {
 		time.Sleep(5 * time.Millisecond)
-		err = callable.Call1(time.Second, "Ping", &Ping{
+		err = callable.Call5(time.Second, "Ping", &Ping{
 			Time: time.Now(),
 			Msg:  "ping from server",
 		}, clientRsp)
