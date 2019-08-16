@@ -20,7 +20,7 @@ type RemoveDeviceModelsRequest struct {
 }
 
 type RegisterDevicesRequest struct {
-	Devices []*Device `json:"devices" validate:"required,dive"`
+	Devices []*Device `json:"devices" validate:"required,gt=0,dive,required"`
 }
 
 type RemoveDevicesRequest struct {
@@ -43,12 +43,12 @@ type ReportDeviceStatusRequest struct {
 type ControlDeviceRequest struct {
 	PkgInfo    PkgInfo                `json:"pkgInfo" validate:"required"`
 	Id         string                 `json:"id" validate:"required"`
-	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
+	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required,gt=0"`
 }
 
 type OnDeviceControlRequest struct {
 	Id         string                 `json:"id" validate:"required"`
-	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"gt=0"`
+	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required,gt=0"`
 }
 
 type DeviceStatusInfo struct {
@@ -103,7 +103,7 @@ type DeviceModelRuntime struct {
 }
 
 type ListDeviceModelRequest struct {
-	Includes []*ModelInfo `json:"includes" validate:"omitempty,required,dive"`
+	Includes []*ModelInfo `json:"includes" validate:"omitempty,gt=0,dive,required"`
 }
 type ListDeviceModelResponse struct {
 	Models []*DeviceModelRuntime `json:"models"`
@@ -111,7 +111,7 @@ type ListDeviceModelResponse struct {
 
 type ListDevicesByRoomRequest struct {
 	Rooms    []string     `json:"rooms" validate:"gt=0"`
-	Includes []*ModelInfo `json:"includes" validate:"omitempty,required,dive"`
+	Includes []*ModelInfo `json:"includes" validate:"omitempty,gt=0,dive,required"`
 }
 
 type RoomDeviceResultItem struct {
@@ -121,7 +121,7 @@ type RoomDeviceResultItem struct {
 }
 
 type ListDevicesByRoomResult struct {
-	RoomDevices []*RoomDeviceResultItem `json:"roomDevices"`
+	RoomDevices []*RoomDeviceResultItem `json:"roomDevices" validate:"omitempty,gt=0,dive,required"`
 }
 
 // client side
