@@ -59,8 +59,10 @@ func any2Int32(v interface{}) (int32, error) {
 		out = int32(*num)
 	case *float64:
 		out = int32(*num)
+	default:
+		return 0, errors.New(fmt.Sprintf("cant convert %T to int32", v))
 	}
-	return out, errors.New(fmt.Sprintf("cant convert %T to int32", v))
+	return out, nil
 }
 
 func any2Str(v interface{}) (string, error) {
