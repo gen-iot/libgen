@@ -3,15 +3,33 @@ package libgen
 import (
 	"errors"
 	"fmt"
-	"strconv"
 )
 
 func any2Int32(v interface{}) (int32, error) {
-	i, err := strconv.Atoi(fmt.Sprintf("%v", v))
-	if err != nil {
-		return 0, err
+	out := int32(0)
+	switch num := v.(type) {
+	case int:
+		out = int32(num)
+	case int32:
+		out = num
+	case int64:
+		out = int32(num)
+	case float32:
+		out = int32(num)
+	case float64:
+		out = int32(num)
+	case *int:
+		out = int32(*num)
+	case *int32:
+		out = *num
+	case *int64:
+		out = int32(*num)
+	case *float32:
+		out = int32(*num)
+	case *float64:
+		out = int32(*num)
 	}
-	return int32(i), nil
+	return out, errors.New(fmt.Sprintf("cant convert %T to int32", v))
 }
 
 func any2Str(v interface{}) (string, error) {
