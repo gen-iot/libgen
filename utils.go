@@ -8,6 +8,33 @@ import (
 func any2Int32(v interface{}) (int32, error) {
 	out := int32(0)
 	switch num := v.(type) {
+
+	//
+	case uint8:
+		out = int32(num)
+	case uint16:
+		out = int32(num)
+	case uint:
+		out = int32(num)
+	case uint32:
+		out = int32(num)
+	case uint64:
+		out = int32(num)
+	case *uint8:
+		out = int32(*num)
+	case *uint16:
+		out = int32(*num)
+	case *uint:
+		out = int32(*num)
+	case *uint32:
+		out = int32(*num)
+	case *uint64:
+		out = int32(*num)
+	//
+	case int8:
+		out = int32(num)
+	case int16:
+		out = int32(num)
 	case int:
 		out = int32(num)
 	case int32:
@@ -18,6 +45,10 @@ func any2Int32(v interface{}) (int32, error) {
 		out = int32(num)
 	case float64:
 		out = int32(num)
+	case *int8:
+		out = int32(*num)
+	case *int16:
+		out = int32(*num)
 	case *int:
 		out = int32(*num)
 	case *int32:
