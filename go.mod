@@ -1,4 +1,4 @@
-module github.com/gen-iot/libgen
+module github.com/gen-iot/libgen/v2
 
 go 1.12
 
