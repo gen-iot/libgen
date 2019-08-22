@@ -5,7 +5,7 @@ type ModelInfo = PkgInfo
 type DeviceModel struct {
 	ModelInfo
 	StatusProperties  []*StatusProperty  `json:"statusProperties"`
-	ControlProperties []*ControlProperty `json:"controlGroups"`
+	CommandProperties []*CommandProperty `json:"commandProperties"`
 }
 
 type Device struct {
@@ -25,7 +25,7 @@ func NewDeviceModel(pkg string, name string) *DeviceModel {
 			Name:    name,
 		},
 		StatusProperties:  make([]*StatusProperty, 0),
-		ControlProperties: make([]*ControlProperty, 0),
+		CommandProperties: make([]*CommandProperty, 0),
 	}
 }
 

@@ -4,18 +4,18 @@ type StatusProperty struct {
 	Restrict Restrict `json:"restrict" validate:"omitempty,required"`
 }
 
-type ControlProperty struct {
-	CtrlFuncName   string     `json:"ctrlFuncName"`
+type CommandProperty struct {
+	Command        string     `json:"command"`
 	ParamRestricts []Restrict `json:"restricts" validate:"omitempty,dive,required"`
 }
 
-func NewControlProperty(funcName string, params ...Restrict) *ControlProperty {
-	return &ControlProperty{
-		CtrlFuncName:   funcName,
+func NewCommandProperty(funcName string, params ...Restrict) *CommandProperty {
+	return &CommandProperty{
+		Command:        funcName,
 		ParamRestricts: params,
 	}
 }
 
-func (this *ControlProperty) AddParamRestrict(r Restrict) {
+func (this *CommandProperty) AddParamRestrict(r Restrict) {
 	this.ParamRestricts = append(this.ParamRestricts, r)
 }
