@@ -99,7 +99,7 @@ type ListRoomsResponse struct {
 
 type DeviceModelRuntime struct {
 	ModelInfo
-	StatusProperties  map[string]*StatusProperty  `json:"statusProperties"`
+	StatusProperties  map[string]Restrict         `json:"statusProperties"`
 	CommandProperties map[string]*CommandProperty `json:"commandProperties"`
 }
 

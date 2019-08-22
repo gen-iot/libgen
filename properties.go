@@ -1,9 +1,5 @@
 package libgen
 
-type StatusProperty struct {
-	Restrict Restrict `json:"restrict" validate:"omitempty,required"`
-}
-
 type CommandProperty struct {
 	Command        string     `json:"command"`
 	ParamRestricts []Restrict `json:"restricts" validate:"omitempty,dive,required"`

@@ -4,8 +4,8 @@ type ModelInfo = PkgInfo
 
 type DeviceModel struct {
 	ModelInfo
-	StatusProperties  []*StatusProperty  `json:"statusProperties"`
-	CommandProperties []*CommandProperty `json:"commandProperties"`
+	StatusProperties  []Restrict         `json:"statusProperties" validate:"omitempty,dive,required"`
+	CommandProperties []*CommandProperty `json:"commandProperties" validate:"omitempty,dive,required"`
 }
 
 type Device struct {
@@ -24,14 +24,11 @@ func NewDeviceModel(pkg string, name string) *DeviceModel {
 			Package: pkg,
 			Name:    name,
 		},
-		StatusProperties:  make([]*StatusProperty, 0),
+		StatusProperties:  make([]Restrict, 0),
 		CommandProperties: make([]*CommandProperty, 0),
 	}
 }
 
 func (this *DeviceModel) AddModelProperty(restrict Restrict) {
-	p := &StatusProperty{
-		Restrict: restrict,
-	}
-	this.StatusProperties = append(this.StatusProperties, p)
+	this.StatusProperties = append(this.StatusProperties, restrict)
 }
