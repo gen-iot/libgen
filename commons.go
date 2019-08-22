@@ -1,7 +1,6 @@
 package libgen
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -52,23 +51,3 @@ const (
 	Status  PropertyType = "status"
 	Command PropertyType = "command"
 )
-
-type JsonObject map[string]interface{}
-
-func NewJsonObjectFromBytes(data []byte) (JsonObject, error) {
-	out := make(JsonObject)
-	err := json.Unmarshal(data, &out)
-	return out, err
-}
-
-func (this JsonObject) GetIntOr(key string, dft int) int {
-	i, ok := this[key]
-	if !ok {
-		return dft
-	}
-	i2, ok := i.(int)
-	if !ok {
-		return dft
-	}
-	return i2
-}
