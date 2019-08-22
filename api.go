@@ -47,6 +47,12 @@ type ControlDeviceRequest struct {
 	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required,gt=0"`
 }
 
+type OnDeviceControlRequest struct {
+	Id         string                 `json:"id" validate:"required"`
+	CtrlFunc   string                 `json:"ctrlFunc" validate:"required"`
+	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required,gt=0"`
+}
+
 type DeviceStatusInfo struct {
 	PkgInfo   PkgInfo                `json:"pkgInfo"`
 	ModelInfo *ModelInfo             `json:"modelInfo"`
