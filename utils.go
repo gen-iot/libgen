@@ -5,10 +5,20 @@ import (
 	"fmt"
 )
 
+func AppType2Str(t AppType) string {
+	switch t {
+	case LocalApp:
+		return "LOCAL"
+	case RemoteApp:
+		return "REMOTE"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 func any2Int32(v interface{}) (int32, error) {
 	out := int32(0)
 	switch num := v.(type) {
-
 	//
 	case uint8:
 		out = int32(num)

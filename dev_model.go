@@ -2,17 +2,12 @@ package libgen
 
 import "github.com/gen-iot/std"
 
-type ModelProperty struct {
-	Type     PropertyType `json:"type" validate:"required"`
-	Name     string       `json:"name" validate:"required"`
-	Restrict Restrict     `json:"restrict" validate:"required"`
-}
-
-type ModelInfo PkgInfo
+type ModelInfo = PkgInfo
 
 type DeviceModel struct {
 	ModelInfo
-	ModelProperties []*ModelProperty `json:"properties"`
+	StatusProperties  []*StatusProperty  `json:"statusProperties"`
+	ControlProperties []*ControlProperty `json:"controlGroups"`
 }
 
 type Device struct {
@@ -31,16 +26,16 @@ func NewDeviceModel(pkg string, name string) *DeviceModel {
 			Package: pkg,
 			Name:    name,
 		},
-		ModelProperties: make([]*ModelProperty, 0),
+		StatusProperties:  make([]*StatusProperty, 0),
+		ControlProperties: make([]*ControlProperty, 0),
 	}
 }
 
-func (this *DeviceModel) AddModelProperty(tp PropertyType, name string, restrict Restrict) {
+func (this *DeviceModel) AddModelProperty(name string, restrict Restrict) {
 	std.Assert(len(name) != 0, "empty name")
-	p := &ModelProperty{
-		Type:     tp,
+	p := &StatusProperty{
 		Name:     name,
 		Restrict: restrict,
 	}
-	this.ModelProperties = append(this.ModelProperties, p)
+	this.StatusProperties = append(this.StatusProperties, p)
 }
