@@ -177,7 +177,7 @@ func doInit() {
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
-	gRpc.RegFuncWithName("ControlDevice", onDeviceControl)
+	gRpc.RegFuncWithName("CommandDevice", onDeviceControl)
 	gRpc.RegFuncWithName("DeliveryDeviceStatus", onDeviceStatusDelivery)
 	gRpc.RegFuncWithName("Ping", pong)
 	gRpc.RegFuncWithName("TransportData", onDataTransport)
