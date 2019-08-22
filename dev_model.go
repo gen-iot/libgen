@@ -1,7 +1,5 @@
 package libgen
 
-import "github.com/gen-iot/std"
-
 type ModelInfo = PkgInfo
 
 type DeviceModel struct {
@@ -31,10 +29,8 @@ func NewDeviceModel(pkg string, name string) *DeviceModel {
 	}
 }
 
-func (this *DeviceModel) AddModelProperty(name string, restrict Restrict) {
-	std.Assert(len(name) != 0, "empty name")
+func (this *DeviceModel) AddModelProperty(restrict Restrict) {
 	p := &StatusProperty{
-		Name:     name,
 		Restrict: restrict,
 	}
 	this.StatusProperties = append(this.StatusProperties, p)

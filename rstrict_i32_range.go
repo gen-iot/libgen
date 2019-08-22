@@ -8,10 +8,12 @@ type I32RangeLimiter struct {
 	Exclude  []int32 `json:"exclude"`  // 不允许出现的值,即使在[gte,lte]范围之内
 }
 
-func NewI32RangeLimiter(gte, lte int32, addition []int32, exclude []int32) *I32RangeLimiter {
+func NewI32RangeLimiter(name string, required bool, gte, lte int32, addition []int32, exclude []int32) *I32RangeLimiter {
 	return &I32RangeLimiter{
 		baseRestrict: baseRestrict{
+			RestrictName: name,
 			RestrictType: I32Range,
+			Required:     required,
 		},
 		Gte:      gte,
 		Lte:      lte,

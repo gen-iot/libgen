@@ -10,17 +10,19 @@ type StrEnumLimiter struct {
 	Includes []string `json:"includes"`
 }
 
-func NewStrEnumLimiter(include ...string) *StrEnumLimiter {
+func NewStrEnumLimiter(name string, required bool, include ...string) *StrEnumLimiter {
 	return &StrEnumLimiter{
 		baseRestrict: baseRestrict{
+			RestrictName: name,
 			RestrictType: StrEnum,
+			Required:     required,
 		},
 		Includes: include,
 	}
 }
 
-func NewAnyStrLimiter() Restrict {
-	out := NewStrEnumLimiter()
+func NewAnyStrLimiter(name string, required bool) Restrict {
+	out := NewStrEnumLimiter(name, required)
 	out.RestrictType = StrAny
 	return out
 }

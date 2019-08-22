@@ -33,5 +33,4 @@ const (
 	StrEnum  RestrictType = 1003
 	StrAny   RestrictType = 1004
 	Any      RestrictType = 2000
-	Group    RestrictType = 2001
 )

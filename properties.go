@@ -1,18 +1,17 @@
 package libgen
 
 type StatusProperty struct {
-	Name     string   `json:"name" validate:"required"`
-	Restrict Restrict `json:"restrict" validate:"required"`
+	Restrict Restrict `json:"restrict" validate:"omitempty,required"`
 }
 
 type ControlProperty struct {
-	Name           string     `json:"name" validate:"required"`
+	CtrlFuncName   string     `json:"ctrlFuncName"`
 	ParamRestricts []Restrict `json:"restricts" validate:"omitempty,dive,required"`
 }
 
-func NewRestrictGroup(name string, params ...Restrict) *ControlProperty {
+func NewControlProperty(funcName string, params ...Restrict) *ControlProperty {
 	return &ControlProperty{
-		Name:           name,
+		CtrlFuncName:   funcName,
 		ParamRestricts: params,
 	}
 }

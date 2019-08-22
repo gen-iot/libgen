@@ -5,17 +5,19 @@ type I32EnumLimiter struct {
 	Includes []int32 `json:"includes"`
 }
 
-func NewI32EnumLimiter(include ...int32) *I32EnumLimiter {
+func NewI32EnumLimiter(name string, required bool, include ...int32) *I32EnumLimiter {
 	return &I32EnumLimiter{
 		baseRestrict: baseRestrict{
+			RestrictName: name,
 			RestrictType: I32Enum,
+			Required:     required,
 		},
 		Includes: include,
 	}
 }
 
-func NewAnyI32Limiter() Restrict {
-	o := NewI32EnumLimiter()
+func NewAnyI32Limiter(name string, required bool) Restrict {
+	o := NewI32EnumLimiter(name, required)
 	o.RestrictType = I32Any
 	return o
 }

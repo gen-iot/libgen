@@ -1,14 +1,20 @@
 package libgen
 
 type Restrict interface {
+	Name() string
 	Type() RestrictType
 	Validate(v interface{}) error
 	IsRequired() bool
 }
 
 type baseRestrict struct {
-	RestrictType RestrictType `json:"type"`
+	RestrictName string       `json:"name" validate:"required"`
+	RestrictType RestrictType `json:"type" validate:"required"`
 	Required     bool         `json:"required"`
+}
+
+func (this *baseRestrict) Name() string {
+	return this.RestrictName
 }
 
 func (this *baseRestrict) Type() RestrictType {
