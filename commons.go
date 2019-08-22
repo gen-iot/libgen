@@ -48,6 +48,7 @@ const (
 type PropertyType string
 
 const (
-	Status  PropertyType = "status"
-	Command PropertyType = "command"
+	Status   PropertyType = "status"
+	Command  PropertyType = "command"
+	Callback PropertyType = "callback"
 )
