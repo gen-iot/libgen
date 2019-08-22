@@ -70,13 +70,13 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 		AccessToken: "pujie123",
 	})
 	std.AssertError(err, "Handshake failed")
-	err = callable.Call1(time.Second*10, "ControlDevice", &ControlDeviceRequest{
+	err = callable.Call1(time.Second*10, "ControlDevice", &CommandDeviceRequest{
 		PkgInfo: PkgInfo{
 			Package: "com.pujie88.iot",
 			Name:    "HotelRemote",
 		},
 		Id: "014100000000936A_0_0_67",
-		CtrlParams: map[string]interface{}{
+		Params: map[string]interface{}{
 			"power": 1,
 		},
 	})

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type DeviceControlHandler func(req *ControlDeviceRequest) error
+type DeviceControlHandler func(req *OnDeviceCommandRequest) error
 type DeviceStatusHandler func(notify *DeviceStatusInfo)
 type TransportDataHandler func(req *TransportDataRequest) (map[string]interface{}, error)
 
@@ -24,7 +24,7 @@ func pong(ctx rpcx.Context, req *Ping) (*Pong, error) {
 var errAppNotImpControl = errors.New("app not support control device yet")
 
 //noinspection ALL
-func onDeviceControl(ctx rpcx.Context, req *ControlDeviceRequest) error {
+func onDeviceControl(ctx rpcx.Context, req *OnDeviceCommandRequest) error {
 	if gDeviceControlHandler != nil {
 		return gDeviceControlHandler(req)
 	}

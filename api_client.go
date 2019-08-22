@@ -110,7 +110,7 @@ func (this *ApiClientImpl) ReportDeviceStatus(req *ReportDeviceStatusRequest) er
 	return this.call1Wrapper("ReportDeviceStatus", req)
 }
 
-func (this *ApiClientImpl) ControlDevice(req *ControlDeviceRequest) error {
+func (this *ApiClientImpl) ControlDevice(req *CommandDeviceRequest) error {
 	return this.call1Wrapper("ControlDevice", req)
 }
 

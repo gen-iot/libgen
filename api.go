@@ -40,17 +40,17 @@ type ReportDeviceStatusRequest struct {
 	Online     bool                   `json:"online"`
 }
 
-type ControlDeviceRequest struct {
-	PkgInfo    PkgInfo                `json:"pkgInfo" validate:"required"`
-	Id         string                 `json:"id" validate:"required"`
-	CtrlFunc   string                 `json:"ctrlFunc"`
-	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required,gt=0"`
+type CommandDeviceRequest struct {
+	PkgInfo PkgInfo                `json:"pkgInfo" validate:"required"`
+	Id      string                 `json:"id" validate:"required"`
+	Command string                 `json:"command" validate:"required"`
+	Params  map[string]interface{} `json:"params" validate:"required,gt=0"`
 }
 
-type OnDeviceControlRequest struct {
-	Id         string                 `json:"id" validate:"required"`
-	CtrlFunc   string                 `json:"ctrlFunc" validate:"required"`
-	CtrlParams map[string]interface{} `json:"ctrlParams" validate:"required,gt=0"`
+type OnDeviceCommandRequest struct {
+	Id      string                 `json:"id" validate:"required"`
+	Command string                 `json:"command" validate:"required"`
+	Params  map[string]interface{} `json:"params" validate:"required,gt=0"`
 }
 
 type DeviceStatusInfo struct {
@@ -157,7 +157,7 @@ type RpcApiClient interface {
 	ReportDeviceStatus(req *ReportDeviceStatusRequest) error
 
 	//control devices
-	ControlDevice(req *ControlDeviceRequest) error
+	ControlDevice(req *CommandDeviceRequest) error
 
 	SystemSummary() (*SystemSummaryResponse, error)
 
