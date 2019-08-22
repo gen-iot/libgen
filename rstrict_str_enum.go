@@ -21,7 +21,9 @@ func NewStrEnumLimiter(name string, required bool, include ...string) *StrEnumLi
 	}
 }
 
-func NewAnyStrLimiter(name string, required bool) Restrict {
+type AnyStrLimiter = StrEnumLimiter
+
+func NewAnyStrLimiter(name string, required bool) *AnyStrLimiter {
 	out := NewStrEnumLimiter(name, required)
 	out.RestrictType = StrAny
 	return out

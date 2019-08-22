@@ -16,7 +16,9 @@ func NewI32EnumLimiter(name string, required bool, include ...int32) *I32EnumLim
 	}
 }
 
-func NewAnyI32Limiter(name string, required bool) Restrict {
+type AnyI32Limiter = I32EnumLimiter
+
+func NewAnyI32Limiter(name string, required bool) *AnyI32Limiter {
 	o := NewI32EnumLimiter(name, required)
 	o.RestrictType = I32Any
 	return o
