@@ -43,14 +43,14 @@ type ReportDeviceStatusRequest struct {
 type CommandDeviceRequest struct {
 	PkgInfo PkgInfo                `json:"pkgInfo" validate:"required"`
 	Id      string                 `json:"id" validate:"required"`
-	Command string                 `json:"command" validate:"required"`
-	Params  map[string]interface{} `json:"params" validate:"required,gt=0"`
+	Command string                 `json:"command"`
+	Params  map[string]interface{} `json:"params"`
 }
 
 type OnDeviceCommandRequest struct {
 	Id      string                 `json:"id" validate:"required"`
 	Command string                 `json:"command" validate:"required"`
-	Params  map[string]interface{} `json:"params" validate:"required,gt=0"`
+	Params  map[string]interface{} `json:"params"`
 }
 
 type DeviceStatusInfo struct {
