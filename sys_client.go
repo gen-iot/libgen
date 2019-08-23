@@ -166,6 +166,14 @@ func Cleanup() {
 	gApiClient = nil
 }
 
+const (
+	// supported func list
+	kCommandDevice        = "CommandDevice"
+	kDeliveryDeviceStatus = "DeliveryDeviceStatus"
+	kPing                 = "Ping"
+	kTransportData        = "TransportData"
+)
+
 func doInit() {
 	fmt.Printf("LIBGEN CLIENT INIT , MODE=%s\n", AppType2Str(gConfig.Type))
 	initSuccessMsg := "LIBGEN CLIENT INIT SUCCESS"
@@ -177,10 +185,11 @@ func doInit() {
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
 	gRpc = rpc
-	gRpc.RegFuncWithName("CommandDevice", onDeviceControl)
-	gRpc.RegFuncWithName("DeliveryDeviceStatus", onDeviceStatusDelivery)
-	gRpc.RegFuncWithName("Ping", pong)
-	gRpc.RegFuncWithName("TransportData", onDataTransport)
+
+	gRpc.RegFuncWithName(kCommandDevice, onDeviceControl)
+	gRpc.RegFuncWithName(kDeliveryDeviceStatus, onDeviceStatusDelivery)
+	gRpc.RegFuncWithName(kPing, pong)
+	gRpc.RegFuncWithName(kTransportData, onDataTransport)
 	gRpc.Start()
 	gApiClient = NewApiClientImpl()
 	fmt.Println(initSuccessMsg)
