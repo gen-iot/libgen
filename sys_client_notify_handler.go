@@ -11,7 +11,7 @@ type DeviceControlHandler func(req *OnDeviceCommandRequest) error
 type DeviceStatusHandler func(notify *DeviceStatusInfo)
 type TransportDataHandler func(req *TransportDataRequest) (map[string]interface{}, error)
 
-var gDeviceControlHandler DeviceControlHandler
+var gDeviceCommandHandler DeviceControlHandler
 var gDeviceStatusHandler DeviceStatusHandler
 var gDataTransportHandler TransportDataHandler
 
@@ -25,8 +25,8 @@ var errAppNotImpControl = errors.New("app not support control device yet")
 
 //noinspection ALL
 func onDeviceControl(ctx rpcx.Context, req *OnDeviceCommandRequest) error {
-	if gDeviceControlHandler != nil {
-		return gDeviceControlHandler(req)
+	if gDeviceCommandHandler != nil {
+		return gDeviceCommandHandler(req)
 	}
 	return errAppNotImpControl
 }
@@ -48,8 +48,8 @@ func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (map[string]in
 }
 
 //noinspection ALL
-func RegOnDeviceControlHandler(fn DeviceControlHandler) {
-	gDeviceControlHandler = fn
+func RegOnDeviceCommandHandler(fn DeviceControlHandler) {
+	gDeviceCommandHandler = fn
 }
 
 //noinspection ALL
