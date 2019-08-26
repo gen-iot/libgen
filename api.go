@@ -126,6 +126,13 @@ type ListDevicesByRoomResult struct {
 	RoomDevices []*RoomDeviceResultItem `json:"roomDevices" validate:"omitempty,gt=0,dive,required"`
 }
 
+type FindDeviceByIdRequest struct {
+	PkgInfo  PkgInfo `json:"pkgInfo" validate:"required"`
+	DeviceId string  `json:"deviceId" validate:"dive,required"`
+}
+
+type FindDeviceByIdResponse = DeviceStatusInfo
+
 // client side
 type RpcApiClient interface {
 	//ping
@@ -166,4 +173,6 @@ type RpcApiClient interface {
 	ListDeviceModels(req *ListDeviceModelRequest) (*ListDeviceModelResponse, error)
 
 	ListDevicesByRoom(req *ListDevicesByRoomRequest) (*ListDevicesByRoomResult, error)
+
+	FindDeviceById(req *FindDeviceByIdRequest) (*FindDeviceByIdResponse, error)
 }

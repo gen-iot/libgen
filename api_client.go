@@ -131,3 +131,9 @@ func (this *ApiClientImpl) ListDevicesByRoom(req *ListDevicesByRoomRequest) (*Li
 	err := this.call5Wrapper("ListDevicesByRoom", req, res)
 	return res, err
 }
+
+func (this *ApiClientImpl) FindDeviceById(req *FindDeviceByIdRequest) (*FindDeviceByIdResponse, error) {
+	res := new(FindDeviceByIdResponse)
+	err := this.call5Wrapper("FindDeviceById", req, res)
+	return res, err
+}
