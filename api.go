@@ -11,8 +11,10 @@ type PkgInfo struct {
 }
 
 type DeclareDeviceModelRequest struct {
-	Model           *DeviceModel `json:"model" validate:"required"`
-	OverrideIfExist bool         `json:"overrideIfExist"`
+	ModelName         string             `json:"modelName" validate:"required"`
+	StatusProperties  []Restrict         `json:"statusProperties" validate:"omitempty,dive,required"`
+	CommandProperties []*CommandProperty `json:"commandProperties" validate:"omitempty,dive,required"`
+	OverrideIfExist   bool               `json:"overrideIfExist"`
 }
 
 type RemoveDeviceModelsRequest struct {
@@ -116,14 +118,8 @@ type ListDevicesByRoomRequest struct {
 	Includes []*ModelInfo `json:"includes" validate:"omitempty,gt=0,dive,required"`
 }
 
-type RoomDeviceResultItem struct {
-	Room        string              `json:"room"`
-	RoomDevices []*DeviceStatusInfo `json:"devices"`
-	Error       string              `json:"error,omitempty"`
-}
-
 type ListDevicesByRoomResult struct {
-	RoomDevices []*RoomDeviceResultItem `json:"roomDevices" validate:"omitempty,gt=0,dive,required"`
+	RoomDevices []*DeviceStatusInfo `json:"roomDevices" validate:"omitempty,gt=0,dive,required"`
 }
 
 type FindDeviceByIdRequest struct {
