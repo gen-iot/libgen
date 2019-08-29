@@ -39,15 +39,15 @@ type Device struct {
 	Id        string         `json:"id" validate:"required"`
 	Name      string         `json:"name" validate:"required"`
 	Room      string         `json:"room" validate:"required"`
+	Category  string         `json:"category"`
 	Status    std.JsonObject `json:"status,omitempty"`
 	MetaData  std.JsonObject `json:"metadata,omitempty"`
 }
 
 type DeviceStatusInfo struct {
 	*Device
-	PkgInfo  *PkgInfo `json:"pkgInfo"`
-	Online   bool     `json:"online"`
-	Category string   `json:"category"`
+	PkgInfo *PkgInfo `json:"pkgInfo"`
+	Online  bool     `json:"online"`
 }
 
 type Ping struct {
