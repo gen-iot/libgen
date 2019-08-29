@@ -3,13 +3,14 @@ package libgen
 import (
 	"errors"
 	"github.com/gen-iot/rpcx"
+	"github.com/gen-iot/std"
 	"log"
 	"time"
 )
 
-type DeviceCommandHandler func(req *OnDeviceCommandRequest) error
+type DeviceCommandHandler func(req *OnDeviceCommandRequest) (std.JsonObject, error)
 type DeviceStatusHandler func(notify *DeviceStatusInfo)
-type TransportDataHandler func(req *TransportDataRequest) (map[string]interface{}, error)
+type TransportDataHandler func(req *TransportDataRequest) (std.JsonObject, error)
 
 var gDeviceCommandHandler DeviceCommandHandler
 var gDeviceStatusHandler DeviceStatusHandler
@@ -24,11 +25,11 @@ func pong(ctx rpcx.Context, req *Ping) (*Pong, error) {
 var errAppNotImpControl = errors.New("app not support control device yet")
 
 //noinspection ALL
-func onDeviceControl(ctx rpcx.Context, req *OnDeviceCommandRequest) error {
+func onDeviceCommand(ctx rpcx.Context, req *OnDeviceCommandRequest) (std.JsonObject, error) {
 	if gDeviceCommandHandler != nil {
 		return gDeviceCommandHandler(req)
 	}
-	return errAppNotImpControl
+	return nil, errAppNotImpControl
 }
 
 //noinspection ALL
@@ -40,11 +41,11 @@ func onDeviceStatusDelivery(ctx rpcx.Context, notify *DeviceStatusInfo) error {
 }
 
 //noinspection ALL
-func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (map[string]interface{}, error) {
+func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (std.JsonObject, error) {
 	if gDataTransportHandler != nil {
 		return gDataTransportHandler(req)
 	}
-	return map[string]interface{}{}, nil
+	return std.NewJsonObject(), nil
 }
 
 //noinspection ALL

@@ -5,28 +5,50 @@ package libgen
 import (
 	"errors"
 	"github.com/gen-iot/rpcx"
+	"github.com/gen-iot/std"
 	"sync"
 )
 
-type ApiClientImpl struct {
-	rwLock   *sync.RWMutex
-	callable rpcx.Callable
-}
+const (
+	// supported func list
+	kDeliveryDeviceStatus = "DeliveryDeviceStatus"
+	kPing                 = "Ping"
+	kTransportData        = "TransportData"
+	kHandshake            = "Handshake"
+	kSystemSummary        = "SystemSummary"
+	kDeclareDeviceModel   = "DeclareDeviceModel"
+	kRemoveDeviceModels   = "RemoveDeviceModels"
+	kListDeviceModels     = "ListDeviceModels"
+	kRegisterDevices      = "RegisterDevices"
+	kRemoveDevices        = "RemoveDevices"
+	kRemoveAppDevice      = "RemoveAppDevice"
+	kUpdateDeviceInfo     = "UpdateDeviceInfo"
+	kReportDeviceStatus   = "ReportDeviceStatus"
+	kSetDeviceOnline      = "SetDeviceOnline"
+	kListRooms            = "ListRooms"
+	kListDevicesByRoom    = "ListDevicesByRoom"
+	kFindDeviceById       = "FindDeviceById"
+	kCommandDevice        = "CommandDevice"
+)
 
-func NewApiClientImpl() *ApiClientImpl {
-	return &ApiClientImpl{
+func NewApiClientImpl() RpcApiClient {
+	return &apiClientImpl{
 		rwLock:   &sync.RWMutex{},
 		callable: nil,
 	}
 }
 
-func (this *ApiClientImpl) setCallable(callable rpcx.Callable) {
+type apiClientImpl struct {
+	rwLock   *sync.RWMutex
+	callable rpcx.Callable
+}
+
+func (this *apiClientImpl) setCallable(callable rpcx.Callable) {
 	this.rwLock.Lock()
 	defer this.rwLock.Unlock()
 	this.callable = callable
 }
-
-func (this *ApiClientImpl) getCallable() rpcx.Callable {
+func (this *apiClientImpl) getCallable() rpcx.Callable {
 	this.rwLock.RLock()
 	defer this.rwLock.RUnlock()
 	return this.callable
@@ -34,7 +56,7 @@ func (this *ApiClientImpl) getCallable() rpcx.Callable {
 
 var errConnectionClosed = errors.New("the connection to gen not established")
 
-func (this *ApiClientImpl) callWrapper(method string) error {
+func (this *apiClientImpl) callWrapper(method string) error {
 	callable := this.getCallable()
 	if callable == nil {
 		return errConnectionClosed
@@ -42,7 +64,7 @@ func (this *ApiClientImpl) callWrapper(method string) error {
 	return callable.Call(ApiCallTimeout, method)
 }
 
-func (this *ApiClientImpl) call1Wrapper(method string, req interface{}) error {
+func (this *apiClientImpl) call1Wrapper(method string, req interface{}) error {
 	callable := this.getCallable()
 	if callable == nil {
 		return errConnectionClosed
@@ -50,7 +72,7 @@ func (this *ApiClientImpl) call1Wrapper(method string, req interface{}) error {
 	return callable.Call1(ApiCallTimeout, method, req)
 }
 
-func (this *ApiClientImpl) call5Wrapper(method string, req interface{}, res interface{}) error {
+func (this *apiClientImpl) call5Wrapper(method string, req interface{}, res interface{}) error {
 	callable := this.getCallable()
 	if callable == nil {
 		return errConnectionClosed
@@ -58,7 +80,7 @@ func (this *ApiClientImpl) call5Wrapper(method string, req interface{}, res inte
 	return callable.Call5(ApiCallTimeout, method, req, res)
 }
 
-func (this *ApiClientImpl) call3Wrapper(method string, res interface{}) error {
+func (this *apiClientImpl) call3Wrapper(method string, res interface{}) error {
 	callable := this.getCallable()
 	if callable == nil {
 		return errConnectionClosed
@@ -66,74 +88,75 @@ func (this *ApiClientImpl) call3Wrapper(method string, res interface{}) error {
 	return callable.Call3(ApiCallTimeout, method, res)
 }
 
-func (this *ApiClientImpl) SystemSummary() (*SystemSummaryResponse, error) {
-	out := new(SystemSummaryResponse)
-	err := this.call3Wrapper("SystemSummary", out)
-	return out, err
-}
-
-func (this *ApiClientImpl) Ping(req *Ping) (*Pong, error) {
+func (this *apiClientImpl) Ping(req *Ping) (*Pong, error) {
 	res := new(Pong)
-	err := this.call5Wrapper("Ping", req, res)
+	err := this.call5Wrapper(kPing, req, res)
 	return res, err
 }
 
-func (this *ApiClientImpl) DeclareDeviceModel(req *DeclareDeviceModelRequest) error {
-	return this.call1Wrapper("DeclareDeviceModel", req)
-}
-
-func (this *ApiClientImpl) RemoveDeviceModels(req *RemoveDeviceModelsRequest) error {
-	return this.call1Wrapper("RemoveDeviceModels", req)
-}
-
-func (this *ApiClientImpl) RegisterDevices(req *RegisterDevicesRequest) error {
-	return this.call1Wrapper("RegisterDevices", req)
-}
-
-func (this *ApiClientImpl) RemoveDevices(req *RemoveDevicesRequest) error {
-	return this.call1Wrapper("RemoveDevices", req)
-}
-
-func (this *ApiClientImpl) RemoveAppDevice() error {
-	return this.callWrapper("RemoveAppDevice")
-}
-
-func (this *ApiClientImpl) UpdateDeviceInfo(req *UpdateDeviceInfoRequest) error {
-	return this.call1Wrapper("UpdateDeviceInfo", req)
-}
-
-func (this *ApiClientImpl) SetDeviceOnline(req *SetOnlineRequest) error {
-	return this.call1Wrapper("SetDeviceOnline", req)
-}
-
-func (this *ApiClientImpl) ReportDeviceStatus(req *ReportDeviceStatusRequest) error {
-	return this.call1Wrapper("ReportDeviceStatus", req)
-}
-
-func (this *ApiClientImpl) ControlDevice(req *CommandDeviceRequest) error {
-	return this.call1Wrapper("ControlDevice", req)
-}
-
-func (this *ApiClientImpl) ListRooms() (*ListRoomsResponse, error) {
-	out := new(ListRoomsResponse)
-	err := this.call3Wrapper("ListRooms", out)
+func (this *apiClientImpl) SystemSummary() (*SystemSummaryResponse, error) {
+	out := new(SystemSummaryResponse)
+	err := this.call3Wrapper(kSystemSummary, out)
 	return out, err
 }
 
-func (this *ApiClientImpl) ListDeviceModels(req *ListDeviceModelRequest) (*ListDeviceModelResponse, error) {
+func (this *apiClientImpl) DeclareDeviceModel(req *DeclareDeviceModelRequest) error {
+	return this.call1Wrapper(kDeclareDeviceModel, req)
+}
+
+func (this *apiClientImpl) RemoveDeviceModels(req *RemoveDeviceModelsRequest) error {
+	return this.call1Wrapper(kRemoveDeviceModels, req)
+}
+
+func (this *apiClientImpl) ListDeviceModels(req *ListDeviceModelRequest) (*ListDeviceModelResponse, error) {
 	out := new(ListDeviceModelResponse)
-	err := this.call5Wrapper("ListDeviceModels", req, out)
+	err := this.call5Wrapper(kListDeviceModels, req, out)
 	return out, err
 }
 
-func (this *ApiClientImpl) ListDevicesByRoom(req *ListDevicesByRoomRequest) (*ListDevicesByRoomResult, error) {
+func (this *apiClientImpl) RegisterDevices(req *RegisterDevicesRequest) error {
+	return this.call1Wrapper(kRegisterDevices, req)
+}
+
+func (this *apiClientImpl) RemoveDevices(req *RemoveDevicesRequest) error {
+	return this.call1Wrapper(kRemoveDevices, req)
+}
+
+func (this *apiClientImpl) RemoveAppDevice() error {
+	return this.callWrapper(kRemoveAppDevice)
+}
+
+func (this *apiClientImpl) UpdateDeviceInfo(req *UpdateDeviceInfoRequest) error {
+	return this.call1Wrapper(kUpdateDeviceInfo, req)
+}
+
+func (this *apiClientImpl) ReportDeviceStatus(req *ReportDeviceStatusRequest) error {
+	return this.call1Wrapper(kReportDeviceStatus, req)
+}
+
+func (this *apiClientImpl) SetDeviceOnline(req *SetOnlineRequest) error {
+	return this.call1Wrapper(kSetDeviceOnline, req)
+}
+
+func (this *apiClientImpl) ListRooms() (*ListRoomsResponse, error) {
+	out := new(ListRoomsResponse)
+	err := this.call3Wrapper(kListRooms, out)
+	return out, err
+}
+func (this *apiClientImpl) ListDevicesByRoom(req *ListDevicesByRoomRequest) (*ListDevicesByRoomResult, error) {
 	res := new(ListDevicesByRoomResult)
-	err := this.call5Wrapper("ListDevicesByRoom", req, res)
+	err := this.call5Wrapper(kListDevicesByRoom, req, res)
 	return res, err
 }
 
-func (this *ApiClientImpl) FindDeviceById(req *FindDeviceByIdRequest) (*FindDeviceByIdResponse, error) {
+func (this *apiClientImpl) FindDeviceById(req *FindDeviceByIdRequest) (*FindDeviceByIdResponse, error) {
 	res := new(FindDeviceByIdResponse)
-	err := this.call5Wrapper("FindDeviceById", req, res)
+	err := this.call5Wrapper(kFindDeviceById, req, res)
 	return res, err
+}
+
+func (this *apiClientImpl) CommandDevice(req *CommandDeviceRequest) (std.JsonObject, error) {
+	out := std.NewJsonObject()
+	err := this.call5Wrapper(kCommandDevice, req, &out)
+	return out, err
 }

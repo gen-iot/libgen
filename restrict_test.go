@@ -14,7 +14,7 @@ func mustErr(err error) {
 }
 
 func TestI32EnumLimiter(t *testing.T) {
-	limiter := NewI32EnumLimiter(1, 2, 3, 4, 5)
+	limiter := NewI32EnumLimiter("test", true, 1, 2, 3, 4, 5)
 	must(limiter.Validate(1))
 	must(limiter.Validate(2))
 	must(limiter.Validate(3))

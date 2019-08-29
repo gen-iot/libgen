@@ -66,11 +66,11 @@ func TestApiClientImpl_ControlDevice(t *testing.T) {
 	callable := rpc.NewConnCallable(int(sockFd), nil)
 	//handshake
 	err = callable.Call1(time.Second*10, "Handshake", &HandshakeRequest{
-		PkgInfo:     pkg,
-		AccessToken: "pujie123",
+		PkgInfo:        pkg,
+		ApiAccessToken: "pujie123",
 	})
 	std.AssertError(err, "Handshake failed")
-	err = callable.Call1(time.Second*10, "ControlDevice", &CommandDeviceRequest{
+	err = callable.Call1(time.Second*10, "CommandDevice", &CommandDeviceRequest{
 		PkgInfo: PkgInfo{
 			Package: "com.pujie88.iot",
 			Name:    "HotelRemote",

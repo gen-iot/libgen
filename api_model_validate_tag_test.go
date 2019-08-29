@@ -13,11 +13,11 @@ func Test_RegisterDevicesRequest_Validate(t *testing.T) {
 					Package: "com.pujie88.com",
 					Name:    "test",
 				},
-				Id:         "1",
-				Name:       "2",
-				Room:       "3",
-				Properties: nil,
-				MetaData:   nil,
+				Id:       "1",
+				Name:     "2",
+				Room:     "3",
+				Status:   nil,
+				MetaData: nil,
 			},
 		},
 	}
@@ -40,11 +40,11 @@ func Test_RegisterDevicesRequest_Validate(t *testing.T) {
 					Package: "com.pujie88.iot",
 					Name:    "test",
 				},
-				Id:         "",
-				Name:       "",
-				Room:       "",
-				Properties: nil,
-				MetaData:   nil,
+				Id:       "",
+				Name:     "",
+				Room:     "",
+				Status:   nil,
+				MetaData: nil,
 			},
 		},
 	}
@@ -54,28 +54,30 @@ func Test_RegisterDevicesRequest_Validate(t *testing.T) {
 
 func Test_ListDevicesByRoomRequest_Validate(t *testing.T) {
 	req := &ListDevicesByRoomRequest{
-		Rooms:    []string{"101"},
-		Includes: nil,
+		Rooms:          []string{"101"},
+		Filter:         nil,
+		CategoryFilter: nil,
 	}
 	err := std.ValidateStruct(req)
 	std.Assert(err == nil, "1 validate should be success")
 	req = &ListDevicesByRoomRequest{
-		Rooms:    []string{},
-		Includes: nil,
+		Rooms:          []string{},
+		Filter:         nil,
+		CategoryFilter: nil,
 	}
 	err = std.ValidateStruct(req)
 	std.Assert(err != nil, "2 validate should be failed")
 
 	req = &ListDevicesByRoomRequest{
-		Rooms:    []string{"101"},
-		Includes: []*ModelInfo{},
+		Rooms:  []string{"101"},
+		Filter: []*ModelInfo{},
 	}
 	err = std.ValidateStruct(req)
 	std.Assert(err != nil, "3 validate should be failed")
 
 	req = &ListDevicesByRoomRequest{
 		Rooms: []string{"101"},
-		Includes: []*ModelInfo{
+		Filter: []*ModelInfo{
 			{
 				Package: "",
 				Name:    "",
@@ -86,7 +88,7 @@ func Test_ListDevicesByRoomRequest_Validate(t *testing.T) {
 	std.Assert(err != nil, "4 validate should be failed")
 	req = &ListDevicesByRoomRequest{
 		Rooms: []string{"101"},
-		Includes: []*ModelInfo{
+		Filter: []*ModelInfo{
 			{
 				Package: "com.pujie88.iot",
 				Name:    "test",

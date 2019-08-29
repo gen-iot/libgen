@@ -15,27 +15,29 @@ import (
 	"time"
 )
 
-var initOnce = sync.Once{}
-var gRpc *rpcx.RPC
-var gApiClient *ApiClientImpl
-var gConfig = defaultConfig
-var gOnConnected func() = nil
-
-var ApiCallTimeout = time.Second * 5
+var (
+	initOnce         = sync.Once{}
+	gRpc             *rpcx.RPC
+	gApiClient       RpcApiClient
+	gConfig                 = defaultConfig
+	gOnConnected     func() = nil
+	ApiCallTimeout          = time.Second * 5
+	libgenExitSignal        = make(chan bool)
+)
 
 const clientFd = 3
 
 type config struct {
-	Type        AppType `json:"type" validate:"required,oneof=900 901"`
-	Endpoint    string  `json:"endpoint"`
-	PkgInfo     PkgInfo `json:"pkgInfo" validate:"-"`
-	AccessToken string  `json:"accessToken"`
+	Type           AppType `json:"type" validate:"required,oneof=900 901"`
+	Endpoint       string  `json:"endpoint"`
+	PkgInfo        PkgInfo `json:"pkgInfo" validate:"-"`
+	ApiAccessToken string  `json:"accessToken"`
 }
 
 var defaultConfig = config{
-	Type:        LocalApp,
-	Endpoint:    "",
-	AccessToken: "",
+	Type:           LocalApp,
+	Endpoint:       "",
+	ApiAccessToken: "",
 	PkgInfo: PkgInfo{
 		Package: "",
 		Name:    "",
@@ -44,21 +46,67 @@ var defaultConfig = config{
 
 //noinspection ALL
 func InitLocal(onConnected func()) {
-	initWithConfig(defaultConfig)
 	gOnConnected = onConnected
-	go callableWatcher()
+	initWithConfig(defaultConfig)
 }
 
 //noinspection ALL
-func InitRemote(endPoint string, pkgInfo PkgInfo, accessToken string, onConnected func()) {
-	initWithConfig(config{
-		Type:        RemoteApp,
-		Endpoint:    endPoint,
-		PkgInfo:     pkgInfo,
-		AccessToken: accessToken,
-	})
+func InitRemote(endPoint string, pkgInfo PkgInfo, apiAccessToken string, onConnected func()) {
 	gOnConnected = onConnected
-	go callableWatcher()
+	initWithConfig(config{
+		Type:           RemoteApp,
+		Endpoint:       endPoint,
+		PkgInfo:        pkgInfo,
+		ApiAccessToken: apiAccessToken,
+	})
+}
+
+//noinspection ALL
+func Cleanup() {
+	close(libgenExitSignal)
+	std.CloseIgnoreErr(GetRawCallable())
+	std.CloseIgnoreErr(gRpc)
+	gApiClient = nil
+}
+
+//noinspection ALL
+func GetRawCallable() rpcx.Callable {
+	std.Assert(gApiClient != nil, "please init first")
+	return gApiClient.getCallable()
+}
+
+//noinspection ALL
+func GetApiClient() RpcApiClient {
+	std.Assert(gApiClient != nil, "please init first")
+	return gApiClient
+}
+
+func initWithConfig(config config) {
+	initOnce.Do(func() {
+		gConfig = config
+		doInit()
+		go callableWatcher()
+	})
+}
+
+func doInit() {
+	fmt.Printf("LIBGEN CLIENT INIT , MODE=%s\n", AppType2Str(gConfig.Type))
+	initSuccessMsg := "LIBGEN CLIENT INIT SUCCESS"
+	if gConfig.Type == LocalApp {
+		appIdentifier := os.Getenv("X_GEN_APP_IDENTIFIER")
+		fmt.Printf("LIBGEN INIT, APP IDENTIFIER=[%s]\n", appIdentifier)
+		initSuccessMsg = fmt.Sprintf("%s: APP IDENTIFIER=[%s]", initSuccessMsg, appIdentifier)
+	}
+	rpc, err := rpcx.New()
+	std.AssertError(err, "new rpc failed")
+	gRpc = rpc
+	gRpc.RegFuncWithName(kCommandDevice, onDeviceCommand)
+	gRpc.RegFuncWithName(kDeliveryDeviceStatus, onDeviceStatusDelivery)
+	gRpc.RegFuncWithName(kPing, pong)
+	gRpc.RegFuncWithName(kTransportData, onDataTransport)
+	gRpc.Start()
+	gApiClient = NewApiClientImpl()
+	fmt.Println(initSuccessMsg)
 }
 
 func waitRemoteConnReady(call *rpcx.SignalCallable, timeout time.Duration) error {
@@ -101,13 +149,11 @@ func doHandshake(call rpcx.Callable) error {
 		return nil
 	}
 	//handshake
-	return call.Call1(ApiCallTimeout, "Handshake", &HandshakeRequest{
-		PkgInfo:     gConfig.PkgInfo,
-		AccessToken: gConfig.AccessToken,
+	return call.Call1(ApiCallTimeout, kHandshake, &HandshakeRequest{
+		PkgInfo:        gConfig.PkgInfo,
+		ApiAccessToken: gConfig.ApiAccessToken,
 	})
 }
-
-var libgenExitSignal = make(chan bool)
 
 func callableWatcher() {
 	for {
@@ -150,58 +196,4 @@ func callableWatcher() {
 		log.Println("LIBGEN CLIENT DISCONNECTED", " , RECONNECT IN 5s......")
 		time.Sleep(time.Second * 5)
 	}
-}
-
-func initWithConfig(config config) {
-	initOnce.Do(func() {
-		gConfig = config
-		doInit()
-	})
-}
-
-//noinspection ALL
-func Cleanup() {
-	std.CloseIgnoreErr(GetRawCallable())
-	std.CloseIgnoreErr(gRpc)
-	gApiClient = nil
-}
-
-const (
-	// supported func list
-	kCommandDevice        = "CommandDevice"
-	kDeliveryDeviceStatus = "DeliveryDeviceStatus"
-	kPing                 = "Ping"
-	kTransportData        = "TransportData"
-)
-
-func doInit() {
-	fmt.Printf("LIBGEN CLIENT INIT , MODE=%s\n", AppType2Str(gConfig.Type))
-	initSuccessMsg := "LIBGEN CLIENT INIT SUCCESS"
-	if gConfig.Type == LocalApp {
-		appIdentifier := os.Getenv("X_GEN_APP_IDENTIFIER")
-		fmt.Printf("LIBGEN INIT, APP IDENTIFIER=[%s]\n", appIdentifier)
-		initSuccessMsg = fmt.Sprintf("%s: APP IDENTIFIER=[%s]", initSuccessMsg, appIdentifier)
-	}
-	rpc, err := rpcx.New()
-	std.AssertError(err, "new rpc failed")
-	gRpc = rpc
-
-	gRpc.RegFuncWithName(kCommandDevice, onDeviceControl)
-	gRpc.RegFuncWithName(kDeliveryDeviceStatus, onDeviceStatusDelivery)
-	gRpc.RegFuncWithName(kPing, pong)
-	gRpc.RegFuncWithName(kTransportData, onDataTransport)
-	gRpc.Start()
-	gApiClient = NewApiClientImpl()
-	fmt.Println(initSuccessMsg)
-}
-
-func GetRawCallable() rpcx.Callable {
-	std.Assert(gApiClient != nil, "please init first")
-	return gApiClient.getCallable()
-}
-
-//noinspection ALL
-func GetApiClient() RpcApiClient {
-	std.Assert(gApiClient != nil, "please init first")
-	return gApiClient
 }
