@@ -1,13 +1,10 @@
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/gen-iot/liblpc v1.0.5/go.mod h1:e/wXOzMSN/xZpHyysiUMCDAw7tSgiwnYHmmpfoteb38=
-github.com/gen-iot/liblpc v1.0.6 h1:JiToVR7Ti6FwElPIf4KKFK9X2827scuM/kKsWeR6ZJM=
-github.com/gen-iot/liblpc v1.0.6/go.mod h1:e/wXOzMSN/xZpHyysiUMCDAw7tSgiwnYHmmpfoteb38=
-github.com/gen-iot/rpcx v1.0.8 h1:eyfERAZAVKOY9xlQINcfiUvP3qmSW/Lx2GSjk77dUeM=
-github.com/gen-iot/rpcx v1.0.8/go.mod h1:cxbHFzbyImjvoGIp4eGm18dFJFpRs9cxq5mUdYTe5x0=
-github.com/gen-iot/rpcx v1.0.9 h1:zaI6aXxpiorYAFmUIzbmMPQfx3ykPxaqJ7QW913zg+4=
-github.com/gen-iot/rpcx v1.0.9/go.mod h1:h01AR+Matyel+F7wZpwciYR45SIBTnCTZ2dptia5vXQ=
+github.com/gen-iot/liblpc v1.0.7 h1:91YYIVZXjBRmFfRBh63+sQ0duQMLJMWiMWSvKpzfZ3A=
+github.com/gen-iot/liblpc v1.0.7/go.mod h1:e/wXOzMSN/xZpHyysiUMCDAw7tSgiwnYHmmpfoteb38=
+github.com/gen-iot/rpcx v1.1.0 h1:NesGlFfo1OGATDWPFQzrERf2/MrSrQXomAR3PvI6ZDQ=
+github.com/gen-iot/rpcx v1.1.0/go.mod h1:jK9W+qtomf/YOxQonsZj/V71NK6z9peDZxXMAnK7oqw=
 github.com/gen-iot/std v1.0.8 h1:rPY7ako9P/8f1L7gwSSayFMiOIW4AE8sq9ZvrXLZtr8=
 github.com/gen-iot/std v1.0.8/go.mod h1:9uwnaFY5FKmutNKSkLr0xUM/h6U7w6W/ofO4l6aRh7c=
 github.com/go-playground/locales v0.12.1 h1:2FITxuFt/xuCNP1Acdhv62OzaCiviiE4kotfhkmOqEc=
@@ -48,7 +45,6 @@ golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJ
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190606165138-5da285871e9c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456 h1:ng0gs1AKnRRuEMZoTLLlbOd+C17zUDepwGQBb/n+JVg=
 golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
@@ -57,6 +53,8 @@ golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGm
 golang.org/x/tools v0.0.0-20190606124116-d0a3d012864b/go.mod h1:/rFqwRUd4F7ZHNgwSSTFct+R/Kf4OFW1sUzUTQQTgfc=
 google.golang.org/appengine v1.6.1 h1:QzqyMA1tlu6CgqCDUtU9V+ZKhLFT2dkJuANu5QaxI3I=
 google.golang.org/appengine v1.6.1/go.mod h1:i06prIuMbXzDqacNJfV5OdTW448YApPu5ww/cMBSeb0=
+google.golang.org/appengine v1.6.2 h1:j8RI1yW0SkI+paT6uGwMlrMI/6zwYA6/CFil8rxOzGI=
+google.golang.org/appengine v1.6.2/go.mod h1:i06prIuMbXzDqacNJfV5OdTW448YApPu5ww/cMBSeb0=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
