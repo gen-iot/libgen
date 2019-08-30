@@ -137,7 +137,7 @@ type FindDeviceByIdResponse = DeviceStatusInfo
 type CommandDeviceRequest struct {
 	PkgInfo PkgInfo        `json:"pkgInfo" validate:"required"`
 	Id      string         `json:"id" validate:"required"`
-	Command string         `json:"command" validate:"required"`
+	Command string         `json:"command"`
 	Params  std.JsonObject `json:"params"`
 }
 
