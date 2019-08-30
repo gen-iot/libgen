@@ -40,14 +40,14 @@ type Device struct {
 	Name      string         `json:"name" validate:"required"`
 	Room      string         `json:"room" validate:"required"`
 	Category  string         `json:"category"`
-	Status    std.JsonObject `json:"status,omitempty"`
 	MetaData  std.JsonObject `json:"metadata,omitempty"`
 }
 
 type DeviceStatusInfo struct {
 	*Device
-	PkgInfo *PkgInfo `json:"pkgInfo"`
-	Online  bool     `json:"online"`
+	PkgInfo *PkgInfo       `json:"pkgInfo"`
+	Online  bool           `json:"online"`
+	Status  std.JsonObject `json:"status,omitempty"`
 }
 
 type Ping struct {
@@ -119,9 +119,12 @@ type ListDevicesByRoomRequest struct {
 	Filter         []*ModelInfo `json:"filter" validate:"omitempty,dive,required"`
 	CategoryFilter []string     `json:"categoryFilter" validate:"omitempty,dive,required"`
 }
-
+type RoomDevicesBucket struct {
+	Room    string              `json:"room"`
+	Devices []*DeviceStatusInfo `json:"devices"`
+}
 type ListDevicesByRoomResult struct {
-	RoomDevices []*DeviceStatusInfo `json:"roomDevices" validate:"omitempty,gt=0,dive,required"`
+	RoomDevices []*RoomDevicesBucket `json:"rooms" validate:"omitempty,gt=0,dive,required"`
 }
 
 type FindDeviceByIdRequest struct {
