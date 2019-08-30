@@ -100,9 +100,9 @@ type UpdateDeviceInfoRequest struct {
 }
 
 type ReportDeviceStatusRequest struct {
-	Id         string         `json:"id" validate:"required"`
-	Properties std.JsonObject `json:"properties"`
-	Online     bool           `json:"online"`
+	Id     string         `json:"id" validate:"required"`
+	Status std.JsonObject `json:"status"`
+	Online bool           `json:"online"`
 }
 
 type SetOnlineRequest struct {
