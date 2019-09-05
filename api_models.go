@@ -33,7 +33,17 @@ type DeviceModel struct {
 	StatusProperties  []Restrict         `json:"statusProperties" validate:"omitempty,dive,required"`
 	CommandProperties []*CommandProperty `json:"commandProperties" validate:"omitempty,dive,required"`
 }
+type RestrictPersist std.JsonObject
 
+type CommandPropertyPersist struct {
+	FuncName       string            `json:"command" validate:"required"`
+	ParamRestricts []RestrictPersist `json:"restricts" validate:"omitempty,dive,required"`
+}
+type DeviceModelPersist struct {
+	ModelInfo
+	StatusProperties  []RestrictPersist         `json:"statusProperties"`
+	CommandProperties []*CommandPropertyPersist `json:"commandProperties"`
+}
 type Device struct {
 	ModelInfo *ModelInfo     `json:"modelInfo" validate:"required"`
 	Id        string         `json:"id" validate:"required"`
@@ -81,7 +91,7 @@ type ListDeviceModelRequest struct {
 }
 
 type ListDeviceModelResponse struct {
-	Models []*DeviceModel `json:"models"`
+	Models []*DeviceModelPersist `json:"models"`
 }
 
 type RegisterDevicesRequest struct {
