@@ -11,10 +11,12 @@ import (
 type DeviceCommandHandler func(req *OnDeviceCommandRequest) (std.JsonObject, error)
 type DeviceStatusHandler func(notify *DeviceStatusInfo)
 type TransportDataHandler func(req *TransportDataRequest) (std.JsonObject, error)
+type DeviceIDLENotifyHandler func(req *NotifyDeviceIDLERequest) error
 
 var gDeviceCommandHandler DeviceCommandHandler
 var gDeviceStatusHandler DeviceStatusHandler
 var gDataTransportHandler TransportDataHandler
+var gDeviceIDLENotifyHandler DeviceIDLENotifyHandler
 
 //noinspection ALL
 func pong(ctx rpcx.Context, req *Ping) (*Pong, error) {
@@ -49,6 +51,14 @@ func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (std.JsonObjec
 }
 
 //noinspection ALL
+func onDeviceIDLENotify(ctx rpcx.Context, req *NotifyDeviceIDLERequest) error {
+	if gDeviceIDLENotifyHandler != nil {
+		return gDeviceIDLENotifyHandler(req)
+	}
+	return nil
+}
+
+//noinspection ALL
 func RegOnDeviceCommandHandler(fn DeviceCommandHandler) {
 	gDeviceCommandHandler = fn
 }
@@ -61,4 +71,9 @@ func RegOnDeviceStatusHandler(fn DeviceStatusHandler) {
 //noinspection ALL
 func RegOnDataTransport(fn TransportDataHandler) {
 	gDataTransportHandler = fn
+}
+
+//noinspection ALL
+func RegOnDeviceIDLENotify(fn DeviceIDLENotifyHandler) {
+	gDeviceIDLENotifyHandler = fn
 }

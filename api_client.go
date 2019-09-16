@@ -14,6 +14,7 @@ const (
 	kDeliveryDeviceStatus = "DeliveryDeviceStatus"
 	kPing                 = "Ping"
 	kTransportData        = "TransportData"
+	kNotifyDeviceIDLE     = "NotifyDeviceIDLE"
 	kHandshake            = "Handshake"
 	kSystemSummary        = "SystemSummary"
 	kDeclareDeviceModel   = "DeclareDeviceModel"

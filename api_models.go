@@ -166,3 +166,7 @@ type TransportDataRequest struct {
 	Sender *PkgInfo `json:"sender" validate:"required"`
 	Data   []byte   `json:"data" validate:"required"`
 }
+
+type NotifyDeviceIDLERequest struct {
+	Ids []string `json:"Ids"`
+}
