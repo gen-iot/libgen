@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/gen-iot/liblpc v1.1.1-beta.1
-	github.com/gen-iot/rpcx v1.1.1-beta.7
+	github.com/gen-iot/rpcx v1.1.1-beta.8
 	github.com/gen-iot/std v1.0.12-beta.3
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect
