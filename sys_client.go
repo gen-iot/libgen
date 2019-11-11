@@ -105,7 +105,7 @@ func doInit() {
 	gRpc.RegFuncWithName(kPing, pong)
 	gRpc.RegFuncWithName(kTransportData, onDataTransport)
 	gRpc.RegFuncWithName(kNotifyDeviceIDLE, onDeviceIDLENotify)
-	gRpc.Start()
+	gRpc.Start(nil)
 	gApiClient = NewApiClientImpl()
 	fmt.Println(initSuccessMsg)
 }

@@ -40,7 +40,7 @@ func startLocalRpcService(fd int, wg *sync.WaitGroup) {
 	std.AssertError(err, "new rpcx")
 	rpc.PreUse(createTraceMiddleware("pre use"))
 	defer std.CloseIgnoreErr(rpc)
-	rpc.Start()
+	rpc.Start(nil)
 	rpc.RegFunc(sum, createTraceMiddleware("use"))
 	call := rpc.NewConnCallable(fd, nil)
 	call.Start()
@@ -52,7 +52,7 @@ func startMockRpcCall(fd int, wg *sync.WaitGroup) {
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpcx")
 	defer std.CloseIgnoreErr(rpc)
-	rpc.Start()
+	rpc.Start(nil)
 	callable := rpc.NewConnCallable(fd, nil,
 		//middleware.Validate(std.DefaultValidatorEN()),
 		middleware.Recover(true),
