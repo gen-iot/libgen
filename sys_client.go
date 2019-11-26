@@ -28,10 +28,11 @@ var (
 const clientFd = 3
 
 type config struct {
-	Type           AppType `json:"type" validate:"required,oneof=900 901"`
-	Endpoint       string  `json:"endpoint"`
-	PkgInfo        PkgInfo `json:"pkgInfo" validate:"-"`
-	ApiAccessToken string  `json:"accessToken"`
+	Type           AppType    `json:"type" validate:"required,oneof=900 901"`
+	Endpoint       string     `json:"endpoint"`
+	PkgInfo        PkgInfo    `json:"pkgInfo" validate:"-"`
+	ApiAccessToken string     `json:"accessToken"`
+	LinkMethod     LinkMethod `json:"linkMethod"`
 }
 
 var defaultConfig = config{
@@ -52,8 +53,13 @@ func InitLocal(onConnected func()) {
 
 //noinspection ALL
 func InitRemote(endPoint string, pkgInfo PkgInfo, apiAccessToken string, onConnected func()) {
+	InitRemote2(Handshake, endPoint, pkgInfo, apiAccessToken, onConnected)
+}
+
+func InitRemote2(linkMethod LinkMethod, endPoint string, pkgInfo PkgInfo, apiAccessToken string, onConnected func()) {
 	gOnConnected = onConnected
 	initWithConfig(config{
+		LinkMethod:     linkMethod,
 		Type:           RemoteApp,
 		Endpoint:       endPoint,
 		PkgInfo:        pkgInfo,
@@ -149,8 +155,12 @@ func doHandshake(call rpcx.Callable) error {
 	if gConfig.Type == LocalApp {
 		return nil
 	}
+	linkMethod := gConfig.LinkMethod
+	if len(linkMethod) == 0 {
+		linkMethod = Handshake
+	}
 	//handshake
-	return call.Call1(ApiCallTimeout, kHandshake, &HandshakeRequest{
+	return call.Call1(ApiCallTimeout, string(linkMethod), &HandshakeRequest{
 		PkgInfo:        gConfig.PkgInfo,
 		ApiAccessToken: gConfig.ApiAccessToken,
 	})

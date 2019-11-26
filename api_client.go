@@ -9,13 +9,19 @@ import (
 	"sync"
 )
 
+type LinkMethod string
+
+const (
+	Handshake   LinkMethod = "Handshake"
+	DebugAttach LinkMethod = "DebugAttach"
+)
+
 const (
 	// supported func list
 	kDeliveryDeviceStatus = "DeliveryDeviceStatus"
 	kPing                 = "Ping"
 	kTransportData        = "TransportData"
 	kNotifyDeviceIDLE     = "NotifyDeviceIDLE"
-	kHandshake            = "Handshake"
 	kSystemSummary        = "SystemSummary"
 	kDeclareDeviceModel   = "DeclareDeviceModel"
 	kRemoveDeviceModels   = "RemoveDeviceModels"
