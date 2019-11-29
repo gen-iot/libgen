@@ -3,7 +3,7 @@ package libgen
 import (
 	"fmt"
 	"github.com/gen-iot/liblpc"
-	"github.com/gen-iot/rpcx"
+	"github.com/gen-iot/rpcx/v2"
 	"github.com/gen-iot/std"
 	"log"
 	"syscall"

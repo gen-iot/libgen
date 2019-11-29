@@ -3,7 +3,7 @@ package libgen
 import (
 	"fmt"
 	"github.com/gen-iot/liblpc"
-	"github.com/gen-iot/rpcx"
+	"github.com/gen-iot/rpcx/v2"
 	"github.com/gen-iot/std"
 	"log"
 	"sync"
@@ -16,7 +16,7 @@ func TestApiClientImpl_Ping(t *testing.T) {
 	wg := sync.WaitGroup{}
 	rpc, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
-	//gRpc.RegFunc(deviceControl)
+	//gRpcCore.RegFunc(deviceControl)
 	rpc.RegFuncWithName("Ping", pong)
 	rpc.Start(nil)
 	sock, err := syscall.Socket(syscall.AF_INET, syscall.SOL_SOCKET, syscall.IPPROTO_TCP)

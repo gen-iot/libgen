@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gen-iot/liblpc"
-	"github.com/gen-iot/rpcx"
+	"github.com/gen-iot/rpcx/v2"
 	"github.com/gen-iot/std"
 	"log"
 	"os"
@@ -17,7 +17,7 @@ import (
 
 var (
 	initOnce         = sync.Once{}
-	gRpc             *rpcx.RPC
+	gRpcCore         rpcx.Core
 	gApiClient       RpcApiClient
 	gConfig                 = defaultConfig
 	gOnConnected     func() = nil
@@ -71,7 +71,7 @@ func InitRemote2(linkMethod LinkMethod, endPoint string, pkgInfo PkgInfo, apiAcc
 func Cleanup() {
 	close(libgenExitSignal)
 	std.CloseIgnoreErr(GetRawCallable())
-	std.CloseIgnoreErr(gRpc)
+	std.CloseIgnoreErr(gRpcCore)
 	gApiClient = nil
 }
 
@@ -103,15 +103,15 @@ func doInit() {
 		fmt.Printf("LIBGEN INIT, APP IDENTIFIER=[%s]\n", appIdentifier)
 		initSuccessMsg = fmt.Sprintf("%s: APP IDENTIFIER=[%s]", initSuccessMsg, appIdentifier)
 	}
-	rpc, err := rpcx.New()
+	core, err := rpcx.New()
 	std.AssertError(err, "new rpc failed")
-	gRpc = rpc
-	gRpc.RegFuncWithName(kCommandDevice, onDeviceCommand)
-	gRpc.RegFuncWithName(kDeliveryDeviceStatus, onDeviceStatusDelivery)
-	gRpc.RegFuncWithName(kPing, pong)
-	gRpc.RegFuncWithName(kTransportData, onDataTransport)
-	gRpc.RegFuncWithName(kNotifyDeviceIDLE, onDeviceIDLENotify)
-	gRpc.Start(nil)
+	gRpcCore = core
+	gRpcCore.RegFuncWithName(kCommandDevice, onDeviceCommand)
+	gRpcCore.RegFuncWithName(kDeliveryDeviceStatus, onDeviceStatusDelivery)
+	gRpcCore.RegFuncWithName(kPing, pong)
+	gRpcCore.RegFuncWithName(kTransportData, onDataTransport)
+	gRpcCore.RegFuncWithName(kNotifyDeviceIDLE, onDeviceIDLENotify)
+	gRpcCore.Start(nil)
 	gApiClient = NewApiClientImpl()
 	fmt.Println(initSuccessMsg)
 }
@@ -134,7 +134,7 @@ func newRemoteCallable(endpoint string) (rpcx.Callable, error) {
 	if err != nil {
 		return nil, err
 	}
-	call, err := gRpc.NewClientCallable(sockAddr, nil)
+	call, err := rpcx.NewClientStreamCallable(gRpcCore, sockAddr, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func newRemoteCallable(endpoint string) (rpcx.Callable, error) {
 func createCallable() (rpcx.Callable, error) {
 	std.Assert(strings.Compare(AppType2Str(gConfig.Type), "UNKNOWN") != 0, "unknown app type")
 	if gConfig.Type == LocalApp {
-		callable := gRpc.NewConnCallable(clientFd, nil)
+		callable := rpcx.NewConnStreamCallable(gRpcCore, clientFd, nil)
 		return callable, nil
 	} else {
 		return newRemoteCallable(gConfig.Endpoint)
