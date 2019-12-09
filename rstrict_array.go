@@ -15,7 +15,7 @@ func NewArrayLimiter(name string, elementValidator Restrict) Restrict {
 	out.ElementRestrict = elementValidator
 	out.FixedLength = -1
 	if out.ElementRestrict == nil {
-		out.ElementRestrict = NewAnyLimiter(name, false)
+		out.ElementRestrict = NewAnyLimiter("validator", false)
 	}
 	out.baseRestrict = newBaseRestrict(out, name, Array)
 	return out.SetDefaultValue(true, []interface{}{})
