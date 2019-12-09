@@ -1,7 +1,6 @@
 package libgen
 
 import (
-	"github.com/gen-iot/std"
 	"github.com/pkg/errors"
 )
 
@@ -19,7 +18,7 @@ func NewArrayLimiter(name string, elementValidator Restrict) Restrict {
 		out.ElementRestrict = NewAnyLimiter(name, false)
 	}
 	out.baseRestrict = newBaseRestrict(out, name, Array)
-	return out.SetDefaultValue(true, std.JsonArray{})
+	return out.SetDefaultValue(true, []interface{}{})
 }
 
 func (this *ArrayLimiter) Validate(v interface{}) error {
