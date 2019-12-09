@@ -6,14 +6,11 @@ type I32EnumLimiter struct {
 }
 
 func NewI32EnumLimiter(name string, required bool, include ...int32) *I32EnumLimiter {
-	return &I32EnumLimiter{
-		baseRestrict: baseRestrict{
-			RestrictName: name,
-			RestrictType: I32Enum,
-			Required:     required,
-		},
-		Includes: include,
-	}
+	out := new(I32EnumLimiter)
+	out.baseRestrict = newBaseRestrict(out, name, I32Enum)
+	out.SetRequired(required)
+	out.Includes = include
+	return out
 }
 
 type AnyI32Limiter = I32EnumLimiter
@@ -25,15 +22,10 @@ func NewAnyI32Limiter(name string, required bool) *AnyI32Limiter {
 }
 
 func (this *I32EnumLimiter) Check(v int32) error {
-	includeOk := len(this.Includes) == 0
 	for idx := range this.Includes {
 		if v == this.Includes[idx] {
-			includeOk = true
-			break
+			return nil
 		}
-	}
-	if includeOk {
-		return nil
 	}
 	return errOutOfEnum
 }
@@ -45,6 +37,9 @@ func (this *I32EnumLimiter) Validate(vx interface{}) error {
 	v, err := any2Int32(vx)
 	if err != nil {
 		return err
+	}
+	if this.Type() == I32Any {
+		return nil
 	}
 	return this.Check(v)
 }

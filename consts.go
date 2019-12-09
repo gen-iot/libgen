@@ -32,5 +32,6 @@ const (
 	I32Any   RestrictType = 1002
 	StrEnum  RestrictType = 1003
 	StrAny   RestrictType = 1004
+	Array    RestrictType = 1005
 	Any      RestrictType = 2000
 )

@@ -9,17 +9,16 @@ type I32RangeLimiter struct {
 }
 
 func NewI32RangeLimiter(name string, required bool, gte, lte int32, addition []int32, exclude []int32) *I32RangeLimiter {
-	return &I32RangeLimiter{
-		baseRestrict: baseRestrict{
-			RestrictName: name,
-			RestrictType: I32Range,
-			Required:     required,
-		},
+	out := &I32RangeLimiter{
 		Gte:      gte,
 		Lte:      lte,
 		Addition: addition,
 		Exclude:  exclude,
 	}
+	out.baseRestrict = newBaseRestrict(out, name, I32Range)
+	out.SetRequired(required)
+
+	return out
 }
 
 func (this *I32RangeLimiter) Validate(v interface{}) error {

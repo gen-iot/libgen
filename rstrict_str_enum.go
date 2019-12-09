@@ -10,35 +10,28 @@ type StrEnumLimiter struct {
 	Includes []string `json:"includes"`
 }
 
-func NewStrEnumLimiter(name string, required bool, include ...string) *StrEnumLimiter {
-	return &StrEnumLimiter{
-		baseRestrict: baseRestrict{
-			RestrictName: name,
-			RestrictType: StrEnum,
-			Required:     required,
-		},
+func NewStrEnumLimiter(name string, required bool, include ...string) Restrict {
+	out := &StrEnumLimiter{
 		Includes: include,
 	}
+	out.baseRestrict = newBaseRestrict(out, name, StrEnum)
+	out.SetRequired(required)
+	return out
 }
 
 type AnyStrLimiter = StrEnumLimiter
 
-func NewAnyStrLimiter(name string, required bool) *AnyStrLimiter {
-	out := NewStrEnumLimiter(name, required)
+func NewAnyStrLimiter(name string, required bool) Restrict {
+	out := NewStrEnumLimiter(name, required).(*StrEnumLimiter)
 	out.RestrictType = StrAny
 	return out
 }
 
 func (this *StrEnumLimiter) Check(v string) error {
-	includeOk := len(this.Includes) == 0
 	for idx := range this.Includes {
 		if strings.Compare(v, this.Includes[idx]) == 0 {
-			includeOk = true
-			break
+			return nil
 		}
-	}
-	if includeOk {
-		return nil
 	}
 	return errOutOfEnum
 }
@@ -50,6 +43,9 @@ func (this *StrEnumLimiter) Validate(v interface{}) error {
 	s, err := any2Str(v)
 	if err != nil {
 		return err
+	}
+	if this.RestrictType == StrAny {
+		return nil
 	}
 	return this.Check(s)
 }
