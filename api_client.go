@@ -20,7 +20,7 @@ const (
 	// supported func list
 	kDeliveryDeviceStatus = "DeliveryDeviceStatus"
 	kPing                 = "Ping"
-	kTransportData        = "TransportData"
+	kInvokeService        = "InvokeService"
 	kNotifyDeviceIDLE     = "NotifyDeviceIDLE"
 	kSystemSummary        = "SystemSummary"
 	kDeclareDeviceModel   = "DeclareDeviceModel"

@@ -162,9 +162,10 @@ type HandshakeRequest struct {
 	ApiAccessToken string `json:"apiAccessToken"`
 }
 
-type TransportDataRequest struct {
-	Sender *PkgInfo `json:"sender" validate:"required"`
-	Data   []byte   `json:"data" validate:"required"`
+type InvokeServiceRequest struct {
+	Caller      PkgInfo        `json:"pkgInfo" validate:"required"`
+	ServiceName string         `json:"serviceName" validate:"required"`
+	Params      std.JsonObject `json:"params"`
 }
 
 type NotifyDeviceIDLERequest struct {

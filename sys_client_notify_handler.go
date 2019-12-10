@@ -10,12 +10,12 @@ import (
 
 type DeviceCommandHandler func(req *OnDeviceCommandRequest) (std.JsonObject, error)
 type DeviceStatusHandler func(notify *DeviceStatusInfo)
-type TransportDataHandler func(req *TransportDataRequest) (std.JsonObject, error)
+type InvokeServiceHandler func(req *InvokeServiceRequest) (std.JsonObject, error)
 type DeviceIDLENotifyHandler func(req *NotifyDeviceIDLERequest) error
 
 var gDeviceCommandHandler DeviceCommandHandler
 var gDeviceStatusHandler DeviceStatusHandler
-var gDataTransportHandler TransportDataHandler
+var gInvokeServiceHandler InvokeServiceHandler
 var gDeviceIDLENotifyHandler DeviceIDLENotifyHandler
 
 //noinspection ALL
@@ -43,9 +43,9 @@ func onDeviceStatusDelivery(ctx rpcx.Context, notify *DeviceStatusInfo) error {
 }
 
 //noinspection ALL
-func onDataTransport(ctx rpcx.Context, req *TransportDataRequest) (std.JsonObject, error) {
-	if gDataTransportHandler != nil {
-		return gDataTransportHandler(req)
+func onServiceInvoke(ctx rpcx.Context, req *InvokeServiceRequest) (std.JsonObject, error) {
+	if gInvokeServiceHandler != nil {
+		return gInvokeServiceHandler(req)
 	}
 	return std.NewJsonObject(), nil
 }
@@ -69,8 +69,8 @@ func RegOnDeviceStatusHandler(fn DeviceStatusHandler) {
 }
 
 //noinspection ALL
-func RegOnDataTransport(fn TransportDataHandler) {
-	gDataTransportHandler = fn
+func RegOnInvokeServiceHandler(fn InvokeServiceHandler) {
+	gInvokeServiceHandler = fn
 }
 
 //noinspection ALL
