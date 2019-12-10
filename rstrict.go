@@ -54,13 +54,12 @@ func (this *baseRestrict) DefaultValue() (exist bool, v interface{}) {
 func (this *baseRestrict) SetDefaultValue(enable bool, v interface{}) Restrict {
 	this.HasDefault = enable
 	if this.HasDefault {
-		this.DefaultVal = v
 		err := this.drivenChild.Validate(v)
 		std.AssertError(err, "validate default value failed")
+		this.DefaultVal = v
 	} else {
 		this.DefaultVal = nil
 	}
-	this.Required = !this.HasDefault
 	return this.drivenChild
 }
 func (this *baseRestrict) SetRequired(required bool) Restrict {
