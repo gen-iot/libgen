@@ -20,7 +20,10 @@ const (
 	// supported func list
 	kDeliveryDeviceStatus = "DeliveryDeviceStatus"
 	kPing                 = "Ping"
+	kListService          = "ListService"
 	kInvokeService        = "InvokeService"
+	kRemoveService        = "RemoveService"
+	kDeclareService       = "DeclareService"
 	kNotifyDeviceIDLE     = "NotifyDeviceIDLE"
 	kSystemSummary        = "SystemSummary"
 	kDeclareDeviceModel   = "DeclareDeviceModel"
@@ -166,4 +169,26 @@ func (this *apiClientImpl) CommandDevice(req *CommandDeviceRequest) (std.JsonObj
 	out := std.NewJsonObject()
 	err := this.call5Wrapper(kCommandDevice, req, &out)
 	return out, err
+}
+
+func (this *apiClientImpl) DeclareService(req *DeclareServiceRequest) error {
+	return this.call3Wrapper(kDeclareService, req)
+}
+
+func (this *apiClientImpl) RemoveService() error {
+	return this.callWrapper(kRemoveService)
+}
+
+func (this *apiClientImpl) InvokeService(req *InvokeServiceRequest) (std.JsonObject, error) {
+	out := std.NewJsonObject()
+	err := this.call5Wrapper(kInvokeService, req, &out)
+	return out, err
+}
+
+func (this *apiClientImpl) ListService() (*ListServiceResponse, error) {
+	out := new(ListServiceResponse)
+	if err := this.call3Wrapper(kListService, out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

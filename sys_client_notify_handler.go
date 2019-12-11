@@ -10,7 +10,7 @@ import (
 
 type DeviceCommandHandler func(req *OnDeviceCommandRequest) (std.JsonObject, error)
 type DeviceStatusHandler func(notify *DeviceStatusInfo)
-type InvokeServiceHandler func(req *InvokeServiceRequest) (std.JsonObject, error)
+type InvokeServiceHandler func(req *OnServiceInvokedRequest) (std.JsonObject, error)
 type DeviceIDLENotifyHandler func(req *NotifyDeviceIDLERequest) error
 
 var gDeviceCommandHandler DeviceCommandHandler
@@ -43,7 +43,7 @@ func onDeviceStatusDelivery(ctx rpcx.Context, notify *DeviceStatusInfo) error {
 }
 
 //noinspection ALL
-func onServiceInvoke(ctx rpcx.Context, req *InvokeServiceRequest) (std.JsonObject, error) {
+func onServiceInvoke(ctx rpcx.Context, req *OnServiceInvokedRequest) (std.JsonObject, error) {
 	if gInvokeServiceHandler != nil {
 		return gInvokeServiceHandler(req)
 	}

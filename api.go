@@ -40,4 +40,9 @@ type RpcApiClient interface {
 	FindDeviceById(req *FindDeviceByIdRequest) (*FindDeviceByIdResponse, error)
 	//command devices
 	CommandDevice(req *CommandDeviceRequest) (std.JsonObject, error)
+	//
+	DeclareService(req *DeclareServiceRequest) error
+	RemoveService() error
+	InvokeService(req *InvokeServiceRequest) (std.JsonObject, error)
+	ListService() (*ListServiceResponse, error)
 }

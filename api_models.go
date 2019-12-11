@@ -162,12 +162,27 @@ type HandshakeRequest struct {
 	ApiAccessToken string `json:"apiAccessToken"`
 }
 
+type OnServiceInvokedRequest struct {
+	Caller      PkgInfo        `json:"caller" validate:"required"`
+	ServiceName string         `json:"serviceName" validate:"required"`
+	Params      std.JsonObject `json:"params"`
+}
+
 type InvokeServiceRequest struct {
-	Caller      PkgInfo        `json:"pkgInfo" validate:"required"`
+	TimeoutSec  int            `json:"timeoutSec" validate:"lte=30"`
+	Target      PkgInfo        `json:"target" validate:"required"`
 	ServiceName string         `json:"serviceName" validate:"required"`
 	Params      std.JsonObject `json:"params"`
 }
 
 type NotifyDeviceIDLERequest struct {
 	Ids []string `json:"Ids"`
+}
+
+type DeclareServiceRequest struct {
+	CommandProperties []*CommandProperty `json:"commandProperties" validate:"omitempty,dive,required"`
+}
+
+type ListServiceResponse struct {
+	Services []*CommandPropertyPersist `json:"services" validate:"omitempty,dive,required"`
 }
