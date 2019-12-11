@@ -172,7 +172,7 @@ func (this *apiClientImpl) CommandDevice(req *CommandDeviceRequest) (std.JsonObj
 }
 
 func (this *apiClientImpl) DeclareService(req *DeclareServiceRequest) error {
-	return this.call3Wrapper(kDeclareService, req)
+	return this.call1Wrapper(kDeclareService, req)
 }
 
 func (this *apiClientImpl) RemoveService() error {
