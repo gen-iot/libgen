@@ -183,6 +183,11 @@ type DeclareServiceRequest struct {
 	CommandProperties []*CommandProperty `json:"commandProperties" validate:"omitempty,dive,required"`
 }
 
+type ServiceItem struct {
+	PkgInfo  `validate:"required"`
+	Commands []*CommandPropertyPersist `json:"commands" validate:"omitempty,dive,required"`
+}
+
 type ListServiceResponse struct {
-	Services []*CommandPropertyPersist `json:"services" validate:"omitempty,dive,required"`
+	Services []*ServiceItem `json:"services" validate:"omitempty,dive,required"`
 }
