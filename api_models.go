@@ -169,7 +169,7 @@ type OnServiceInvokedRequest struct {
 }
 
 type InvokeServiceRequest struct {
-	TimeoutSec  int            `json:"timeoutSec" validate:"lte=30"`
+	TimeoutSec  int            `json:"timeoutSec" validate:"gte=0"`
 	Target      PkgInfo        `json:"target" validate:"required"`
 	ServiceName string         `json:"serviceName" validate:"required"`
 	Params      std.JsonObject `json:"params"`
