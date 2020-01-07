@@ -58,10 +58,10 @@ func (this *ArrayLimiter) Validate(v interface{}) error {
 	}
 
 	if this.MinLength != -1 && vaLen < this.MinLength {
-		return errors.Wrapf(errArrayLengthMismatched, "expect >= %d, real=%d", this.MinLength, len(va))
+		return errors.Wrapf(errArrayLengthMismatched, "expect >= %d, real=%d", this.MinLength, vaLen)
 	}
 	if this.MaxLength != -1 && vaLen > this.MaxLength {
-		return errors.Wrapf(errArrayLengthMismatched, "expect <= %d, real=%d", this.MaxLength, len(va))
+		return errors.Wrapf(errArrayLengthMismatched, "expect <= %d, real=%d", this.MaxLength, vaLen)
 	}
 	for idx := 0; idx < vaLen; idx++ {
 		it := rawValue.Index(idx).Interface()
