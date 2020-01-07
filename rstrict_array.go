@@ -12,7 +12,7 @@ type ArrayLimiter struct {
 	NotEmpty        bool     `json:"notEmpty"`
 }
 
-func NewArrayLimiter(name string, elementValidator Restrict) Restrict {
+func NewArrayLimiter(name string, elementValidator Restrict) *ArrayLimiter {
 	out := new(ArrayLimiter)
 	out.ElementRestrict = elementValidator
 	out.MinLength = -1
@@ -22,7 +22,8 @@ func NewArrayLimiter(name string, elementValidator Restrict) Restrict {
 		out.ElementRestrict = NewAnyLimiter("validator", false)
 	}
 	out.baseRestrict = newBaseRestrict(out, name, Array)
-	return out.SetDefaultValue(true, []interface{}{})
+	out.SetDefaultValue(true, []interface{}{})
+	return out
 }
 
 func (this *ArrayLimiter) SetMinLength(minLen int) *ArrayLimiter {
