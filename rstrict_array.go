@@ -35,6 +35,11 @@ func (this *ArrayLimiter) SetMaxLength(maxLen int) *ArrayLimiter {
 	return this
 }
 
+func (this *ArrayLimiter) SetNotEmpty(notEmpty bool) *ArrayLimiter {
+	this.NotEmpty = notEmpty
+	return this
+}
+
 func (this *ArrayLimiter) Validate(v interface{}) error {
 	if v == nil {
 		return errIllegalParams
