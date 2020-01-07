@@ -2,6 +2,7 @@ package libgen
 
 import (
 	"github.com/pkg/errors"
+	"reflect"
 )
 
 type ArrayLimiter struct {
@@ -45,20 +46,25 @@ func (this *ArrayLimiter) Validate(v interface{}) error {
 	if v == nil {
 		return errIllegalParams
 	}
-	va, ok := v.([]interface{})
-	if !ok {
+	rawValue := reflect.ValueOf(v)
+	rawValueKind := rawValue.Kind()
+	if rawValueKind != reflect.Array && rawValueKind != reflect.Slice {
 		return errIllegalParams
 	}
-	if this.NotEmpty && len(va) == 0 {
+
+	vaLen := rawValue.Len()
+	if this.NotEmpty && vaLen == 0 {
 		return errArrayEmpty
 	}
-	if this.MinLength != -1 && len(va) < this.MinLength {
+
+	if this.MinLength != -1 && vaLen < this.MinLength {
 		return errors.Wrapf(errArrayLengthMismatched, "expect >= %d, real=%d", this.MinLength, len(va))
 	}
-	if this.MaxLength != -1 && len(va) > this.MaxLength {
+	if this.MaxLength != -1 && vaLen > this.MaxLength {
 		return errors.Wrapf(errArrayLengthMismatched, "expect <= %d, real=%d", this.MaxLength, len(va))
 	}
-	for _, it := range va {
+	for idx := 0; idx < vaLen; idx++ {
+		it := rawValue.Index(idx).Interface()
 		if err := this.ElementRestrict.Validate(it); err != nil {
 			return err
 		}
