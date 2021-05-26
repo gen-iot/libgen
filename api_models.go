@@ -51,7 +51,7 @@ type Device struct {
 	Room      string         `json:"room" validate:"required"`
 	Category  string         `json:"category"`
 	MetaData  std.JsonObject `json:"metadata,omitempty"`
-	NickName []string   `json:"nickName"` //added by zhuxf
+	NickName  string   `json:"nickName"` //added by zhuxf
 }
 
 type DeviceStatusInfo struct {
